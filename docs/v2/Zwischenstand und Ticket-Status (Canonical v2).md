@@ -248,5 +248,5 @@
 
 ## Empfohlener Startpunkt für die nächste Session (konkret)
 
-1. Bei neuen Anforderungen ein neues Ticket unter `docs/v2/tickets/` anlegen.
-2. Aktuell sind keine offenen PR-Tickets aus der bestehenden v2-Queue vorhanden.
+1. Neue Tickets unter `docs/v2/tickets/`
+2. Reihenfolge: PR11, PR12, PR13
