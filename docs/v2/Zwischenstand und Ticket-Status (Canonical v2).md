@@ -218,4 +218,6 @@
 
 ## Empfohlener Startpunkt für die nächste Session (konkret)
 
-1. Keine offenen v2-Tickets mehr in `docs/v2/tickets/`; nächster Schritt ist ggf. neue Ticketrunde/Phase definieren.
+1. diehe Tickets in `docs/v2/tickets/`
+2. Empfohlene Reihenfolge:
+   PR6, PR7, PR8, PR9, PR10
