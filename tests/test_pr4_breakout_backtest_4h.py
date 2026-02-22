@@ -107,3 +107,41 @@ def test_pr4_retest_entry_supported_with_limit_fill():
     assert event["triggered"] is True
     assert event["entry_idx"] == 2
     assert event["entry_price"] == 100.0
+
+
+def test_pr9_none_trade_keeps_row_with_no_trade_status_for_missing_next_open():
+    candles = [
+        _candle(99.0, 101.2, 98.5, 101.0, ema20=99.0),  # trigger on last candle
+    ]
+    snapshots = [_snapshot_with_breakout("breakout_immediate_1_5d", candles)]
+
+    out = run_backtest_from_snapshots(snapshots)
+    events = out["events"]["breakout_immediate_1_5d"]
+
+    assert len(events) == 1
+    assert events[0]["trade_status"] == "NO_TRADE"
+    assert events[0]["no_trade_reason"] == "MISSING_NEXT_4H_OPEN"
+
+
+def test_pr9_summary_separates_signals_and_trades_for_breakout_4h():
+    tradable = [
+        _candle(99.0, 101.0, 98.0, 101.0, ema20=99.0),
+        _candle(100.0, 101.0, 99.0, 100.0, ema20=99.0),
+    ]
+    no_trade = [
+        _candle(99.0, 101.2, 98.5, 101.0, ema20=99.0),
+    ]
+    snapshots = [
+        _snapshot_with_breakout("breakout_immediate_1_5d", tradable),
+        {
+            **_snapshot_with_breakout("breakout_immediate_1_5d", no_trade),
+            "meta": {"date": "2026-03-02"},
+        },
+    ]
+
+    out = run_backtest_from_snapshots(snapshots)
+    summary = out["by_setup"]["breakout_immediate_1_5d"]
+
+    assert summary["signals_count"] == 2
+    assert summary["trades_count"] == 1
+    assert summary["signals_count"] >= summary["trades_count"]

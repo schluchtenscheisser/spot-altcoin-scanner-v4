@@ -180,10 +180,15 @@ def _evaluate_candidate(
 def _summarize(events: Sequence[Dict[str, Any]], thresholds_pct: Sequence[float]) -> Dict[str, Any]:
     total = len(events)
     triggered = [e for e in events if e.get("triggered")]
+    has_trade_status = any("trade_status" in e for e in events)
+    trades = [e for e in events if e.get("trade_status") == "TRADE"] if has_trade_status else triggered
     summary: Dict[str, Any] = {
         "count": total,
+        "signals_count": total,
         "triggered_count": len(triggered),
         "trigger_rate": (len(triggered) / total) if total else 0.0,
+        "trades_count": len(trades),
+        "trade_rate_on_signals": (len(trades) / total) if total else 0.0,
     }
 
     for thr in thresholds_pct:
@@ -316,6 +321,7 @@ def _simulate_breakout_4h_trade(entry: Mapping[str, Any], setup_id: str) -> Opti
     return {
         "symbol": entry.get("symbol"),
         "setup_id": setup_id,
+        "trade_status": "TRADE",
         "triggered": True,
         "entry_idx": entry_idx,
         "entry_price": entry_price,
@@ -327,6 +333,58 @@ def _simulate_breakout_4h_trade(entry: Mapping[str, Any], setup_id: str) -> Opti
         "exit_reason": exit_reason,
         "exit_price": exit_price,
     }
+
+
+def _infer_breakout_no_trade_reason(entry: Mapping[str, Any], setup_id: str) -> str:
+    analysis = entry.get("analysis") if isinstance(entry.get("analysis"), Mapping) else {}
+    trade_levels = analysis.get("trade_levels") if isinstance(analysis.get("trade_levels"), Mapping) else {}
+    bt = analysis.get("backtest_4h") if isinstance(analysis.get("backtest_4h"), Mapping) else {}
+    candles = bt.get("candles") if isinstance(bt.get("candles"), list) else []
+    if not candles:
+        return "INSUFFICIENT_4H_HISTORY"
+
+    breakout_level = _float_or_none(trade_levels.get("entry_trigger") or trade_levels.get("breakout_level_20"))
+    if breakout_level is None:
+        return "MISSING_REQUIRED_FEATURES"
+
+    trigger_idx = None
+    for idx, candle in enumerate(candles):
+        close = _float_or_none(candle.get("close") if isinstance(candle, Mapping) else None)
+        if close is not None and close > breakout_level:
+            trigger_idx = idx
+            break
+    if trigger_idx is None:
+        return "MISSING_NEXT_4H_OPEN"
+
+    if setup_id == "breakout_immediate_1_5d":
+        entry_idx = trigger_idx + 1
+        if entry_idx >= len(candles):
+            return "MISSING_NEXT_4H_OPEN"
+        entry_open = _float_or_none(candles[entry_idx].get("open") if isinstance(candles[entry_idx], Mapping) else None)
+        if entry_open is None:
+            return "MISSING_NEXT_4H_OPEN"
+    else:
+        retest_filled = False
+        for idx in range(trigger_idx + 1, len(candles)):
+            candle = candles[idx]
+            if not isinstance(candle, Mapping):
+                continue
+            low = _float_or_none(candle.get("low"))
+            high = _float_or_none(candle.get("high"))
+            if low is not None and high is not None and low <= breakout_level <= high:
+                retest_filled = True
+                break
+        if not retest_filled:
+            return "RETEST_NOT_FILLED"
+
+    atr_abs = _float_or_none(bt.get("atr_abs_4h"))
+    if atr_abs is None:
+        atr_pct = _float_or_none(bt.get("atr_pct_4h_last_closed"))
+        close_4h = _float_or_none(bt.get("close_4h_last_closed"))
+        if atr_pct is None or close_4h is None:
+            return "MISSING_REQUIRED_FEATURES"
+
+    return "MISSING_REQUIRED_FEATURES"
 
 
 def run_backtest_from_snapshots(
@@ -377,6 +435,20 @@ def run_backtest_from_snapshots(
                     if event_4h is not None:
                         event_4h["t0_date"] = t0_date
                         events_by_setup.setdefault(setup_id, []).append(event_4h)
+                    else:
+                        events_by_setup.setdefault(setup_id, []).append(
+                            {
+                                "symbol": symbol,
+                                "setup_id": setup_id,
+                                "t0_date": t0_date,
+                                "trade_status": "NO_TRADE",
+                                "no_trade_reason": _infer_breakout_no_trade_reason(entry, setup_id),
+                                "triggered": True,
+                                "entry_idx": None,
+                                "entry_price": None,
+                                "exit_reason": None,
+                            }
+                        )
                     continue
 
                 trade_levels = (
