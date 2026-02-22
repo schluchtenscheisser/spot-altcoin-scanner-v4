@@ -195,6 +195,12 @@
   - Hard-Gates in `scanner/pipeline/scoring/breakout_trend_1_5d.py` auf Canonical v2 abgeglichen: Trend-Gate nutzt jetzt `close_1d > ema20_1d` und `ema20_1d > ema50_1d`; ATR-Gate rejectet nur noch bei `atr_pct_rank_120_1d > 0.80` (Boundary `0.80` bleibt valide).
   - Ticket-spezifische Regression-Tests ergänzt (`tests/test_pr3_breakout_trend_scoring.py`) für Trend-Gate-Fälle (Pass/Fail) und ATR-Boundary (`0.80` Pass, `0.800001` Fail).
   - Ticketdatei nach Abschluss nach `docs/legacy/v2/tickets/PR8_scoring_align_gates_with_feature_spec.md` verschoben.
+- **PR9 – Backtest: Do not drop rows when 4H simulation returns None**
+  - Breakout-4H-Backtest verwirft Setup-Zeilen nicht mehr bei `None` aus der Simulationsfunktion; stattdessen wird ein Event mit `trade_status="NO_TRADE"` und enum-basiertem `no_trade_reason` geschrieben.
+  - Summary trennt jetzt explizit zwischen `signals_count` und `trades_count` (Trades = `trade_status == "TRADE"`).
+  - Regression-Tests ergänzt (`tests/test_pr4_breakout_backtest_4h.py`) und Golden-Expected für Backtest-Summary aktualisiert (`tests/golden/backtest_t84_expected.json`).
+  - Ticketdatei nach Abschluss nach `docs/legacy/v2/tickets/PR9_backtest_do_not_drop_rows_when_sim_returns_none.md` verschoben.
+
 
 ## ❌ Offen
 
@@ -208,7 +214,7 @@
 - [x] **PR5_breakout_trend_1_5d_reporting_excel_schema.md** (report sections + excel sheets + schema bump)
 - [x] **PR7_reports_fix_schema_bump_and_topn_limits.md** (schema bump for btc_regime + top_n_per_setup for breakout 1–5D lists)
 - [x] **PR8_scoring_align_gates_with_feature_spec.md** (trend/ATR hard-gate alignment to canonical feature spec + boundary tests)
-- [ ] **PR9_backtest_do_not_drop_rows_when_sim_returns_none.md** (preserve rows when 4H sim returns None + explicit NO_TRADE status)
+- [x] **PR9_backtest_do_not_drop_rows_when_sim_returns_none.md** (preserve rows when 4H sim returns None + explicit NO_TRADE status)
 - [ ] **PR10_excel_keep_legacy_breakout_setups_tab.md** (keep legacy Breakout Setups sheet alongside new breakout tabs)
 
 ---
@@ -241,4 +247,4 @@
 
 1. diehe Tickets in `docs/v2/tickets/`
 2. Empfohlene Reihenfolge:
-   PR9, PR10
+   PR10
