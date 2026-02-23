@@ -1,3 +1,5 @@
+> ARCHIVED: This v2 document is superseded by `docs/canonical/AUTHORITY.md`.
+> Canonical source of truth: `docs/canonical/AUTHORITY.md`.
 # AUTHORITY – Dokument-Hierarchie & Quelle der Wahrheit
 
 **Status:** Canonical v2 (für GPT‑Codex)  

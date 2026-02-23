@@ -1,3 +1,5 @@
+> ARCHIVED: This v2 document is superseded by `docs/canonical/VERIFICATION_FOR_AI.md`.
+> Canonical source of truth: `docs/canonical/VERIFICATION_FOR_AI.md`.
 # Test‑Fixtures & Validierungsstrategie (v2) – Canonical
 
 **Status:** Canonical v2 (für GPT‑Codex)  

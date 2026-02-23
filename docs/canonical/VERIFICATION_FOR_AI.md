@@ -13,7 +13,7 @@ invariants:
 golden_fixtures:
   - id: FIX_A_MORPHOUSDT_2026_02_21
     type: market_snapshot
-    source: docs/v2/40_TEST_FIXTURES_VALIDATION.md
+    source: docs/canonical/VERIFICATION_FOR_AI.md
 negative_fixtures:
   - id: FIX_B_BTC_RISK_OFF_NO_RS_OVERRIDE
     type: synthetic
@@ -50,7 +50,7 @@ deterministic_tables:
 
 ## 2) Golden Fixture Set A — MORPHOUSDT Snapshot (2026-02-21)
 
-Source: `docs/v2/40_TEST_FIXTURES_VALIDATION.md`
+Source: `docs/canonical/VERIFICATION_FOR_AI.md`
 
 ### 2.1 Snapshot time & last closed candles
 - Snapshot time: 2026-02-21 05:10:00 UTC

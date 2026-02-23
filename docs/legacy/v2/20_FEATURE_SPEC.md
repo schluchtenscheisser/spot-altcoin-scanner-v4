@@ -1,3 +1,5 @@
+> ARCHIVED: This v2 document is superseded by canonical docs under `docs/canonical/`.
+> Canonical source of truth: `docs/canonical/INDEX.md`.
 # Feature‑Spezifikation (v2) – Spot Altcoin Scanner
 
 **Status:** Canonical v2 (für GPT‑Codex)  
