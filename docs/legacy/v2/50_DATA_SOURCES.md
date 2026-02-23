@@ -1,3 +1,5 @@
+> ARCHIVED: This v2 document is superseded by `docs/canonical/DATA_SOURCES.md`.
+> Canonical source of truth: `docs/canonical/DATA_SOURCES.md`.
 # Datenquellen (v2) – Canonical
 
 **Status:** Canonical v2 (für GPT‑Codex)  

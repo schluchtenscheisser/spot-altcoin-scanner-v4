@@ -5,6 +5,8 @@
 
 Scanner for short-term trading setups in MidCap Altcoins on MEXC Spot USDT markets.
 
+Canonical documentation: `docs/canonical/INDEX.md`
+
 ---
 
 ## What It Does

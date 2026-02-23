@@ -1,12 +1,12 @@
-# AGENTS.md — Spot Altcoin Scanner (Canonical v2)
+# AGENTS.md — Spot Altcoin Scanner (Canonical)
 
 ## Read first
-1) `docs/v2/AUTHORITY.md`
-2) `docs/v2/20_FEATURE_SPEC.md`
-3) `docs/v2/30_IMPLEMENTATION_TICKETS.md`
+1) `docs/canonical/AUTHORITY.md`
+2) `docs/canonical/INDEX.md`
+3) `docs/canonical/INDEX.md`
 
 ## Precedence
-v2 > auto-docs > legacy.
+canonical > auto-docs > legacy.
 - Auto-docs: `docs/code_map.md`, `docs/GPT_SNAPSHOT.md` (do not edit; keep under docs/)
 
 ## Fixed decisions (Phase 1)
