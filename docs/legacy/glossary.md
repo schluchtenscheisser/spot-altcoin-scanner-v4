@@ -1,3 +1,7 @@
+> ARCHIVED: Superseded by `docs/canonical/GLOSSARY.md`.
+>
+> This file is historical context only. Canonical definitions live under `docs/canonical/`.
+
 # Glossary
 Version: v1.0
 Language: English
