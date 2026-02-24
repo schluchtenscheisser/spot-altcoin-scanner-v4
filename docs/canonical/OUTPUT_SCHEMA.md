@@ -11,8 +11,14 @@ outputs:
   - excel
 limits:
   global_top_n_default: 20
+manifest:
+  config_hash_required: true
+  config_version_optional: true
 trade_levels:
   status: canonical_output_only
+  levels_timeframe_default_by_setup_id:
+    breakout_immediate_1_5d: 4h
+    breakout_retest_1_5d: 4h
   note: "Trade levels are informational outputs; they must not affect ranking unless explicitly referenced."
 ```
 
@@ -20,11 +26,15 @@ trade_levels:
 Canonical goal: JSON is the primary machine-readable artifact.
 
 ### 1.1 Run manifest (required)
+Required:
 - `commit_hash`
-- `config_hash` or `config_version`
 - `schema_version`
 - `asof_ts_ms` (or ISO timestamp)
 - `providers_used` (MEXC/CMC, etc.)
+- `config_hash`
+
+Optional:
+- `config_version`
 
 ### 1.2 Candidate row (required, minimal set)
 - Identity:
@@ -36,6 +46,7 @@ Canonical goal: JSON is the primary machine-readable artifact.
 - Core diagnostics (setup-specific required fields)
   - for Breakout Trend 1–5d: see `SCORING/SCORE_BREAKOUT_TREND_1_5D.md` section “Pflichtfelder”
 - Liquidity:
+  - `quote_volume_24h_usd` (proxy; if available)
   - `spread_bps` (optional if not fetched)
   - `slippage_bps` (optional if not fetched)
   - `liquidity_insufficient_depth` (bool)
@@ -53,7 +64,7 @@ If trade levels are included in outputs, they must be computed deterministically
 
 ### 2.1 Required fields (if present)
 - `trade_levels_enabled` (bool)
-- `levels_timeframe` in {"1d","4h"} (default is implementation-defined; must be stable)
+- `levels_timeframe` in {"1d","4h"} (canonical default depends on setup_id; see Machine Header)
 - `entry_level` (price)
 - `stop_level` (price)
 - `partial_target_level` (price, optional)
@@ -61,10 +72,8 @@ If trade levels are included in outputs, they must be computed deterministically
 - `risk_R` (price distance; optional)
 
 ### 2.2 Canonical formulas (default)
-These formulas are canonical **when trade levels are emitted**. If the implementation differs, it must be documented explicitly.
-
 Let:
-- `entry_level = close_last_closed` (same timeframe chosen for trade levels)
+- `entry_level = close_last_closed` (of the selected `levels_timeframe`)
 - `atr_abs = (atr_pct_last_closed/100) * close_last_closed`
 - `stop_level = entry_level - 1.2 * atr_abs`
 - `R = entry_level - stop_level`
@@ -72,21 +81,17 @@ Let:
 - `take_profit_level = entry_level + 3.0 * R` (optional)
 
 Notes:
-- If ATR% is not available (NaN), levels must be omitted or flagged as unavailable (deterministically).
+- If ATR% is NaN, levels must be omitted or flagged as unavailable deterministically.
 - If `close_last_closed <= 0`, all levels are undefined.
 
 ### 2.3 Determinism constraints
 - Only closed candles
-- Stable timeframe selection per run (e.g., always 4H for breakout setups), not per-symbol ad hoc
-- No lookahead (no use of future candles)
+- Timeframe selection is deterministic by setup_id (Machine Header)
+- No lookahead
 - Rounding policy (if any) must be explicit and stable
 
 ## 3) Markdown output
 - Must be consistent with JSON (no contradictions).
-- Typical sections:
-  - Top-N table(s)
-  - Quick diagnostics summary
-  - Notes about as-of and determinism
 
 ## 4) Excel output
 - A tabular export of the same canonical fields.
