@@ -1,3 +1,7 @@
+> ARCHIVED: Superseded by canonical docs under `docs/canonical/`.
+>
+> Start here: `docs/canonical/INDEX.md`
+
 # Implementation Tickets (v2) – Canonical
 
 **Status:** Canonical v2 (für GPT‑Codex)  
