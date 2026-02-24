@@ -1,3 +1,7 @@
+> ARCHIVED: Superseded by canonical docs under `docs/canonical/`.
+>
+> Start here: `docs/canonical/INDEX.md`
+
 # Gap-Analyse (Ist-Stand) gegen Canonical v2
 
 **Status:** Arbeitsdokument (aus Repo-Scan abgeleitet)  
