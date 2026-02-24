@@ -1,3 +1,7 @@
+> ARCHIVED: Superseded by canonical docs under `docs/canonical/`.
+>
+> Start here: `docs/canonical/INDEX.md`
+
 # Master Plan – Spot Altcoin Scanner (Phase 1)
 
 **Status:** Canonical v2 (für GPT‑Codex)  
