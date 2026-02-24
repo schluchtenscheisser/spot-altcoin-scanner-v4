@@ -1,3 +1,7 @@
+> ARCHIVED: Superseded by canonical docs under `docs/canonical/`.
+>
+> Start here: `docs/canonical/INDEX.md`
+
 # Produktanforderungen (v2) – Spot Altcoin Scanner
 
 **Status:** Canonical v2 Produktanforderungen für GPT‑Codex  
