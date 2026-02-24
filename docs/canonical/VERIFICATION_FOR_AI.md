@@ -13,17 +13,17 @@ invariants:
 golden_fixtures:
   - id: FIX_A_MORPHOUSDT_2026_02_21
     type: market_snapshot
-    source: docs/canonical/VERIFICATION_FOR_AI.md
 negative_fixtures:
   - id: FIX_B_BTC_RISK_OFF_NO_RS_OVERRIDE
-    type: synthetic
   - id: FIX_C_OVEREXTENSION_HARD_GATE
-    type: synthetic
 deterministic_tables:
   - id: TABLE_ANTI_CHASE_MULT
   - id: TABLE_OVEREXTENSION_MULT
   - id: TABLE_BB_SCORE
   - id: TABLE_ATR_GATE
+rounding_policy:
+  component_scores: "no rounding"
+  reported_decimals_optional: 9
 ```
 
 ## 1) Invariants (must always hold)
@@ -41,16 +41,15 @@ deterministic_tables:
 ### 1.4 Score ranges
 - All component scores and final scores are clamped to `0..100`.
 
-### 1.5 percent_rank population
+### 1.5 percent_rank population (cross-sectional)
 - `percent_rank` population is the *eligible universe after hard gates* (not the shortlist).
 - Tie handling is `average_rank` with:
-  - `rank = (count_less + 0.5*count_equal) / N` in `[0..1]`.
+  - `rank = (count_less + 0.5*count_equal) / N` in `[0..1]`
+- Equality is exact IEEE-754 float equality (no rounding).
 
 ---
 
 ## 2) Golden Fixture Set A — MORPHOUSDT Snapshot (2026-02-21)
-
-Source: `docs/canonical/VERIFICATION_FOR_AI.md`
 
 ### 2.1 Snapshot time & last closed candles
 - Snapshot time: 2026-02-21 05:10:00 UTC
@@ -98,72 +97,62 @@ Source: `docs/canonical/VERIFICATION_FOR_AI.md`
 
 ## 3) Expected multipliers & component scores (Fixture A)
 
-### 3.1 Overextension multiplier (d = 20.6625)
+### 3.1 Overextension multiplier (d = 20.662505719)
 Expected:
 - overextension_multiplier = 0.837578018
-Explanation:
-- 20 < d < 28 uses linear segment 0.85 -> 0.70.
 
-### 3.2 Anti-chase multiplier (r7 = 33.0156)
+### 3.2 Anti-chase multiplier (r7 = 33.015605230)
 Expected:
 - anti_chase_multiplier = 0.974869956
-Explanation:
-- 30..60 linear 1.0 -> 0.75.
 
 ### 3.3 BB score (rank r = 0.595833333)
 Expected:
 - bb_score = 40.625000000
-Explanation:
-- 0.20..0.60 linear 100 -> 40.
 
 ### 3.4 Volume score (spike_combined = 2.425059108)
 Expected:
 - volume_score = 92.505910842
-Explanation:
-- 1.5..2.5 linear 0 -> 100.
 
-### 3.5 Breakout distance score
-This fixture asserts that the *input* `dist_pct` is correct and the curve parameters are:
+### 3.5 Breakout distance score (dist_pct = 1.643406808)
+Curve params:
 - floor=-5, min=2, ideal=5, max=20
-The numeric score must match the implemented curve exactly.
+
+Expected:
+- breakout_distance_score = 62.868136160
+
+Notes:
+- No rounding is applied to component scores by default; values above are provided with 9 decimals.
 
 ### 3.6 Gates for Fixture A (must pass)
-- trend_gate_1d:
-  - ema20_1d > ema50_1d => True
-  - close_1d > ema20_1d => True
-- atr_chaos_gate_1d:
-  - atr_pct_rank_120_1d <= 0.80 => True
-- overextension_hard_gate_1d:
-  - dist_ema20_pct_1d < 28.0 => True
-- momentum_gate_1d:
-  - r_7_1d > 0 => True
+- trend_gate_1d: True
+- atr_chaos_gate_1d: True
+- overextension_hard_gate_1d: True
+- momentum_gate_1d: True
 
 ---
 
 ## 4) Negative Fixture Set B — BTC Risk-Off without RS override => Excluded
 
-Goal: When BTC is risk-off and RS override conditions are not met, setup must be invalid/excluded.
-
 Arrange (synthetic):
 - btc_risk_on = false
-- quote_volume_24h_usd (alt) = 20,000,000  (passes risk-off liquidity)
-- alt_r7_1d - btc_r7_1d = 7.49  (just below 7.5)
-- alt_r3_1d - btc_r3_1d = 3.49  (just below 3.5)
+- quote_volume_24h_usd (alt) = 20,000,000
+- alt_r7_1d - btc_r7_1d = 7.49
+- alt_r3_1d - btc_r3_1d = 3.49
 
 Assert:
 - RS override == false
-- setup invalid (excluded from both immediate and retest lists)
-- btc_multiplier must not be applied because candidate is excluded.
+- setup invalid (excluded)
+- btc_multiplier must not be applied (candidate excluded).
 
 ---
 
 ## 5) Negative Fixture Set C — Overextension hard gate boundary => Excluded
 
-Arrange (synthetic):
+Arrange:
 - dist_ema20_pct_1d = 28.0
 
 Assert:
-- setup invalid (excluded) because hard gate is strict: `dist_ema20_pct_1d < 28.0`.
+- setup invalid because hard gate is strict: `dist_ema20_pct_1d < 28.0`.
 
 ---
 
@@ -209,8 +198,8 @@ Assert:
 ---
 
 ## 7) AI Review Checklist (questions to answer)
-- Do the fixture inputs reproduce the expected derived values exactly?
+- Do the fixture inputs reproduce the expected derived values exactly (within float tolerance)?
 - Are all hard gates applied exactly as specified (including strict inequalities)?
-- Is `percent_rank` tie-handling implemented as average-rank?
-- Is the population for percent_rank the eligible universe after hard gates (not shortlist)?
-- Is the output ordering deterministic and stable (see liquidity re-rank rules)?
+- Is cross-sectional `percent_rank` tie-handling average-rank with IEEE-754 equality?
+- Are rolling ranks (ATR rank, BB rank) using `rolling_percent_rank` (time-series), not cross-sectional population?
+- Is ordering deterministic (global ranking + liquidity re-rank)?
