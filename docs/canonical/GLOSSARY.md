@@ -4,18 +4,17 @@
 ```yaml
 id: CANON_GLOSSARY
 status: canonical
-source_migrated_from: docs/glossary.md
 language: en
 audience:
   - developer
   - ai_models
 ```
 
---- 
+---
+
 ## 1. Purpose
 
 This glossary defines the key terms used across:
-
 - spec
 - docs
 - code
@@ -30,7 +29,7 @@ It ensures consistent meaning and eliminates ambiguity for future development.
 ## 2. Core Trading Concepts
 
 **Breakout**  
-Price exceeds prior resistance level (e.g. 20–30d high) with volume confirmation.
+Price exceeds prior resistance level (e.g. 20–30D high) with volume confirmation.
 
 **Pullback**  
 Retracement inside an existing uptrend, followed by continuation.
@@ -118,13 +117,13 @@ Intermediate asset set after filtering but before scoring.
 Highest historical price.
 
 **MidCaps**  
-Market cap range (100M – 3B) in context of this scanner.
+Market cap range (100M – 10B) in context of this scanner.
 
 **Liquidity**  
 Depth + turnover, proxied by quote-volume in this spec.
 
 **Regime**  
-Macro environment affecting behavior of setups (BTC/ETH-led).
+Macro environment affecting behavior of setups (BTC-led).
 
 ---
 
@@ -154,29 +153,4 @@ State handoff capsule for work continuity.
 
 ---
 
-## 9. SQL/Modeling Terms (Optional Future)
-
-**Forward Return**  
-Return measured at t+k relative to t.
-
-**Dail Risk**  
-Lower distribution percentile behavior.
-
-**Rank Monotonicity**  
-Expected ranking quality (higher score → better outcomes).
-
----
-
-## 10. Anti-Confusion Notes
-
-Glossary excludes:
-
-- sentiment terms
-- derivatives terms
-- portfolio terms
-
-These may join future versions.
-
----
-
-## End of `glossary.md`
+## End of glossary.
