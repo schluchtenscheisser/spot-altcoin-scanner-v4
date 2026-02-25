@@ -1,3 +1,7 @@
+> ARCHIVED: Superseded by `docs/canonical/OUTPUTS/RUNTIME_MARKET_META_EXPORT.md`.
+>
+> Start here: `docs/canonical/INDEX.md`
+
 # Runtime Market Meta Export (MEXC + CMC Identity) — Spezifikation
 
 ## Ziel
