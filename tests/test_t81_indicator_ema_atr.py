@@ -1,14 +1,11 @@
 import json
-from pathlib import Path
-
 import numpy as np
 import pytest
 
 from scanner.pipeline.features import FeatureEngine
+from tests._helpers import fixture_path
 
-FIXTURE_PATH = (
-    Path(__file__).resolve().parent / "golden" / "fixtures" / "t81_indicator_cases.json"
-)
+FIXTURE_PATH = fixture_path("t81_indicator_cases.json")
 
 
 def _to_array(values: list[float | None]) -> np.ndarray:
