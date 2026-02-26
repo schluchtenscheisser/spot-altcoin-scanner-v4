@@ -1,3 +1,5 @@
+> ARCHIVED (ticket): Implemented in PR for this ticket. Canonical truth is under `docs/canonical/`.
+
 # 5) 2026-02-26__P1__tests_fixture_paths_independent_of_cwd.md
 
 ## Title

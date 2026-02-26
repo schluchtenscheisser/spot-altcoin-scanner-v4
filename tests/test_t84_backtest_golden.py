@@ -1,11 +1,11 @@
 import json
 import os
-from pathlib import Path
 from typing import Any
 
 import pytest
 
 from scanner.pipeline.backtest_runner import run_backtest_from_snapshots
+from tests._helpers import fixture_path, golden_path
 
 
 def _assert_close(actual: Any, expected: Any, path: str = "") -> None:
@@ -34,24 +34,23 @@ def _assert_close(actual: Any, expected: Any, path: str = "") -> None:
 
 
 def test_t84_backtest_golden_fixture() -> None:
-    tests_dir = Path(__file__).resolve().parent
-    fixture_path = tests_dir / "golden" / "fixtures" / "backtest_t84_snapshots.json"
-    golden_path = tests_dir / "golden" / "backtest_t84_expected.json"
+    fixture_file = fixture_path("backtest_t84_snapshots.json")
+    golden_file = golden_path("backtest_t84_expected.json")
 
-    fixture_payload = json.loads(fixture_path.read_text(encoding="utf-8"))
+    fixture_payload = json.loads(fixture_file.read_text(encoding="utf-8"))
     snapshots = fixture_payload["snapshots"]
     config = fixture_payload["config"]
 
     actual = run_backtest_from_snapshots(snapshots, config=config)
 
     if os.getenv("UPDATE_GOLDEN") in {"1", "true", "yes"}:
-        golden_path.write_text(
+        golden_file.write_text(
             json.dumps(actual, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
             encoding="utf-8",
         )
         return
 
-    expected = json.loads(golden_path.read_text(encoding="utf-8"))
+    expected = json.loads(golden_file.read_text(encoding="utf-8"))
     _assert_close(actual, expected)
 
     breakout_event = actual["events"]["breakout"][0]

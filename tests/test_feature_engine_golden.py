@@ -1,12 +1,12 @@
 import json
 import os
-from pathlib import Path
 from typing import Any
 
 import pytest
 import numpy as np
 
 from scanner.pipeline.features import FeatureEngine
+from tests._helpers import golden_path
 
 
 def _gen_klines(
@@ -104,22 +104,21 @@ def _assert_close(actual: Any, expected: Any, path: str = "") -> None:
 
 
 def test_feature_engine_golden() -> None:
-    tests_dir = Path(__file__).resolve().parent
-    golden_path = tests_dir / "golden" / "feature_engine_v1_1.json"
+    golden_file = golden_path("feature_engine_v1_1.json")
 
     engine = FeatureEngine(config={})
     actual = engine.compute_all(_fixture_ohlcv())
 
     # Optional: regenerate golden file intentionally
     if os.getenv("UPDATE_GOLDEN") in {"1", "true", "yes"}:
-        golden_path.parent.mkdir(parents=True, exist_ok=True)
-        golden_path.write_text(
+        golden_file.parent.mkdir(parents=True, exist_ok=True)
+        golden_file.write_text(
             json.dumps(actual, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
             encoding="utf-8",
         )
         return
 
-    expected = json.loads(golden_path.read_text(encoding="utf-8"))
+    expected = json.loads(golden_file.read_text(encoding="utf-8"))
 
     # Sanity checks (helpful error messages before deep-compare)
     assert "TESTUSDT" in actual
