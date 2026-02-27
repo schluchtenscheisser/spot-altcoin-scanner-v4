@@ -1,7 +1,7 @@
 # Spot Altcoin Scanner • GPT Snapshot
 
-**Generated:** 2026-02-27 23:20 UTC  
-**Commit:** `a34fb4b` (a34fb4bb1d9e8d7fd6ee503f24214d5a8f83f880)  
+**Generated:** 2026-02-27 23:43 UTC  
+**Commit:** `921fe01` (921fe01276dab0d3c69420a3cc2a77cdb9369d15)  
 **Status:** MVP Complete (Phase 6)  
 
 ---
@@ -61,8 +61,8 @@
 | `scanner/pipeline/shortlist.py` | `ShortlistSelector` | - |
 | `scanner/pipeline/snapshot.py` | `SnapshotManager` | - |
 | `scanner/schema.py` | - | - |
-| `scanner/tools/backfill_btc_regime.py` | `BackfillStats` | `_parse_date`, `_daterange`, `_load_snapshot`, `_ensure_minimum_version`, `_compute_regime` ... (+3 more) |
-| `scanner/tools/backfill_snapshots.py` | `BackfillStats` | `_parse_date`, `_daterange`, `_snapshot_base`, `_extract_ohlcv_row`, `_build_minimal_features` ... (+6 more) |
+| `scanner/tools/backfill_btc_regime.py` | `BackfillStats` | `_parse_date`, `_daterange`, `_load_snapshot`, `_ensure_minimum_version`, `_extract_btc_features_1d` ... (+6 more) |
+| `scanner/tools/backfill_snapshots.py` | `BackfillStats` | `_parse_date`, `_daterange`, `_snapshot_base`, `_extract_ohlcv_row`, `_build_minimal_features` ... (+9 more) |
 | `scanner/tools/export_evaluation_dataset.py` | - | `_parse_date`, `_daterange`, `_run_id_from_export_time`, `_utc_now_iso`, `_score_from_entry` ... (+5 more) |
 | `scanner/tools/validate_features.py` | - | `_is_number`, `_error`, `_emit`, `validate_features` |
 | `scanner/utils/__init__.py` | - | - |
@@ -75,7 +75,7 @@
 **Statistics:**
 - Total Modules: 42
 - Total Classes: 19
-- Total Functions: 102
+- Total Functions: 108
 
 ---
 
@@ -605,7 +605,7 @@ jobs:
 
 ### `.github/workflows/generate-gpt-snapshot.yml`
 
-**SHA256:** `9dd793c29c5db9204a20ac8e65e5315de69b667c7d1cc049bd6d2fd6fee1632d`
+**SHA256:** `96dffa634f1c1e03148800344bdf70891a2366aadd28d442eab0dc84f1094601`
 
 ```yaml
 name: gpt-snapshot
@@ -685,8 +685,10 @@ jobs:
             "docs/canonical/CONFIGURATION.md",
             "docs/canonical/OUTPUT_SCHEMA.md",
             "docs/canonical/VERIFICATION_FOR_AI.md",
+            "docs/canonical/SCORING/SETUP_VALIDITY_RULES.md",
             "docs/canonical/SCORING/SCORE_BREAKOUT_TREND_1_5D.md",
             "docs/canonical/SCORING/GLOBAL_RANKING_TOP20.md",
+            "docs/canonical/SCORING/DISCOVERY_TAG.md",
           ]
           for doc in canonical_docs:
             if Path(doc).exists():
@@ -3388,7 +3390,7 @@ def compute_global_top20(
 
 ### `scanner/pipeline/liquidity.py`
 
-**SHA256:** `3dc0f355e9ee0dcdc9500a4b3556f28940dee64771ff10c9618a1e4240d9ddab`
+**SHA256:** `3921c4549afa576d8c6a751c21d2d7e5d03de534d58b43e4864568bf95a1139e`
 
 ```python
 """Liquidity stage utilities (Top-K orderbook budget + slippage metrics)."""
@@ -3437,7 +3439,7 @@ def select_top_k_for_orderbook(candidates: List[Dict[str, Any]], top_k: int) -> 
 
 
 def fetch_orderbooks_for_top_k(mexc_client: Any, candidates: List[Dict[str, Any]], config: Dict[str, Any]) -> Dict[str, Any]:
-    """Fetch orderbooks for Top-K symbols and return mapping symbol->payload for fetched snapshots."""
+    """Fetch Top-K orderbooks and keep only validated payloads in mapping symbol->orderbook."""
     top_k = get_orderbook_top_k(config)
     selected = select_top_k_for_orderbook(candidates, top_k)
 
@@ -3448,7 +3450,16 @@ def fetch_orderbooks_for_top_k(mexc_client: Any, candidates: List[Dict[str, Any]
         if not symbol:
             continue
         try:
-            payload[symbol] = mexc_client.get_orderbook(symbol)
+            fetched = mexc_client.get_orderbook(symbol)
+            if not isinstance(fetched, dict):
+                logger.debug("Malformed orderbook payload ignored for %s: non-dict", symbol)
+                continue
+            bids = fetched.get("bids")
+            asks = fetched.get("asks")
+            if not isinstance(bids, list) or not bids or not isinstance(asks, list) or not asks:
+                logger.debug("Malformed orderbook payload ignored for %s: missing/empty bids or asks", symbol)
+                continue
+            payload[symbol] = fetched
         except Exception as exc:
             logger.warning("Orderbook fetch failed for %s: %s", symbol, exc, exc_info=True)
     return payload
@@ -3566,8 +3577,8 @@ def apply_liquidity_metrics_to_shortlist(shortlist: List[Dict[str, Any]], orderb
                 {
                     "spread_bps": None,
                     "slippage_bps": None,
-                    "liquidity_grade": None,
-                    "liquidity_insufficient": None,
+                    "liquidity_grade": "D",
+                    "liquidity_insufficient": True,
                 }
             )
         out.append(r)
@@ -4903,7 +4914,7 @@ class FeatureEngine:
 
 ### `scanner/pipeline/snapshot.py`
 
-**SHA256:** `b2ed2030ff41b2f12e827d9d2b9031c4a9c01ad256c470e3503bc62c5dd9bbba`
+**SHA256:** `efe82d54e854edee4b267a8414f5399c3353895948a206ac051e72e65d879888`
 
 ```python
 """
@@ -4927,6 +4938,25 @@ logger = logging.getLogger(__name__)
 class SnapshotManager:
     """Manages daily pipeline snapshots."""
     
+    @staticmethod
+    def resolve_history_dir(config: Dict[str, Any]) -> Path:
+        """Resolve the snapshot history directory from config with fallback semantics."""
+        if hasattr(config, 'raw'):
+            snapshot_config = config.raw.get('snapshots', {})
+        else:
+            snapshot_config = config.get('snapshots', {})
+
+        history_dir = snapshot_config.get('history_dir')
+        if history_dir:
+            return Path(history_dir)
+
+        snapshot_dir = snapshot_config.get('snapshot_dir')
+        if snapshot_dir:
+            base = Path(snapshot_dir)
+            return base if base.name == 'history' else (base / 'history')
+
+        return Path('snapshots/history')
+
     def __init__(self, config: Dict[str, Any]):
         """
         Initialize snapshot manager.
@@ -4934,17 +4964,7 @@ class SnapshotManager:
         Args:
             config: Config dict with 'snapshots' section
         """
-        # Handle both dict and ScannerConfig object
-        if hasattr(config, 'raw'):
-            snapshot_config = config.raw.get('snapshots', {})
-        else:
-            snapshot_config = config.get('snapshots', {})
-        
-        self.snapshots_dir = Path(
-            snapshot_config.get('history_dir')
-            or snapshot_config.get('snapshot_dir')
-            or 'snapshots/history'
-        )
+        self.snapshots_dir = self.resolve_history_dir(config)
 
         # Ensure directory exists
         self.snapshots_dir.mkdir(parents=True, exist_ok=True)
@@ -6854,7 +6874,7 @@ if __name__ == "__main__":
 
 ### `scanner/tools/backfill_btc_regime.py`
 
-**SHA256:** `d948e648f47c382061e63dbb7969ff944c52acfc9572584cd3aacee44287210b`
+**SHA256:** `07a2248809e76593748dbf9641d7e58a1ea61d2ba1b6c0b9bdb9efeb50495112`
 
 ```python
 from __future__ import annotations
@@ -6869,6 +6889,7 @@ from typing import Any, Iterable
 
 from scanner.config import load_config
 from scanner.pipeline.regime import compute_btc_regime_from_1d_features
+from scanner.pipeline.snapshot import SnapshotManager
 
 
 @dataclass(frozen=True)
@@ -6906,7 +6927,7 @@ def _ensure_minimum_version(meta: dict[str, Any]) -> bool:
     return False
 
 
-def _compute_regime(snapshot: dict[str, Any]) -> dict[str, Any]:
+def _extract_btc_features_1d(snapshot: dict[str, Any]) -> dict[str, Any]:
     features = snapshot.get("data", {}).get("features", {})
     btc_features_1d = {}
     if isinstance(features, dict):
@@ -6915,7 +6936,24 @@ def _compute_regime(snapshot: dict[str, Any]) -> dict[str, Any]:
             maybe_1d = btc.get("1d", {})
             if isinstance(maybe_1d, dict):
                 btc_features_1d = maybe_1d
+    return btc_features_1d
+
+
+def _compute_regime(snapshot: dict[str, Any]) -> dict[str, Any] | None:
+    btc_features_1d = _extract_btc_features_1d(snapshot)
+    if not btc_features_1d:
+        return None
     return compute_btc_regime_from_1d_features(btc_features_1d)
+
+
+def _resolve_snapshots_dir(args: argparse.Namespace) -> Path:
+    if args.snapshots_dir:
+        return Path(args.snapshots_dir)
+    return SnapshotManager.resolve_history_dir(load_config(args.config))
+
+
+def _preflight_missing_paths(start: date, end: date, snapshots_dir: Path) -> list[Path]:
+    return [snapshots_dir / f"{day.isoformat()}.json" for day in _daterange(start, end) if not (snapshots_dir / f"{day.isoformat()}.json").exists()]
 
 
 def backfill(args: argparse.Namespace) -> BackfillStats:
@@ -6924,12 +6962,16 @@ def backfill(args: argparse.Namespace) -> BackfillStats:
     if end < start:
         raise ValueError("--to must be >= --from")
 
-    snapshots_dir = Path(args.snapshots_dir) if args.snapshots_dir else Path(
-        load_config(args.config).raw.get("snapshots", {}).get("history_dir", "snapshots/history")
-    )
+    snapshots_dir = _resolve_snapshots_dir(args)
 
     stats = BackfillStats()
     missing_paths: list[Path] = []
+
+    if args.strict_missing:
+        missing_paths = _preflight_missing_paths(start, end, snapshots_dir)
+        if missing_paths:
+            msg = f"Missing {len(missing_paths)} snapshot file(s): " + ", ".join(str(p) for p in missing_paths)
+            raise FileNotFoundError(msg)
 
     for day in _daterange(start, end):
         stats = BackfillStats(
@@ -6968,7 +7010,14 @@ def backfill(args: argparse.Namespace) -> BackfillStats:
             )
             continue
 
-        meta["btc_regime"] = _compute_regime(snapshot)
+        regime = _compute_regime(snapshot)
+        if regime is None:
+            meta["btc_regime"] = None
+            meta["btc_regime_status"] = "missing_btc_features"
+        else:
+            meta["btc_regime"] = regime
+            if meta.get("btc_regime_status") == "missing_btc_features":
+                meta.pop("btc_regime_status", None)
         _ensure_minimum_version(meta)
 
         if not args.dry_run:
@@ -6993,7 +7042,7 @@ def backfill(args: argparse.Namespace) -> BackfillStats:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Backfill meta.btc_regime in snapshot history")
+    parser = argparse.ArgumentParser(description="Backfill meta.btc_regime in snapshot history (missing BTC features => btc_regime=null)")
     parser.add_argument("--from", dest="from_date", required=True, help="Start date YYYY-MM-DD")
     parser.add_argument("--to", dest="to_date", required=True, help="End date YYYY-MM-DD")
     parser.add_argument("--dry-run", action="store_true", help="Do not modify files")
@@ -7025,7 +7074,7 @@ if __name__ == "__main__":
 
 ### `scanner/tools/backfill_snapshots.py`
 
-**SHA256:** `d8a33fe91ee39d10684fb3d41263274ad0b5d54a53aceff2621d6c146bf98702`
+**SHA256:** `123552c229599629143c9f408eaaeed217b436f55a3934d005d4d86178b1ecff`
 
 ```python
 from __future__ import annotations
@@ -7041,6 +7090,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from scanner.config import ScannerConfig, load_config
+from scanner.pipeline.snapshot import SnapshotManager
 
 SYMBOL_CACHE_RE = re.compile(r"^mexc_klines_(?P<symbol>[A-Z0-9]+)_1d\.json$")
 
@@ -7050,6 +7100,7 @@ class BackfillStats:
     scanned: int = 0
     created: int = 0
     skipped_existing: int = 0
+    missing: int = 0
 
 
 def _parse_date(value: str) -> date:
@@ -7159,22 +7210,6 @@ def _build_minimal_features(ohlcv_cache_dir: Path, target_date: str) -> dict[str
     return dict(sorted(features.items(), key=lambda item: item[0]))
 
 
-@contextmanager
-def _patched_pipeline_now(target_day: date):
-    from scanner import pipeline as pipeline_module
-
-    original_utc_now = pipeline_module.utc_now
-
-    def _fake_now() -> datetime:
-        return datetime(target_day.year, target_day.month, target_day.day, 0, 0, 0, tzinfo=timezone.utc)
-
-    pipeline_module.utc_now = _fake_now
-    try:
-        yield
-    finally:
-        pipeline_module.utc_now = original_utc_now
-
-
 def _run_full_mode(target_day: date, config_path: str, snapshots_dir: Path, dry_run: bool) -> None:
     if dry_run:
         return
@@ -7188,7 +7223,7 @@ def _run_full_mode(target_day: date, config_path: str, snapshots_dir: Path, dry_
     raw_copy["snapshots"] = snapshots_cfg
     patched_config = ScannerConfig(raw=raw_copy)
 
-    with _patched_pipeline_now(target_day):
+    with _patched_full_mode_time_sources(target_day):
         run_pipeline(patched_config)
 
 
@@ -7212,20 +7247,97 @@ def _mark_full_backfill(snapshot_path: Path) -> None:
         fh.write("\n")
 
 
+def _resolve_snapshots_dir(args: argparse.Namespace) -> Path:
+    if args.snapshots_dir:
+        return Path(args.snapshots_dir)
+    return SnapshotManager.resolve_history_dir(load_config(args.config))
+
+
+def _preflight_requirements(args: argparse.Namespace, start: date, end: date, snapshots_dir: Path, ohlcv_cache_dir: Path) -> None:
+    errors: list[str] = []
+    for day in _daterange(start, end):
+        run_date = day.isoformat()
+        snapshot_path = snapshots_dir / f"{run_date}.json"
+        if snapshot_path.exists():
+            if args.strict_existing:
+                errors.append(f"Snapshot already exists for {run_date}: {snapshot_path}")
+            continue
+
+        if args.mode == "minimal":
+            try:
+                _build_minimal_features(ohlcv_cache_dir=ohlcv_cache_dir, target_date=run_date)
+            except Exception as exc:  # preflight aggregation
+                errors.append(f"{run_date}: {exc}")
+
+    if errors:
+        raise FileNotFoundError("Strict preflight failed: " + " | ".join(errors))
+
+
+def _resolve_cache_date(target_day: date) -> str:
+    return target_day.isoformat()
+
+
+@contextmanager
+def _patched_full_mode_time_sources(target_day: date):
+    from scanner import pipeline as pipeline_module
+    from scanner.utils import io_utils, time_utils
+
+    fake_now = datetime(target_day.year, target_day.month, target_day.day, 0, 0, 0, tzinfo=timezone.utc)
+
+    original_pipeline_utc_now = pipeline_module.utc_now
+    original_pipeline_timestamp_to_ms = pipeline_module.timestamp_to_ms
+    original_time_utils_utc_now = time_utils.utc_now
+    original_time_utils_utc_date = time_utils.utc_date
+    original_time_utils_utc_timestamp = time_utils.utc_timestamp
+    original_io_get_cache_path = io_utils.get_cache_path
+
+    def _fake_utc_now() -> datetime:
+        return fake_now
+
+    def _fake_utc_date() -> str:
+        return _resolve_cache_date(target_day)
+
+    def _fake_utc_timestamp() -> str:
+        return fake_now.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    def _fake_timestamp_to_ms(dt: datetime) -> int:
+        return int(dt.timestamp() * 1000)
+
+    def _fake_get_cache_path(cache_type: str, date: str | None = None) -> Path:
+        return original_io_get_cache_path(cache_type, date or _resolve_cache_date(target_day))
+
+    pipeline_module.utc_now = _fake_utc_now
+    pipeline_module.timestamp_to_ms = _fake_timestamp_to_ms
+    time_utils.utc_now = _fake_utc_now
+    time_utils.utc_date = _fake_utc_date
+    time_utils.utc_timestamp = _fake_utc_timestamp
+    io_utils.get_cache_path = _fake_get_cache_path
+    try:
+        yield
+    finally:
+        pipeline_module.utc_now = original_pipeline_utc_now
+        pipeline_module.timestamp_to_ms = original_pipeline_timestamp_to_ms
+        time_utils.utc_now = original_time_utils_utc_now
+        time_utils.utc_date = original_time_utils_utc_date
+        time_utils.utc_timestamp = original_time_utils_utc_timestamp
+        io_utils.get_cache_path = original_io_get_cache_path
+
+
 def backfill(args: argparse.Namespace) -> BackfillStats:
     start = _parse_date(args.from_date)
     end = _parse_date(args.to_date)
     if end < start:
         raise ValueError("--to must be >= --from")
 
-    snapshots_dir = Path(args.snapshots_dir) if args.snapshots_dir else Path(
-        load_config(args.config).raw.get("snapshots", {}).get("history_dir", "snapshots/history")
-    )
+    snapshots_dir = _resolve_snapshots_dir(args)
     snapshots_dir.mkdir(parents=True, exist_ok=True)
 
     ohlcv_cache_dir = Path(args.ohlcv_cache_dir)
 
     stats = BackfillStats()
+
+    if args.strict_missing:
+        _preflight_requirements(args=args, start=start, end=end, snapshots_dir=snapshots_dir, ohlcv_cache_dir=ohlcv_cache_dir)
 
     for day in _daterange(start, end):
         run_date = day.isoformat()
@@ -7235,6 +7347,7 @@ def backfill(args: argparse.Namespace) -> BackfillStats:
             scanned=stats.scanned + 1,
             created=stats.created,
             skipped_existing=stats.skipped_existing,
+            missing=stats.missing,
         )
 
         if snapshot_path.exists():
@@ -7244,8 +7357,10 @@ def backfill(args: argparse.Namespace) -> BackfillStats:
                 scanned=stats.scanned,
                 created=stats.created,
                 skipped_existing=stats.skipped_existing + 1,
+                missing=stats.missing,
             )
             continue
+
 
         if args.mode == "minimal":
             features = _build_minimal_features(ohlcv_cache_dir=ohlcv_cache_dir, target_date=run_date)
@@ -7274,6 +7389,7 @@ def backfill(args: argparse.Namespace) -> BackfillStats:
             scanned=stats.scanned,
             created=stats.created + 1,
             skipped_existing=stats.skipped_existing,
+            missing=stats.missing,
         )
 
     return stats
@@ -7286,6 +7402,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mode", choices=["minimal", "full"], default="minimal")
     parser.add_argument("--dry-run", action="store_true", help="Do not write files")
     parser.add_argument("--strict-existing", action="store_true", help="Fail if any target date already has a snapshot")
+    parser.add_argument("--strict-missing", action="store_true", help="Preflight dates and fail atomically before writes if any target snapshot is missing")
     parser.add_argument("--config", default="config/config.yml", help="Path to scanner config (used for snapshots dir and full mode)")
     parser.add_argument("--snapshots-dir", default=None, help="Override snapshots history directory")
     parser.add_argument(
@@ -7305,7 +7422,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
-    print(f"mode={args.mode} scanned={stats.scanned} created={stats.created} skipped_existing={stats.skipped_existing}")
+    print(f"mode={args.mode} scanned={stats.scanned} created={stats.created} skipped_existing={stats.skipped_existing} missing={stats.missing}")
     return 0
 
 
@@ -9182,6 +9299,69 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 
 ```
 
+### `docs/canonical/SCORING/SETUP_VALIDITY_RULES.md`
+
+**SHA256:** `727956639c2b5fba44f7c80dd471632b81ed78179595a05beae6876710dc48bb`
+
+```markdown
+# Setup Validity Rules — `is_valid_setup`, Minimum History, Watchlist (Canonical)
+
+## Machine Header (YAML)
+```yaml
+id: SCORE_SETUP_VALIDITY
+status: canonical
+invalid_behavior:
+  top_lists: exclude
+  watchlist: optional_include_with_reason
+reasons_canonical:
+  - insufficient_history
+  - failed_gate
+  - risk_flag
+  - btc_risk_off_ineligible
+minimum_history_defaults:
+  breakout: { "1d": 30, "4h": 50 }
+  pullback: { "1d": 60, "4h": 80 }
+  reversal: { "1d": 120, "4h": 80 }
+setup_id_to_history_key:
+  breakout_immediate_1_5d: breakout
+  breakout_retest_1_5d: breakout
+```
+
+## 1) `is_valid_setup` contract
+- If `is_valid_setup == false`:
+  - must not appear in Top lists/rankings
+  - may appear in watchlist only if a stable reason is provided
+
+## 2) Canonical reasons
+Reasons must be deterministic strings (stable keys), e.g.:
+- `insufficient_history:<tf>`
+- `failed_gate:<gate_name>`
+- `risk_flag:<flag_name>`
+- `btc_risk_off_ineligible`
+
+## 3) Minimum history thresholds (defaults)
+These defaults must match `CONFIGURATION.md`.
+
+### Breakout (used by Breakout Trend 1–5d)
+- 1D: >= 30 closed candles
+- 4H: >= 50 closed candles
+
+### Pullback
+- 1D: >= 60 closed candles
+- 4H: >= 80 closed candles
+
+### Reversal
+- 1D: >= 120 closed candles
+- 4H: >= 80 closed candles
+
+## 4) Closed-candle buffer rule (implementation guard)
+Effective lookback includes a buffer so the last in-progress candle never affects the required minimum of closed candles.
+
+## 5) Interaction with percent_rank
+Population definitions remain as specified in feature docs.
+
+```
+
 ### `docs/canonical/SCORING/SCORE_BREAKOUT_TREND_1_5D.md`
 
 **SHA256:** `69eceb455bf39d7ab09ce59d67f3d70d7c334a076bf63c3ba218d91cc8e4ba11`
@@ -9587,6 +9767,33 @@ After top-n inclusion is determined, apply `LIQUIDITY/RE_RANK_RULE.md` to produc
 
 ```
 
+### `docs/canonical/SCORING/DISCOVERY_TAG.md`
+
+**SHA256:** `27e313afbaefa4f837a7404436389ce850f52cf0f0fb5995942b586db6960809`
+
+```markdown
+# Discovery Tag — “New coin” identification (Canonical)
+
+## Machine Header (YAML)
+```yaml
+id: SCORE_DISCOVERY_TAG
+status: canonical
+default_max_age_days: 180
+timestamps_unit: ms
+discovery_source_allowed:
+  - cmc_date_added
+  - first_seen_ts
+  - null
+```
+
+## Age computation (ms)
+- `age_days = floor((asof_ts_ms - source_ts_ms) / 86_400_000)`
+
+## Output
+- `discovery_source` is `null` if neither source exists.
+
+```
+
 ---
 
 ## 📚 Additional Resources
@@ -9598,4 +9805,4 @@ After top-n inclusion is determined, apply `LIQUIDITY/RE_RANK_RULE.md` to produc
 
 ---
 
-_Generated by GitHub Actions • 2026-02-27 23:20 UTC_
+_Generated by GitHub Actions • 2026-02-27 23:43 UTC_
