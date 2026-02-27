@@ -1,7 +1,7 @@
 # 📘 Code Map — Automatically Generated
 
 **Repository:** schluchtenscheisser/spot-altcoin-scanner  
-**Last Updated:** 2026-02-27 23:33 UTC  
+**Last Updated:** 2026-02-27 23:43 UTC  
 **Generator:** scripts/update_codemap.py
 
 ---
@@ -20,7 +20,7 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 - **Total Modules:** 42
 - **Total Classes:** 19
-- **Total Functions:** 260
+- **Total Functions:** 271
 
 ---
 
@@ -346,9 +346,9 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 **Classes:** `SnapshotManager`
 
-**Functions:** `__init__, create_snapshot, get_snapshot_stats, list_snapshots, load_snapshot`
+**Functions:** `__init__, create_snapshot, get_snapshot_stats, list_snapshots, load_snapshot, resolve_history_dir`
 
-**Module Variables:** `logger, payload, size_mb, snapshot, snapshot_config, snapshot_path, snapshots`
+**Module Variables:** `base, history_dir, logger, payload, size_mb, snapshot, snapshot_config, snapshot_dir, snapshot_path, snapshots`
 
 **Imports:** `datetime, json, logging, pathlib, re, typing`
 
@@ -366,11 +366,11 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 **Classes:** `BackfillStats`
 
-**Functions:** `_compute_regime, _daterange, _ensure_minimum_version, _load_snapshot, _parse_date, backfill, build_parser, main`
+**Functions:** `_compute_regime, _daterange, _ensure_minimum_version, _extract_btc_features_1d, _load_snapshot, _parse_date, _preflight_missing_paths, _resolve_snapshots_dir, backfill, build_parser, main`
 
-**Module Variables:** `args, btc, btc_features_1d, changed, current, end, features, maybe_1d, meta, msg` _(+8 more)_
+**Module Variables:** `args, btc, btc_features_1d, changed, current, end, features, maybe_1d, meta, missing_paths` _(+10 more)_
 
-**Imports:** `__future__, argparse, dataclasses, datetime, json, pathlib, scanner.config, scanner.pipeline.regime` _(+2 more)_
+**Imports:** `__future__, argparse, dataclasses, datetime, json, pathlib, scanner.config, scanner.pipeline.regime` _(+3 more)_
 
 ---
 
@@ -378,11 +378,11 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 **Classes:** `BackfillStats`
 
-**Functions:** `_build_minimal_features, _daterange, _extract_ohlcv_row, _fake_now, _mark_full_backfill, _parse_date, _patched_pipeline_now, _run_full_mode, _snapshot_base, backfill, build_parser, main`
+**Functions:** `_build_minimal_features, _daterange, _extract_ohlcv_row, _fake_get_cache_path, _fake_timestamp_to_ms, _fake_utc_date, _fake_utc_now, _fake_utc_timestamp, _mark_full_backfill, _parse_date, _patched_full_mode_time_sources, _preflight_requirements, _resolve_cache_date, _resolve_snapshots_dir, _run_full_mode, _snapshot_base, backfill, build_parser, main`
 
-**Module Variables:** `SYMBOL_CACHE_RE, args, asof_iso, asof_ts_ms, candles, close, config, current, date_dir, end` _(+22 more)_
+**Module Variables:** `SYMBOL_CACHE_RE, args, asof_iso, asof_ts_ms, candles, close, config, current, date_dir, end` _(+28 more)_
 
-**Imports:** `__future__, argparse, contextlib, dataclasses, datetime, json, pathlib, re` _(+5 more)_
+**Imports:** `__future__, argparse, contextlib, dataclasses, datetime, json, pathlib, re` _(+7 more)_
 
 ---
 
@@ -786,22 +786,26 @@ _This section shows which functions call which other functions, helping identify
 
 | Calling Function | Internal Calls | External Calls |
 |------------------|----------------|----------------|
-| `__init__` | — | `Path`, `get`, `info`, `mkdir` |
+| `__init__` | `resolve_history_dir` | `info`, `mkdir` |
 | `create_snapshot` | — | `dump`, `info`, `isoformat`, `stat`, `strftime`, `timestamp`, `update`, `utcnow` |
 | `get_snapshot_stats` | `load_snapshot` | — |
 | `list_snapshots` | — | `append`, `fullmatch`, `glob`, `info`, `load`, `sort` |
 | `load_snapshot` | — | `FileNotFoundError`, `exists`, `info`, `load` |
+| `resolve_history_dir` | — | `Path`, `get` |
 
 ### 📄 scanner/tools/backfill_btc_regime.py
 
 | Calling Function | Internal Calls | External Calls |
 |------------------|----------------|----------------|
-| `_compute_regime` | — | `compute_btc_regime_from_1d_features`, `get` |
+| `_compute_regime` | `_extract_btc_features_1d` | `compute_btc_regime_from_1d_features` |
 | `_daterange` | — | `timedelta` |
 | `_ensure_minimum_version` | — | `get` |
+| `_extract_btc_features_1d` | — | `get` |
 | `_load_snapshot` | — | `ValueError`, `load` |
 | `_parse_date` | — | `fromisoformat` |
-| `backfill` | `_compute_regime`, `_daterange`, `_ensure_minimum_version`, `_load_snapshot`, `_parse_date` | `BackfillStats`, `FileNotFoundError`, `Path`, `ValueError`, `append`, `dump`, `exists`, `get`, `isoformat`, `join`, `load_config`, `setdefault`, `write` |
+| `_preflight_missing_paths` | `_daterange` | `exists`, `isoformat` |
+| `_resolve_snapshots_dir` | — | `Path`, `load_config`, `resolve_history_dir` |
+| `backfill` | `_compute_regime`, `_daterange`, `_ensure_minimum_version`, `_load_snapshot`, `_parse_date`, `_preflight_missing_paths`, `_resolve_snapshots_dir` | `BackfillStats`, `FileNotFoundError`, `ValueError`, `append`, `dump`, `exists`, `get`, `isoformat`, `join`, `pop`, `setdefault`, `write` |
 | `build_parser` | — | `ArgumentParser`, `add_argument` |
 | `main` | `backfill`, `build_parser` | `parse_args` |
 
@@ -812,12 +816,19 @@ _This section shows which functions call which other functions, helping identify
 | `_build_minimal_features` | `_extract_ohlcv_row` | `FileNotFoundError`, `exists`, `is_file`, `items`, `iterdir`, `match` |
 | `_daterange` | — | `timedelta` |
 | `_extract_ohlcv_row` | — | `ValueError`, `date`, `fromtimestamp`, `group`, `isoformat`, `load`, `match` |
-| `_fake_now` | — | `datetime` |
+| `_fake_get_cache_path` | `_resolve_cache_date` | `original_io_get_cache_path` |
+| `_fake_timestamp_to_ms` | — | `timestamp` |
+| `_fake_utc_date` | `_resolve_cache_date` | — |
+| `_fake_utc_timestamp` | — | `strftime` |
 | `_mark_full_backfill` | — | `ValueError`, `dump`, `load`, `setdefault`, `write` |
 | `_parse_date` | — | `fromisoformat` |
-| `_run_full_mode` | `_patched_pipeline_now` | `ScannerConfig`, `get`, `load_config`, `run_pipeline` |
+| `_patched_full_mode_time_sources` | — | `datetime` |
+| `_preflight_requirements` | `_build_minimal_features`, `_daterange` | `FileNotFoundError`, `append`, `exists`, `isoformat`, `join` |
+| `_resolve_cache_date` | — | `isoformat` |
+| `_resolve_snapshots_dir` | — | `Path`, `load_config`, `resolve_history_dir` |
+| `_run_full_mode` | `_patched_full_mode_time_sources` | `ScannerConfig`, `get`, `load_config`, `run_pipeline` |
 | `_snapshot_base` | — | `isoformat`, `replace`, `strftime`, `timestamp` |
-| `backfill` | `_build_minimal_features`, `_daterange`, `_mark_full_backfill`, `_parse_date`, `_run_full_mode`, `_snapshot_base` | `BackfillStats`, `FileExistsError`, `FileNotFoundError`, `Path`, `ValueError`, `dump`, `exists`, `get`, `isoformat`, `load_config`, `mkdir`, `now`, `write` |
+| `backfill` | `_build_minimal_features`, `_daterange`, `_mark_full_backfill`, `_parse_date`, `_preflight_requirements`, `_resolve_snapshots_dir`, `_run_full_mode`, `_snapshot_base` | `BackfillStats`, `FileExistsError`, `FileNotFoundError`, `Path`, `ValueError`, `dump`, `exists`, `isoformat`, `mkdir`, `now`, `write` |
 | `build_parser` | — | `ArgumentParser`, `add_argument` |
 | `main` | `backfill`, `build_parser` | `parse_args` |
 
@@ -896,25 +907,25 @@ _Modules with high external call counts may benefit from refactoring._
 | Module | Internal Calls | External Calls | Total | Coupling |
 |--------|----------------|----------------|-------|----------|
 | `scanner/pipeline/features.py` | 29 | 47 | 76 | 🔴 High |
-| `scanner/tools/backfill_snapshots.py` | 10 | 45 | 55 | 🔴 High |
+| `scanner/tools/backfill_snapshots.py` | 16 | 55 | 71 | 🔴 High |
 | `scanner/pipeline/filters.py` | 17 | 33 | 50 | 🔴 High |
 | `scanner/pipeline/__init__.py` | 0 | 42 | 42 | 🔴 High |
 | `scanner/pipeline/backtest_runner.py` | 15 | 25 | 40 | 🔴 High |
 | `scanner/tools/export_evaluation_dataset.py` | 9 | 31 | 40 | 🔴 High |
 | `scanner/pipeline/excel_output.py` | 5 | 34 | 39 | 🔴 High |
+| `scanner/tools/backfill_btc_regime.py` | 11 | 27 | 38 | 🔴 High |
 | `scanner/clients/mexc_client.py` | 7 | 28 | 35 | 🔴 High |
 | `scanner/pipeline/output.py` | 4 | 31 | 35 | 🔴 High |
 | `scanner/clients/marketcap_client.py` | 4 | 27 | 31 | 🔴 High |
 | `scanner/pipeline/scoring/reversal.py` | 9 | 21 | 30 | 🔴 High |
-| `scanner/tools/backfill_btc_regime.py` | 7 | 23 | 30 | 🔴 High |
 | `scanner/pipeline/runtime_market_meta.py` | 12 | 17 | 29 | ⚠️ Medium |
 | `scanner/pipeline/scoring/breakout.py` | 7 | 20 | 27 | 🔴 High |
 | `scanner/pipeline/scoring/pullback.py` | 7 | 20 | 27 | 🔴 High |
 | `scanner/config.py` | 0 | 26 | 26 | 🔴 High |
 | `scanner/clients/mapping.py` | 4 | 21 | 25 | 🔴 High |
+| `scanner/pipeline/snapshot.py` | 2 | 22 | 24 | 🔴 High |
 | `scanner/backtest/e2_model.py` | 10 | 13 | 23 | ⚠️ Medium |
 | `scanner/pipeline/liquidity.py` | 10 | 13 | 23 | ⚠️ Medium |
-| `scanner/pipeline/snapshot.py` | 1 | 22 | 23 | 🔴 High |
 | `scanner/pipeline/scoring/breakout_trend_1_5d.py` | 10 | 12 | 22 | ⚠️ Medium |
 | `scanner/pipeline/ohlcv.py` | 1 | 15 | 16 | 🔴 High |
 | `scanner/utils/io_utils.py` | 5 | 10 | 15 | 🔴 High |
@@ -949,4 +960,4 @@ _Modules with high external call counts may benefit from refactoring._
 
 ---
 
-_Generated by GitHub Actions • 2026-02-27 23:33 UTC_
+_Generated by GitHub Actions • 2026-02-27 23:43 UTC_
