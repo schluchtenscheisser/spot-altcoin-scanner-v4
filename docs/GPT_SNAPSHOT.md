@@ -1,7 +1,7 @@
 # Spot Altcoin Scanner • GPT Snapshot
 
-**Generated:** 2026-02-27 22:56 UTC  
-**Commit:** `af7fd5e` (af7fd5ece85537439ac21583e7dd091416bd97a1)  
+**Generated:** 2026-02-27 23:08 UTC  
+**Commit:** `10d7233` (10d72330addd764d2ab1d6a29951bbfb05a859f0)  
 **Status:** MVP Complete (Phase 6)  
 
 ---
@@ -31,7 +31,7 @@
 |--------|---------|------------|
 | `scanner/__init__.py` | - | - |
 | `scanner/backtest/__init__.py` | - | - |
-| `scanner/backtest/e2_model.py` | - | `_to_float`, `_threshold_key`, `_parse_date`, `_resolve_thresholds`, `_trade_level_status` ... (+2 more) |
+| `scanner/backtest/e2_model.py` | - | `_to_float`, `_threshold_key`, `_parse_date`, `_resolve_thresholds`, `_resolve_param_int` ... (+3 more) |
 | `scanner/clients/__init__.py` | - | - |
 | `scanner/clients/mapping.py` | `MappingResult`, `SymbolMapper` | - |
 | `scanner/clients/marketcap_client.py` | `MarketCapClient` | - |
@@ -75,7 +75,7 @@
 **Statistics:**
 - Total Modules: 42
 - Total Classes: 19
-- Total Functions: 101
+- Total Functions: 102
 
 ---
 
@@ -2420,13 +2420,14 @@ def collect_raw_features(df: pd.DataFrame, stage_name: str = "features"):
 
 ### `scanner/backtest/e2_model.py`
 
-**SHA256:** `2d0127b8885b1fb3b80674da200f67789ff98dcdb5f41b99e5743e0849a2ece6`
+**SHA256:** `26770eb0054087e9a7598e43a8b3bb8d5122164df49ed9b4f0219b24091347fa`
 
 ```python
 from __future__ import annotations
 
 from datetime import date, timedelta
-from typing import Any, Dict, Mapping, Optional, Sequence
+from collections.abc import Iterable
+from typing import Any, Dict, Mapping, Optional
 
 
 DEFAULT_T_TRIGGER_MAX = 5
@@ -2455,8 +2456,15 @@ def _parse_date(value: str) -> Optional[date]:
         return None
 
 
-def _resolve_thresholds(params: Mapping[str, Any]) -> list[float]:
-    raw = params.get("thresholds_pct", DEFAULT_THRESHOLDS_PCT)
+def _resolve_thresholds(thresholds_pct: Any) -> list[float]:
+    if thresholds_pct is None:
+        raw = DEFAULT_THRESHOLDS_PCT
+    else:
+        raw = thresholds_pct
+
+    if isinstance(raw, (str, bytes)) or not isinstance(raw, Iterable):
+        raise ValueError("thresholds_pct must be list-like or null")
+
     resolved: set[float] = set()
     for value in raw:
         numeric = _to_float(value)
@@ -2466,6 +2474,23 @@ def _resolve_thresholds(params: Mapping[str, Any]) -> list[float]:
     resolved.add(10.0)
     resolved.add(20.0)
     return sorted(resolved)
+
+
+def _resolve_param_int(params: Mapping[str, Any], aliases: tuple[str, ...], default: int) -> int:
+    values: list[int] = []
+    for alias in aliases:
+        if alias not in params:
+            continue
+        values.append(int(params[alias]))
+
+    if not values:
+        return default
+
+    if any(value != values[0] for value in values[1:]):
+        alias_list = ", ".join(aliases)
+        raise ValueError(f"Conflicting values for parameter aliases: {alias_list}")
+
+    return values[0]
 
 
 def _trade_level_status(setup_type: str, trade_levels: Mapping[str, Any]) -> tuple[bool, bool]:
@@ -2550,9 +2575,17 @@ def evaluate_e2_candidate(
     params: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any]:
     runtime_params = params or {}
-    t_trigger_max = int(runtime_params.get("T_trigger_max", DEFAULT_T_TRIGGER_MAX))
-    t_hold = int(runtime_params.get("T_hold", DEFAULT_T_HOLD))
-    thresholds = _resolve_thresholds(runtime_params)
+    t_trigger_max = _resolve_param_int(
+        runtime_params,
+        ("T_trigger_max", "t_trigger_max", "T_trigger_max_days", "t_trigger_max_days"),
+        DEFAULT_T_TRIGGER_MAX,
+    )
+    t_hold = _resolve_param_int(
+        runtime_params,
+        ("T_hold", "t_hold", "T_hold_days", "t_hold_days"),
+        DEFAULT_T_HOLD,
+    )
+    thresholds = _resolve_thresholds(runtime_params.get("thresholds_pct"))
 
     hits: Dict[str, Optional[bool]] = {_threshold_key(threshold): None for threshold in thresholds}
 
@@ -9117,7 +9150,7 @@ If present:
 
 ### `docs/canonical/VERIFICATION_FOR_AI.md`
 
-**SHA256:** `2961e6a2ae5f019c12c87a79bbcb7227a2d34135df4736513463ce6fa0ea1e2c`
+**SHA256:** `a854f3bddc9ff98e36cf19af9609b09b37890813f455d186d546c3bb4aaf9dca`
 
 ```markdown
 # Verification for AI — Golden Fixtures, Invariants, Checklist (Canonical)
@@ -9137,6 +9170,17 @@ Compare expected numeric values as floats with absolute tolerance 1e-9. No round
 ## Fixture A trace (key point)
 dist_pct=1.643406808 lies in [0,2):
 breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
+
+## E2 verification boundaries
+- `invalid_entry_price` is evaluated only when `t_trigger` exists.
+- For non-`ok` reasons (`no_trigger`, `insufficient_forward_history`, `missing_price_series`, `missing_trade_levels`, `invalid_trade_levels`, `invalid_entry_price`), E2 outcome fields remain nullable: `hit_10`, `hit_20`, `hits`, `mfe_pct`, `mae_pct`.
+- Parameter alias checks:
+  - `T_hold` / `t_hold` / `T_hold_days` / `t_hold_days` are equivalent.
+  - `T_trigger_max` / `t_trigger_max` / `T_trigger_max_days` / `t_trigger_max_days` are equivalent.
+  - conflicting alias values must raise `ValueError`.
+- `thresholds_pct` parsing:
+  - `null` or missing uses defaults `[10,20]`.
+  - scalar input (e.g. `10` or `"10"`) raises `ValueError("thresholds_pct must be list-like or null")`.
 
 ```
 
@@ -9556,4 +9600,4 @@ After top-n inclusion is determined, apply `LIQUIDITY/RE_RANK_RULE.md` to produc
 
 ---
 
-_Generated by GitHub Actions • 2026-02-27 22:56 UTC_
+_Generated by GitHub Actions • 2026-02-27 23:08 UTC_
