@@ -1,7 +1,7 @@
 # Spot Altcoin Scanner • GPT Snapshot
 
-**Generated:** 2026-02-28 12:35 UTC  
-**Commit:** `287bb6f` (287bb6fbaedb5566acd542e75e35403fb594a894)  
+**Generated:** 2026-02-28 14:15 UTC  
+**Commit:** `69a0af4` (69a0af47e83938c6e3ec1970fc0c5171235704e5)  
 **Status:** MVP Complete (Phase 6)  
 
 ---
@@ -46,7 +46,7 @@
 | `scanner/pipeline/features.py` | `FeatureEngine` | - |
 | `scanner/pipeline/filters.py` | `UniverseFilters` | - |
 | `scanner/pipeline/global_ranking.py` | - | `_config_get`, `compute_global_top20` |
-| `scanner/pipeline/liquidity.py` | - | `_root_config`, `get_orderbook_top_k`, `get_slippage_notional_usdt`, `get_grade_thresholds_bps`, `select_top_k_for_orderbook` ... (+5 more) |
+| `scanner/pipeline/liquidity.py` | - | `_root_config`, `get_orderbook_top_k`, `get_slippage_notional_usdt`, `get_grade_thresholds_bps`, `select_top_k_for_orderbook` ... (+8 more) |
 | `scanner/pipeline/ohlcv.py` | `OHLCVFetcher` | - |
 | `scanner/pipeline/output.py` | `ReportGenerator` | - |
 | `scanner/pipeline/regime.py` | - | `compute_btc_regime_from_1d_features`, `compute_btc_regime`, `_to_float` |
@@ -75,7 +75,7 @@
 **Statistics:**
 - Total Modules: 42
 - Total Classes: 19
-- Total Functions: 110
+- Total Functions: 113
 
 ---
 
@@ -205,7 +205,7 @@ This is a research tool, not financial advice. Use at your own risk.
 
 ### `config/config.yml`
 
-**SHA256:** `5c5c39541b6ad2dc464e89718e7dc453d7c02a7f36a73862366766db0a9681f9`
+**SHA256:** `3066d8854cf5ef0d2cd9d09d4cec9409c9f418ef4e2b7794e43fd3df751b8338`
 
 ```yaml
 version:
@@ -396,6 +396,16 @@ liquidity:
     b_max: 50
     c_max: 100
 
+
+
+execution_gates:
+  mexc_orderbook:
+    enabled: true
+    max_spread_pct: 0.15
+    bands_pct: [0.5, 1.0]
+    min_depth_usd:
+      "0.5": 80000
+      "1.0": 200000
 
 risk_flags:
   denylist_file: "config/denylist.yaml"
@@ -3391,7 +3401,7 @@ def compute_global_top20(
 
 ### `scanner/pipeline/liquidity.py`
 
-**SHA256:** `ef8be7360af6d90e8dc999cbfbf9391075b6fff1467910b2f2ca1499775c285a`
+**SHA256:** `3dda53b3daf7289895873fba12d30dfc812a893397dde6bdf19a216074ffa7be`
 
 ```python
 """Liquidity stage utilities (Top-K orderbook budget + slippage metrics)."""
@@ -3566,6 +3576,55 @@ def compute_orderbook_liquidity_metrics(orderbook: Dict[str, Any], notional_usdt
     }
 
 
+def _band_label(band: float) -> str:
+    bf = float(band)
+    if bf.is_integer():
+        return str(int(bf))
+    return str(bf).replace(".", "_")
+
+
+def _empty_orderbook_metrics(bands_pct: List[float]) -> Dict[str, Any]:
+    out: Dict[str, Any] = {"spread_pct": None, "orderbook_ok": False}
+    for band in bands_pct:
+        label = _band_label(band)
+        out[f"depth_bid_{label}pct_usd"] = None
+        out[f"depth_ask_{label}pct_usd"] = None
+    return out
+
+
+def compute_orderbook_metrics(orderbook: Dict[str, Any], bands_pct: List[float]) -> Dict[str, Any]:
+    """Compute deterministic spread/depth metrics for execution gating."""
+    metrics = _empty_orderbook_metrics(bands_pct)
+    bids = _to_levels(orderbook.get("bids"))
+    asks = _to_levels(orderbook.get("asks"))
+    if not bids or not asks:
+        return metrics
+
+    best_bid = max(p for p, _ in bids)
+    best_ask = min(p for p, _ in asks)
+    if best_bid <= 0 or best_ask <= 0:
+        return metrics
+
+    mid = (best_bid + best_ask) / 2.0
+    if mid <= 0:
+        return metrics
+
+    metrics["spread_pct"] = ((best_ask - best_bid) / mid) * 100.0
+    for band in bands_pct:
+        band_f = float(band)
+        label = _band_label(band_f)
+        bid_cutoff = mid * (1.0 - band_f / 100.0)
+        ask_cutoff = mid * (1.0 + band_f / 100.0)
+
+        bid_depth = sum(price * qty for price, qty in bids if price >= bid_cutoff)
+        ask_depth = sum(price * qty for price, qty in asks if price <= ask_cutoff)
+        metrics[f"depth_bid_{label}pct_usd"] = bid_depth
+        metrics[f"depth_ask_{label}pct_usd"] = ask_depth
+
+    metrics["orderbook_ok"] = True
+    return metrics
+
+
 def apply_liquidity_metrics_to_shortlist(
     shortlist: List[Dict[str, Any]],
     orderbooks: Dict[str, Any],
@@ -3576,6 +3635,11 @@ def apply_liquidity_metrics_to_shortlist(
     notional = get_slippage_notional_usdt(config)
     thresholds = get_grade_thresholds_bps(config)
 
+    root = _root_config(config)
+    gate_cfg = root.get("execution_gates", {}).get("mexc_orderbook", {})
+    bands_cfg = gate_cfg.get("bands_pct", [0.5, 1.0])
+    bands_pct = [float(v) for v in bands_cfg]
+
     out: List[Dict[str, Any]] = []
     for row in shortlist:
         symbol = row.get("symbol")
@@ -3584,6 +3648,7 @@ def apply_liquidity_metrics_to_shortlist(
         if isinstance(orderbook, dict):
             metrics = compute_orderbook_liquidity_metrics(orderbook, notional, thresholds)
             r.update(metrics)
+            r.update(compute_orderbook_metrics(orderbook, bands_pct))
         elif selected_symbols is not None and symbol in selected_symbols:
             r.update(
                 {
@@ -3593,6 +3658,7 @@ def apply_liquidity_metrics_to_shortlist(
                     "liquidity_insufficient": True,
                 }
             )
+            r.update(_empty_orderbook_metrics(bands_pct))
         else:
             r.update(
                 {
@@ -3602,6 +3668,9 @@ def apply_liquidity_metrics_to_shortlist(
                     "liquidity_insufficient": None,
                 }
             )
+            metrics = _empty_orderbook_metrics(bands_pct)
+            metrics["orderbook_ok"] = None
+            r.update(metrics)
         out.append(r)
     return out
 
@@ -3609,7 +3678,7 @@ def apply_liquidity_metrics_to_shortlist(
 
 ### `scanner/pipeline/excel_output.py`
 
-**SHA256:** `4244c7a289f93c4adf982288ce27911411382ff00649c2a5bd0df57ae78265c7`
+**SHA256:** `88cbf256a15d1949b7223143fc9ed9aa46ab1ab2b4dd1dff7050dbca99fd7b98`
 
 ```python
 """
@@ -3878,7 +3947,10 @@ class ExcelReportGenerator:
         
         # Headers
         headers = [
-            'Rank', 'Symbol', 'Name', 'Price (USDT)', 
+            'Rank', 'Symbol', 'Name', 'Price (USDT)',
+            'Execution Gate Pass', 'Spread %',
+            'Depth Bid 0.5% USD', 'Depth Ask 0.5% USD',
+            'Depth Bid 1.0% USD', 'Depth Ask 1.0% USD',
             'Market Cap', '24h Volume', 'Score'
         ] + component_names + ['Flags']
         
@@ -3906,30 +3978,37 @@ class ExcelReportGenerator:
             else:
                 ws.cell(row=row_idx, column=4, value='N/A')
             
+            ws.cell(row=row_idx, column=5, value=bool(result.get('execution_gate_pass', False)))
+            ws.cell(row=row_idx, column=6, value=result.get('spread_pct'))
+            ws.cell(row=row_idx, column=7, value=result.get('depth_bid_0_5pct_usd'))
+            ws.cell(row=row_idx, column=8, value=result.get('depth_ask_0_5pct_usd'))
+            ws.cell(row=row_idx, column=9, value=result.get('depth_bid_1pct_usd'))
+            ws.cell(row=row_idx, column=10, value=result.get('depth_ask_1pct_usd'))
+
             # Market Cap (abbreviated)
             market_cap = result.get('market_cap')
             if market_cap:
-                ws.cell(row=row_idx, column=5, value=self._format_large_number(market_cap))
+                ws.cell(row=row_idx, column=11, value=self._format_large_number(market_cap))
             else:
-                ws.cell(row=row_idx, column=5, value='N/A')
-            
+                ws.cell(row=row_idx, column=11, value='N/A')
+
             # 24h Volume (abbreviated)
             volume = result.get('quote_volume_24h')
             if volume:
-                ws.cell(row=row_idx, column=6, value=self._format_large_number(volume))
+                ws.cell(row=row_idx, column=12, value=self._format_large_number(volume))
             else:
-                ws.cell(row=row_idx, column=6, value='N/A')
-            
+                ws.cell(row=row_idx, column=12, value='N/A')
+
             # Score
-            ws.cell(row=row_idx, column=7, value=result.get('score', 0))
-            
+            ws.cell(row=row_idx, column=13, value=result.get('score', 0))
+
             # Component scores
             components = result.get('components', {})
             for col_offset, comp_name in enumerate(component_names):
                 comp_key = comp_name.lower()
                 comp_value = components.get(comp_key, 0)
-                ws.cell(row=row_idx, column=8 + col_offset, value=comp_value)
-            
+                ws.cell(row=row_idx, column=14 + col_offset, value=comp_value)
+
             # Flags
             flags = result.get('flags', [])
             if isinstance(flags, list):
@@ -3938,7 +4017,7 @@ class ExcelReportGenerator:
                 flag_str = ', '.join([k for k, v in flags.items() if v])
             else:
                 flag_str = ''
-            ws.cell(row=row_idx, column=8 + len(component_names), value=flag_str)
+            ws.cell(row=row_idx, column=14 + len(component_names), value=flag_str)
         
         # Freeze top row
         ws.freeze_panes = 'A2'
@@ -3947,21 +4026,27 @@ class ExcelReportGenerator:
         ws.auto_filter.ref = ws.dimensions
         
         # Column widths
-        ws.column_dimensions['A'].width = 6   # Rank
-        ws.column_dimensions['B'].width = 14  # Symbol
-        ws.column_dimensions['C'].width = 20  # Name
-        ws.column_dimensions['D'].width = 13  # Price
-        ws.column_dimensions['E'].width = 13  # Market Cap
-        ws.column_dimensions['F'].width = 13  # Volume
-        ws.column_dimensions['G'].width = 8   # Score
-        
+        ws.column_dimensions['A'].width = 6
+        ws.column_dimensions['B'].width = 14
+        ws.column_dimensions['C'].width = 20
+        ws.column_dimensions['D'].width = 13
+        ws.column_dimensions['E'].width = 18
+        ws.column_dimensions['F'].width = 10
+        ws.column_dimensions['G'].width = 18
+        ws.column_dimensions['H'].width = 18
+        ws.column_dimensions['I'].width = 18
+        ws.column_dimensions['J'].width = 18
+        ws.column_dimensions['K'].width = 13
+        ws.column_dimensions['L'].width = 13
+        ws.column_dimensions['M'].width = 8
+
         # Component columns
         for i in range(len(component_names)):
-            col_letter = get_column_letter(8 + i)
+            col_letter = get_column_letter(14 + i)
             ws.column_dimensions[col_letter].width = 12
-        
+
         # Flags column
-        flags_col = get_column_letter(8 + len(component_names))
+        flags_col = get_column_letter(14 + len(component_names))
         ws.column_dimensions[flags_col].width = 25
     
     def _format_large_number(self, num: float) -> str:
@@ -3987,7 +4072,7 @@ class ExcelReportGenerator:
 
 ### `scanner/pipeline/__init__.py`
 
-**SHA256:** `52a87ce164f0a26099e646ddf099c51bc8dc9332994001230f593119a2f35632`
+**SHA256:** `e77c912650e5831e95b025d74b68b3e13e90bc79557678987bc017114c8e832b`
 
 ```python
 """
@@ -4190,6 +4275,12 @@ def run_pipeline(config: ScannerConfig) -> None:
             features[symbol]['slippage_bps'] = shortlist_entry.get('slippage_bps')
             features[symbol]['liquidity_grade'] = shortlist_entry.get('liquidity_grade')
             features[symbol]['liquidity_insufficient'] = shortlist_entry.get('liquidity_insufficient')
+            features[symbol]['spread_pct'] = shortlist_entry.get('spread_pct')
+            features[symbol]['depth_bid_0_5pct_usd'] = shortlist_entry.get('depth_bid_0_5pct_usd')
+            features[symbol]['depth_ask_0_5pct_usd'] = shortlist_entry.get('depth_ask_0_5pct_usd')
+            features[symbol]['depth_bid_1pct_usd'] = shortlist_entry.get('depth_bid_1pct_usd')
+            features[symbol]['depth_ask_1pct_usd'] = shortlist_entry.get('depth_ask_1pct_usd')
+            features[symbol]['orderbook_ok'] = shortlist_entry.get('orderbook_ok')
             features[symbol]['risk_flags'] = shortlist_entry.get('risk_flags', [])
             features[symbol]['soft_penalties'] = shortlist_entry.get('soft_penalties', {})
         else:
@@ -4200,6 +4291,12 @@ def run_pipeline(config: ScannerConfig) -> None:
             features[symbol]['slippage_bps'] = None
             features[symbol]['liquidity_grade'] = None
             features[symbol]['liquidity_insufficient'] = None
+            features[symbol]['spread_pct'] = None
+            features[symbol]['depth_bid_0_5pct_usd'] = None
+            features[symbol]['depth_ask_0_5pct_usd'] = None
+            features[symbol]['depth_bid_1pct_usd'] = None
+            features[symbol]['depth_ask_1pct_usd'] = None
+            features[symbol]['orderbook_ok'] = None
             features[symbol]['risk_flags'] = []
             features[symbol]['soft_penalties'] = {}
 
@@ -5223,7 +5320,7 @@ def compute_discovery_fields(
 
 ### `scanner/pipeline/output.py`
 
-**SHA256:** `7642a1a3412cf8d91a31978227f7f0ff4c7f0a96cb0988b8c0c461033ffed38a`
+**SHA256:** `c8dc98e8c0d86465aaa755db9f5ec229100cc5581fa8ebe9b98f3f9642c495f3`
 
 ```python
 """
@@ -5459,6 +5556,16 @@ class ReportGenerator:
         # Price
         if price is not None:
             lines.append(f"**Price:** ${price:.6f} USDT")
+            lines.append("")
+
+        if "execution_gate_pass" in data:
+            lines.append(f"**Execution Gate:** {bool(data.get('execution_gate_pass'))}")
+            lines.append(f"**Spread %:** {data.get('spread_pct')}")
+            lines.append(f"**Depth Bid 1.0% (USD):** {data.get('depth_bid_1pct_usd')}")
+            lines.append(f"**Depth Ask 1.0% (USD):** {data.get('depth_ask_1pct_usd')}")
+            fail_reasons = data.get('execution_gate_fail_reasons') or []
+            if fail_reasons:
+                lines.append(f"**Execution Gate Fail Reasons:** {', '.join(fail_reasons)}")
             lines.append("")
         
         # Components
@@ -8752,7 +8859,7 @@ def score_reversals(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
 
 ### `scanner/pipeline/scoring/breakout_trend_1_5d.py`
 
-**SHA256:** `c68831ba1de4d3845143f0424f4d26609b417cf5c1235d2b56562ec8d1ea2e51`
+**SHA256:** `26a85c2c3faf2e6d98fdb8cb90aa59e51f8d55b3dae525719e641aa7eccd6b70`
 
 ```python
 """Breakout Trend 1-5D scoring (immediate + retest)."""
@@ -8769,6 +8876,15 @@ class BreakoutTrend1to5DScorer:
 
         self.min_24h_risk_off = float(cfg.get("risk_off_min_quote_volume_24h", 15_000_000))
         self.trigger_4h_lookback_bars = int(cfg.get("trigger_4h_lookback_bars", 30))
+
+        gate_cfg = root.get("execution_gates", {}).get("mexc_orderbook", {})
+        self.execution_gate_enabled = bool(gate_cfg.get("enabled", True))
+        self.max_spread_pct = float(gate_cfg.get("max_spread_pct", 0.15))
+        self.execution_bands = [float(v) for v in gate_cfg.get("bands_pct", [0.5, 1.0])]
+        self.execution_min_depth = {
+            str(k): float(v)
+            for k, v in (gate_cfg.get("min_depth_usd", {"0.5": 80_000, "1.0": 200_000}) or {}).items()
+        }
 
     @staticmethod
     def _calc_high_20d_excluding_current(f1d: Dict[str, Any]) -> Optional[float]:
@@ -8871,6 +8987,42 @@ class BreakoutTrend1to5DScorer:
         multiplier = 0.85 if rs_override and liq_ok else 0.75
         return multiplier, state, rs_override, liq_ok
 
+
+    @staticmethod
+    def _band_label(band: float) -> str:
+        bf = float(band)
+        if bf.is_integer():
+            return str(int(bf))
+        return str(bf).replace(".", "_")
+
+    @staticmethod
+    def _band_reason(band: float) -> str:
+        return f"DEPTH_TOO_LOW_{str(float(band)).replace('.', '_')}"
+
+    def _evaluate_execution_gate(self, feature_row: Dict[str, Any]) -> Tuple[bool, List[str]]:
+        if not self.execution_gate_enabled:
+            return True, []
+
+        fail_reasons: List[str] = []
+        if feature_row.get("orderbook_ok") is not True:
+            fail_reasons.append("ORDERBOOK_MISSING")
+            return False, fail_reasons
+
+        spread_pct = feature_row.get("spread_pct")
+        if spread_pct is None or float(spread_pct) > self.max_spread_pct:
+            fail_reasons.append("SPREAD_TOO_WIDE")
+
+        for band in self.execution_bands:
+            label = self._band_label(band)
+            reason = self._band_reason(band)
+            bid = feature_row.get(f"depth_bid_{label}pct_usd")
+            ask = feature_row.get(f"depth_ask_{label}pct_usd")
+            threshold = self.execution_min_depth.get(str(band), self.execution_min_depth.get(f"{band:.1f}", 0.0))
+            if bid is None or ask is None or min(float(bid), float(ask)) < float(threshold):
+                fail_reasons.append(reason)
+
+        return len(fail_reasons) == 0, fail_reasons
+
     def score_symbol(
         self,
         symbol: str,
@@ -8966,8 +9118,18 @@ class BreakoutTrend1to5DScorer:
             "slippage_bps": feature_row.get("slippage_bps"),
             "liquidity_grade": feature_row.get("liquidity_grade"),
             "liquidity_insufficient": feature_row.get("liquidity_insufficient"),
+            "spread_pct": feature_row.get("spread_pct"),
+            "depth_bid_0_5pct_usd": feature_row.get("depth_bid_0_5pct_usd"),
+            "depth_ask_0_5pct_usd": feature_row.get("depth_ask_0_5pct_usd"),
+            "depth_bid_1pct_usd": feature_row.get("depth_bid_1pct_usd"),
+            "depth_ask_1pct_usd": feature_row.get("depth_ask_1pct_usd"),
+            "orderbook_ok": feature_row.get("orderbook_ok"),
             "risk_flags": feature_row.get("risk_flags", []),
         }
+
+        execution_gate_pass, execution_gate_fail_reasons = self._evaluate_execution_gate(feature_row)
+        base["execution_gate_pass"] = execution_gate_pass
+        base["execution_gate_fail_reasons"] = execution_gate_fail_reasons
 
         results: List[Dict[str, Any]] = [{**base, "setup_id": "breakout_immediate_1_5d", "retest_valid": False, "retest_invalidated": False}]
 
@@ -9112,7 +9274,7 @@ last_updated_utc: "2026-02-25T14:41:04Z"
 
 ### `docs/canonical/CONFIGURATION.md`
 
-**SHA256:** `03dd936581f5d84262e90c69f650e5c4417655f2a59a1fcdd8ad340899a675d0`
+**SHA256:** `d0fa97ae78f32d34d15b49d346a64eb13a202f8767dbce1991ee38bd19cd7349`
 
 ```markdown
 # Configuration — Keys, Defaults, Limits (Canonical)
@@ -9147,6 +9309,15 @@ liquidity:
     B_max: 50
     C_max: 100
     D_rule: "> C_max OR insufficient_depth"
+
+execution_gates:
+  mexc_orderbook:
+    enabled_default: true
+    max_spread_pct_default: 0.15
+    bands_pct_default: [0.5, 1.0]
+    min_depth_usd_default:
+      "0.5": 80_000
+      "1.0": 200_000
 
 discovery:
   max_age_days_default: 180
@@ -9217,6 +9388,11 @@ Canonical rule:
 | liquidity.grade_thresholds_bps_default.A_max | liquidity.grade_thresholds_bps.a_max |
 | liquidity.grade_thresholds_bps_default.B_max | liquidity.grade_thresholds_bps.b_max |
 | liquidity.grade_thresholds_bps_default.C_max | liquidity.grade_thresholds_bps.c_max |
+| execution_gates.mexc_orderbook.enabled_default | execution_gates.mexc_orderbook.enabled |
+| execution_gates.mexc_orderbook.max_spread_pct_default | execution_gates.mexc_orderbook.max_spread_pct |
+| execution_gates.mexc_orderbook.bands_pct_default | execution_gates.mexc_orderbook.bands_pct |
+| execution_gates.mexc_orderbook.min_depth_usd_default.0.5 | execution_gates.mexc_orderbook.min_depth_usd."0.5" |
+| execution_gates.mexc_orderbook.min_depth_usd_default.1.0 | execution_gates.mexc_orderbook.min_depth_usd."1.0" |
 | discovery.max_age_days_default | discovery.max_age_days |
 | backtest.model_e2.T_hold_days_default | backtest.t_hold_days |
 | backtest.model_e2.T_trigger_max_days_default | backtest.t_trigger_max_days |
@@ -9249,7 +9425,7 @@ Notes:
 
 ### `docs/canonical/OUTPUT_SCHEMA.md`
 
-**SHA256:** `ef53183d23573fb8eecbeef3f28a1a73a26637188e1f062df58c9295f3f7c954`
+**SHA256:** `314313561ba1be8c148d7d30035d2522cca05e13d1f08d7e86428ea49ae8beec`
 
 ```markdown
 # Output Schema — JSON / Markdown / Excel (Canonical)
@@ -9309,6 +9485,7 @@ Optional:
 - `symbol`, `setup_id`
 - `base_score`, `final_score`, `global_score`
 - Liquidity: `proxy_liquidity_score`, `quote_volume_24h_usd`, `spread_bps`, `slippage_bps`, `liquidity_grade`
+- Execution gate (breakout trend rows): `execution_gate_pass`, `execution_gate_fail_reasons`, `spread_pct`, `depth_bid_0_5pct_usd`, `depth_ask_0_5pct_usd`, `depth_bid_1pct_usd`, `depth_ask_1pct_usd`, `orderbook_ok`
 - `proxy_liquidity_score` is a percent-rank on scale `[0.0, 100.0]` (not rank01).
 - Optional discovery: `discovery`, `age_days`, `discovery_source` ("cmc_date_added" | "first_seen_ts" | null)
 
@@ -9326,7 +9503,7 @@ If present:
 
 ### `docs/canonical/VERIFICATION_FOR_AI.md`
 
-**SHA256:** `fd2f45ddacbac9e377709ce2ced03edb63cb0e99bd29cd68c4a8276c69cfa17f`
+**SHA256:** `77e08e2575c30f4f5a189af11fdf2c95b95f85217bc32c230287e7a81a025c97`
 
 ```markdown
 # Verification for AI — Golden Fixtures, Invariants, Checklist (Canonical)
@@ -9364,6 +9541,13 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - `_find_breakout_indices` returns `(first_breakout_idx, last_breakout_idx)` over the configured trigger window.
 - In `RISK_OFF`, BTC multiplier never excludes candidates: `0.85` when `rs_override AND liq_ok`, otherwise `0.75`.
 - `bb_width_rank_120_4h` is interpreted on percent scale `[0..100]`; defensive rank01 input (`<=1.0`) is multiplied by 100 before scoring.
+
+
+## Execution gate verification boundaries
+- Synthetic book test case: bids `[[99,10],[98,10]]`, asks `[[101,10],[102,10]]` gives `mid=100`, `spread_pct=2.0`, `depth_bid_1pct_usd=990`, `depth_ask_1pct_usd=1010`.
+- Gate pass example: `max_spread_pct=2.5`, `min_depth_usd[1.0]=900`.
+- Gate fail by spread: `max_spread_pct=1.0` => includes `SPREAD_TOO_WIDE`.
+- Gate fail by depth: high min depth for 1.0 band => includes `DEPTH_TOO_LOW_1_0`.
 
 ```
 
@@ -9432,7 +9616,7 @@ Population definitions remain as specified in feature docs.
 
 ### `docs/canonical/SCORING/SCORE_BREAKOUT_TREND_1_5D.md`
 
-**SHA256:** `fad638e5af77946d67b974c1be54ec4cfcff50f4b4b078b2b6ad5b7b1f57e12f`
+**SHA256:** `6d202c7a91e39cb709634c1339b20aba8e7d2d254ede26ddd003e0ca6220eaf7`
 
 ```markdown
 # SCORE_BREAKOUT_TREND_1_5D — Immediate + Retest (Canonical)
@@ -9745,6 +9929,20 @@ Global Top-N dedup & Setup-Gewichte sind in `GLOBAL_RANKING_TOP20.md` zu definie
 Golden fixtures & deterministische Tabellen liegen in:
 - `docs/canonical/VERIFICATION_FOR_AI.md`
 
+
+## 9) Execution Gate (MEXC orderbook)
+- This setup keeps discovery candidates in output even if execution gate fails.
+- Gate is controlled by `execution_gates.mexc_orderbook.*` config.
+- `execution_gate_pass = true` iff all are true:
+  1) `orderbook_ok == true`
+  2) `spread_pct <= max_spread_pct`
+  3) for each configured band `b`: `min(depth_bid_b_pct_usd, depth_ask_b_pct_usd) >= min_depth_usd[b]`
+- Fail reason enum is closed and deterministic:
+  - `ORDERBOOK_MISSING`
+  - `SPREAD_TOO_WIDE`
+  - `DEPTH_TOO_LOW_0_5`
+  - `DEPTH_TOO_LOW_1_0`
+
 ```
 
 ### `docs/canonical/SCORING/GLOBAL_RANKING_TOP20.md`
@@ -9880,4 +10078,4 @@ discovery_source_allowed:
 
 ---
 
-_Generated by GitHub Actions • 2026-02-28 12:35 UTC_
+_Generated by GitHub Actions • 2026-02-28 14:15 UTC_
