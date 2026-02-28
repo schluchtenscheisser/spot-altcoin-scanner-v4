@@ -150,6 +150,9 @@ Required:
 - `high_24h` (number)
 - `low_24h` (number)
 - `quote_volume_24h` (number) — in USDT
+- `global_volume_24h_usd` (number|null) — from CMC `quote.USD.volume_24h`
+- `turnover_24h` (number|null) — `global_volume_24h_usd / market_cap_usd`; null when market cap missing/0 or global volume missing
+- `mexc_share_24h` (number|null) — `quote_volume_24h / global_volume_24h_usd`; null when global volume missing/0
 - `price_change_pct_24h` (number|null)
 
 Recommended (if available):

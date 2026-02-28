@@ -40,3 +40,9 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - Gate pass example: `max_spread_pct=2.5`, `min_depth_usd[1.0]=900`.
 - Gate fail by spread: `max_spread_pct=1.0` => includes `SPREAD_TOO_WIDE`.
 - Gate fail by depth: high min depth for 1.0 band => includes `DEPTH_TOO_LOW_1_0`.
+
+
+## Runtime market meta verification boundaries
+- `global_volume_24h_usd` is nullable and sourced from CMC `quote.USD.volume_24h`; missing value stays `null`.
+- `turnover_24h` is `null` when `market_cap_usd` is missing or zero.
+- `mexc_share_24h` is `null` when `global_volume_24h_usd` is missing or zero.

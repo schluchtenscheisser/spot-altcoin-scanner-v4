@@ -85,6 +85,7 @@ class RuntimeMarketMetaExporter:
             fdv_to_mcap = fdv / market_cap
 
         return {
+            "_cmc_quote_usd": quote_usd,
             "cmc_id": cmc_data.get("id"),
             "name": cmc_data.get("name"),
             "symbol": cmc_data.get("symbol"),
@@ -127,7 +128,7 @@ class RuntimeMarketMetaExporter:
             "max_notional": self._to_float(max_notional),
         }
 
-    def _build_ticker(self, ticker: Dict[str, Any]) -> Dict[str, Any]:
+    def _build_ticker(self, ticker: Dict[str, Any], identity: Dict[str, Any]) -> Dict[str, Any]:
         bid = self._to_float(ticker.get("bidPrice"))
         ask = self._to_float(ticker.get("askPrice"))
         mid = None
@@ -138,11 +139,28 @@ class RuntimeMarketMetaExporter:
             if mid != 0:
                 spread_pct = ((ask - bid) / mid) * 100
 
+        quote_volume_24h = self._to_float(ticker.get("quoteVolume"))
+        global_volume_24h_usd = self._to_float(
+            ((identity.get("_cmc_quote_usd") or {}).get("volume_24h"))
+        )
+
+        turnover_24h = None
+        market_cap_usd = identity.get("market_cap_usd")
+        if global_volume_24h_usd is not None and market_cap_usd not in (None, 0):
+            turnover_24h = global_volume_24h_usd / market_cap_usd
+
+        mexc_share_24h = None
+        if quote_volume_24h is not None and global_volume_24h_usd not in (None, 0):
+            mexc_share_24h = quote_volume_24h / global_volume_24h_usd
+
         return {
             "last_price": self._to_float(ticker.get("lastPrice")),
             "high_24h": self._to_float(ticker.get("highPrice")),
             "low_24h": self._to_float(ticker.get("lowPrice")),
-            "quote_volume_24h": self._to_float(ticker.get("quoteVolume")),
+            "quote_volume_24h": quote_volume_24h,
+            "global_volume_24h_usd": global_volume_24h_usd,
+            "turnover_24h": turnover_24h,
+            "mexc_share_24h": mexc_share_24h,
             "price_change_pct_24h": self._to_float(ticker.get("priceChangePercent")),
             "bid_price": bid,
             "ask_price": ask,
@@ -207,7 +225,7 @@ class RuntimeMarketMetaExporter:
 
             identity = self._build_identity(mapping)
             symbol_info = self._build_symbol_info(symbol, exchange_symbol)
-            ticker_24h = self._build_ticker(ticker)
+            ticker_24h = self._build_ticker(ticker, identity)
 
             quality = self._build_quality(
                 symbol=symbol,
@@ -217,8 +235,11 @@ class RuntimeMarketMetaExporter:
                 has_ohlcv=symbol in ohlcv_data,
             )
 
+            identity_payload = dict(identity)
+            identity_payload.pop("_cmc_quote_usd", None)
+
             coins[symbol] = {
-                "identity": identity,
+                "identity": identity_payload,
                 "mexc": {
                     "symbol_info": symbol_info,
                     "ticker_24h": ticker_24h,
