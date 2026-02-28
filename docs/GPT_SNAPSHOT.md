@@ -1,7 +1,7 @@
 # Spot Altcoin Scanner • GPT Snapshot
 
-**Generated:** 2026-02-28 16:57 UTC  
-**Commit:** `71cfce7` (71cfce7a2eb8c55696ba97d8de8c0cc4af242fc8)  
+**Generated:** 2026-02-28 18:29 UTC  
+**Commit:** `b3e4d3e` (b3e4d3e098f3a030714db387736463f30e066198)  
 **Status:** MVP Complete (Phase 6)  
 
 ---
@@ -38,7 +38,7 @@
 | `scanner/clients/mexc_client.py` | `MEXCClient` | - |
 | `scanner/config.py` | `ScannerConfig` | `load_config`, `validate_config` |
 | `scanner/main.py` | - | `parse_args`, `main` |
-| `scanner/pipeline/__init__.py` | - | `_to_optional_float`, `_extract_cmc_global_volume_24h`, `_compute_turnover_24h`, `_compute_mexc_share_24h`, `run_pipeline` |
+| `scanner/pipeline/__init__.py` | - | `_to_optional_float`, `_extract_cmc_global_volume_24h`, `_compute_turnover_24h`, `_compute_mexc_share_24h`, `_build_scoring_volume_maps` ... (+1 more) |
 | `scanner/pipeline/backtest_runner.py` | - | `_float_or_none`, `_extract_backtest_config`, `_setup_triggered`, `_evaluate_candidate`, `_summarize` ... (+4 more) |
 | `scanner/pipeline/cross_section.py` | - | `percent_rank_average_ties` |
 | `scanner/pipeline/discovery.py` | - | `_iso_to_ts_ms`, `compute_discovery_fields` |
@@ -75,7 +75,7 @@
 **Statistics:**
 - Total Modules: 42
 - Total Classes: 19
-- Total Functions: 117
+- Total Functions: 118
 
 ---
 
@@ -205,7 +205,7 @@ This is a research tool, not financial advice. Use at your own risk.
 
 ### `config/config.yml`
 
-**SHA256:** `3066d8854cf5ef0d2cd9d09d4cec9409c9f418ef4e2b7794e43fd3df751b8338`
+**SHA256:** `7bafcafc87d0d66f7f1ace6844fcf77d647f7b77431859df0870934ceefabfe2`
 
 ```yaml
 version:
@@ -236,7 +236,9 @@ universe_filters:
     min_usd: 100000000      # 100M
     max_usd: 10000000000    # 10B
   volume:
-    min_quote_volume_24h: 1000000
+    min_turnover_24h: 0.03
+    min_mexc_quote_volume_24h_usdt: 5000000
+    min_mexc_share_24h: 0.01
   history:
     min_history_days_1d: 60
   include_only_usdt_pairs: true
@@ -938,7 +940,7 @@ See /docs/spec.md for the full technical specification.
 
 ### `scanner/config.py`
 
-**SHA256:** `518a33d2f31084af0de9a1648bef2842b926ad4ffd75a8f32a018477a8449cc0`
+**SHA256:** `dee1d6b8918e9e409e8d7baff25a03adef16b812de4166a60c4f3a53ec8c2e70`
 
 ```python
 """
@@ -1015,8 +1017,28 @@ class ScannerConfig:
         return self.raw.get("universe_filters", {}).get("market_cap", {}).get("max_usd", 10_000_000_000)
     
     @property
-    def min_quote_volume_24h(self) -> int:
-        return self.raw.get("universe_filters", {}).get("volume", {}).get("min_quote_volume_24h", 1_000_000)
+    def min_turnover_24h(self) -> float:
+        return float(self.raw.get("universe_filters", {}).get("volume", {}).get("min_turnover_24h", 0.03))
+
+    @property
+    def min_mexc_quote_volume_24h_usdt(self) -> float:
+        volume_cfg = self.raw.get("universe_filters", {}).get("volume", {})
+        if "min_mexc_quote_volume_24h_usdt" in volume_cfg:
+            return float(volume_cfg.get("min_mexc_quote_volume_24h_usdt", 5_000_000))
+        return float(volume_cfg.get("min_quote_volume_24h", 5_000_000))
+
+    @property
+    def min_mexc_share_24h(self) -> float:
+        return float(self.raw.get("universe_filters", {}).get("volume", {}).get("min_mexc_share_24h", 0.01))
+
+    @property
+    def min_quote_volume_24h(self) -> float:
+        """Backward-compatible alias for runtime metadata export."""
+        return self.min_mexc_quote_volume_24h_usdt
+
+    @property
+    def scoring_volume_source(self) -> str:
+        return str(self.raw.get("scoring", {}).get("volume_source", "mexc"))
     
     @property
     def min_history_days_1d(self) -> int:
@@ -1095,6 +1117,24 @@ def validate_config(config: ScannerConfig) -> List[str]:
     # Check CMC API key (if needed)
     if not config.cmc_api_key and config.run_mode == "standard":
         errors.append("CMC_API_KEY environment variable not set")
+
+    # Universe volume-gate configuration
+    if config.min_turnover_24h < 0:
+        errors.append(f"min_turnover_24h ({config.min_turnover_24h}) must be >= 0")
+
+    if config.min_mexc_quote_volume_24h_usdt < 0:
+        errors.append(
+            f"min_mexc_quote_volume_24h_usdt ({config.min_mexc_quote_volume_24h_usdt}) must be >= 0"
+        )
+
+    if not (0 <= config.min_mexc_share_24h <= 1):
+        errors.append(f"min_mexc_share_24h ({config.min_mexc_share_24h}) must be in [0, 1]")
+
+    valid_volume_sources = ["mexc", "global_fallback_mexc"]
+    if config.scoring_volume_source not in valid_volume_sources:
+        errors.append(
+            f"scoring.volume_source ({config.scoring_volume_source}) must be one of {valid_volume_sources}"
+        )
     
     return errors
 
@@ -2917,7 +2957,7 @@ def _to_float(value: Any) -> Optional[float]:
 
 ### `scanner/pipeline/filters.py`
 
-**SHA256:** `8a948f40bbd070ca9e5e78e44defa96d7fc4f2545c08eebedecba3414bb07205`
+**SHA256:** `5623be4b5db9b38245567641667ebe2e6443180e1cb2023f9632d22eaa61894d`
 
 ```python
 """
@@ -2962,8 +3002,15 @@ class UniverseFilters:
         self.mcap_min = mcap_cfg.get('min_usd', legacy_filters.get('mcap_min', 100_000_000))  # 100M
         self.mcap_max = mcap_cfg.get('max_usd', legacy_filters.get('mcap_max', 3_000_000_000))  # 3B
 
-        # Liquidity (24h volume in USDT)
-        self.min_volume_24h = volume_cfg.get('min_quote_volume_24h', legacy_filters.get('min_volume_24h', 1_000_000))
+        # Liquidity gates (global turnover + MEXC volume/share with fallback)
+        self.min_turnover_24h = float(volume_cfg.get('min_turnover_24h', 0.03))
+        if 'min_mexc_quote_volume_24h_usdt' in volume_cfg:
+            self.min_mexc_quote_volume_24h_usdt = float(volume_cfg.get('min_mexc_quote_volume_24h_usdt', 5_000_000))
+        else:
+            self.min_mexc_quote_volume_24h_usdt = float(
+                volume_cfg.get('min_quote_volume_24h', legacy_filters.get('min_volume_24h', 5_000_000))
+            )
+        self.min_mexc_share_24h = float(volume_cfg.get('min_mexc_share_24h', 0.01))
 
         # Minimum 1d history used by OHLCV filtering step.
         self.min_history_days_1d = int(history_cfg.get('min_history_days_1d', 60))
@@ -3018,8 +3065,12 @@ class UniverseFilters:
             self.minor_unlock_bases,
         ) = self._load_unlock_overrides(self.unlock_overrides_path)
         
-        logger.info(f"Filters initialized: MCAP {self.mcap_min/1e6:.0f}M-{self.mcap_max/1e9:.1f}B, "
-                   f"Min Volume {self.min_volume_24h/1e6:.1f}M")
+        logger.info(
+            f"Filters initialized: MCAP {self.mcap_min/1e6:.0f}M-{self.mcap_max/1e9:.1f}B, "
+            f"Turnover>={self.min_turnover_24h:.4f}, "
+            f"MEXC Vol>={self.min_mexc_quote_volume_24h_usdt/1e6:.1f}M, "
+            f"MEXC Share>={self.min_mexc_share_24h:.4f}"
+        )
 
     @staticmethod
     def _safe_load_yaml(path: Path) -> Dict[str, Any]:
@@ -3205,16 +3256,50 @@ class UniverseFilters:
 
         return filtered
 
+    @staticmethod
+    def _is_valid_non_negative_number(value: Any) -> bool:
+        try:
+            num = float(value)
+        except (TypeError, ValueError):
+            return False
+        return num == num and num >= 0  # NaN check: NaN != NaN
+
     def _filter_liquidity(self, symbols: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Filter by minimum 24h volume."""
-        filtered = []
-        
+        """Apply turnover + MEXC volume/share gates with explicit turnover-missing fallback."""
+        filtered: List[Dict[str, Any]] = []
+
         for sym_data in symbols:
-            volume = sym_data.get('quote_volume_24h', 0)
-            
-            if volume >= self.min_volume_24h:
-                filtered.append(sym_data)
-        
+            mexc_volume = sym_data.get('quote_volume_24h')
+            if not self._is_valid_non_negative_number(mexc_volume):
+                continue
+            mexc_volume_f = float(mexc_volume)
+
+            turnover = sym_data.get('turnover_24h')
+            turnover_available = self._is_valid_non_negative_number(turnover)
+
+            # Fallback path: turnover unavailable -> require only MEXC minimum volume.
+            if not turnover_available:
+                if mexc_volume_f >= self.min_mexc_quote_volume_24h_usdt:
+                    filtered.append(sym_data)
+                continue
+
+            # Primary path: turnover available -> require turnover + MEXC volume + MEXC share.
+            turnover_f = float(turnover)
+            if turnover_f < self.min_turnover_24h:
+                continue
+
+            if mexc_volume_f < self.min_mexc_quote_volume_24h_usdt:
+                continue
+
+            mexc_share = sym_data.get('mexc_share_24h')
+            if not self._is_valid_non_negative_number(mexc_share):
+                continue
+
+            if float(mexc_share) < self.min_mexc_share_24h:
+                continue
+
+            filtered.append(sym_data)
+
         return filtered
     
     def _filter_exclusions(self, symbols: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -3678,7 +3763,7 @@ def apply_liquidity_metrics_to_shortlist(
 
 ### `scanner/pipeline/excel_output.py`
 
-**SHA256:** `88cbf256a15d1949b7223143fc9ed9aa46ab1ab2b4dd1dff7050dbca99fd7b98`
+**SHA256:** `8507d316c6e225b11922e3c9fa0ed4321a3cda25f77d4d2e0ddbf0d8bd64b701`
 
 ```python
 """
@@ -3897,7 +3982,7 @@ class ExcelReportGenerator:
         ws = wb.create_sheet("Global Top 20", 1)
         headers = [
             'Rank', 'Symbol', 'Name', 'Best Setup', 'Global Score', 'Setup Score', 'Confluence',
-            'Price (USDT)', 'Market Cap', '24h Volume', 'Flags'
+            'Price (USDT)', 'Market Cap', '24h Volume', 'Global Volume 24h (USD)', 'Turnover 24h', 'MEXC Share 24h', 'Flags'
         ]
         for col_idx, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col_idx, value=header)
@@ -3920,9 +4005,12 @@ class ExcelReportGenerator:
             ws.cell(row=row, column=9, value=self._format_large_number(market_cap) if market_cap else 'N/A')
             volume = result.get('quote_volume_24h')
             ws.cell(row=row, column=10, value=self._format_large_number(volume) if volume else 'N/A')
+            ws.cell(row=row, column=11, value=self._sanitize_optional_metric(result.get('global_volume_24h_usd')))
+            ws.cell(row=row, column=12, value=self._sanitize_optional_metric(result.get('turnover_24h')))
+            ws.cell(row=row, column=13, value=self._sanitize_optional_metric(result.get('mexc_share_24h')))
             flags = result.get('flags', [])
             flag_str = ', '.join(flags) if isinstance(flags, list) else ''
-            ws.cell(row=row, column=11, value=flag_str)
+            ws.cell(row=row, column=14, value=flag_str)
 
         ws.freeze_panes = 'A2'
         ws.auto_filter.ref = ws.dimensions
@@ -3951,7 +4039,7 @@ class ExcelReportGenerator:
             'Execution Gate Pass', 'Spread %',
             'Depth Bid 0.5% USD', 'Depth Ask 0.5% USD',
             'Depth Bid 1.0% USD', 'Depth Ask 1.0% USD',
-            'Market Cap', '24h Volume', 'Score'
+            'Market Cap', '24h Volume', 'Global Volume 24h (USD)', 'Turnover 24h', 'MEXC Share 24h', 'Score'
         ] + component_names + ['Flags']
         
         # Write headers
@@ -3999,15 +4087,19 @@ class ExcelReportGenerator:
             else:
                 ws.cell(row=row_idx, column=12, value='N/A')
 
+            ws.cell(row=row_idx, column=13, value=self._sanitize_optional_metric(result.get('global_volume_24h_usd')))
+            ws.cell(row=row_idx, column=14, value=self._sanitize_optional_metric(result.get('turnover_24h')))
+            ws.cell(row=row_idx, column=15, value=self._sanitize_optional_metric(result.get('mexc_share_24h')))
+
             # Score
-            ws.cell(row=row_idx, column=13, value=result.get('score', 0))
+            ws.cell(row=row_idx, column=16, value=result.get('score', 0))
 
             # Component scores
             components = result.get('components', {})
             for col_offset, comp_name in enumerate(component_names):
                 comp_key = comp_name.lower()
                 comp_value = components.get(comp_key, 0)
-                ws.cell(row=row_idx, column=14 + col_offset, value=comp_value)
+                ws.cell(row=row_idx, column=17 + col_offset, value=comp_value)
 
             # Flags
             flags = result.get('flags', [])
@@ -4017,7 +4109,7 @@ class ExcelReportGenerator:
                 flag_str = ', '.join([k for k, v in flags.items() if v])
             else:
                 flag_str = ''
-            ws.cell(row=row_idx, column=14 + len(component_names), value=flag_str)
+            ws.cell(row=row_idx, column=17 + len(component_names), value=flag_str)
         
         # Freeze top row
         ws.freeze_panes = 'A2'
@@ -4038,17 +4130,36 @@ class ExcelReportGenerator:
         ws.column_dimensions['J'].width = 18
         ws.column_dimensions['K'].width = 13
         ws.column_dimensions['L'].width = 13
-        ws.column_dimensions['M'].width = 8
+        ws.column_dimensions['M'].width = 18
+        ws.column_dimensions['N'].width = 14
+        ws.column_dimensions['O'].width = 14
+        ws.column_dimensions['P'].width = 8
 
         # Component columns
         for i in range(len(component_names)):
-            col_letter = get_column_letter(14 + i)
+            col_letter = get_column_letter(17 + i)
             ws.column_dimensions[col_letter].width = 12
 
         # Flags column
-        flags_col = get_column_letter(14 + len(component_names))
+        flags_col = get_column_letter(17 + len(component_names))
         ws.column_dimensions[flags_col].width = 25
     
+
+    @staticmethod
+    def _sanitize_optional_metric(value: Any) -> Any:
+        """Return nullable numeric metric; invalid values become None."""
+        if value is None:
+            return None
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError):
+            return None
+        if numeric < 0:
+            return None
+        if numeric != numeric:  # NaN
+            return None
+        return numeric
+
     def _format_large_number(self, num: float) -> str:
         """
         Format large numbers with M/B suffix.
@@ -4072,7 +4183,7 @@ class ExcelReportGenerator:
 
 ### `scanner/pipeline/__init__.py`
 
-**SHA256:** `004420ef41edb342a181a202d2ede08efa64a8dd1f73967ac4add8d1bb4feef0`
+**SHA256:** `30fb5a23615260d7c3ab735fe01aae33d2ce5e2d14165210a5308fa45cf562c6`
 
 ```python
 """
@@ -4135,6 +4246,32 @@ def _compute_mexc_share_24h(mexc_quote_volume_24h_usdt, global_volume_24h_usd):
     if mexc_quote_volume_24h_usdt is None or global_volume_24h_usd in (None, 0):
         return None
     return mexc_quote_volume_24h_usdt / global_volume_24h_usd
+
+
+def _build_scoring_volume_maps(shortlist, root_config):
+    scoring_cfg = root_config.get('scoring', {}) if isinstance(root_config, dict) else {}
+    volume_source = str(scoring_cfg.get('volume_source', 'mexc'))
+
+    volume_map = {}
+    volume_source_map = {}
+    for row in shortlist:
+        symbol = row.get('symbol')
+        if not symbol:
+            continue
+
+        mexc_volume = _to_optional_float(row.get('quote_volume_24h'))
+        global_volume = _to_optional_float(row.get('global_volume_24h_usd'))
+
+        selected_volume = mexc_volume
+        selected_source = 'mexc'
+        if volume_source == 'global_fallback_mexc' and global_volume is not None:
+            selected_volume = global_volume
+            selected_source = 'global'
+
+        volume_map[symbol] = float(selected_volume or 0.0)
+        volume_source_map[symbol] = selected_source
+
+    return volume_map, volume_source_map
 
 
 def run_pipeline(config: ScannerConfig) -> None:
@@ -4363,22 +4500,22 @@ def run_pipeline(config: ScannerConfig) -> None:
 
     logger.info(f"✓ Enriched {len(features)} symbols with price, name, market cap, and volume")
     
-    # Prepare volume map for scoring (backwards compatibility)
-    volume_map = {s['symbol']: s['quote_volume_24h'] for s in shortlist}
+    # Prepare volume map for scoring
+    volume_map, volume_source_map = _build_scoring_volume_maps(shortlist, config.raw)
     
     # Step 10: Compute scores (breakout / pullback / reversal)
     logger.info("\n[10/12] Scoring setups...")
     
     logger.info("  Scoring Reversals...")
-    reversal_results = score_reversals(features, volume_map, config.raw)
+    reversal_results = score_reversals(features, volume_map, config.raw, volume_source_map=volume_source_map)
     logger.info(f"  ✓ Reversals: {len(reversal_results)} scored")
     
     logger.info("  Scoring Breakout Trend 1-5D...")
-    breakout_results = score_breakout_trend_1_5d(features, volume_map, config.raw, btc_regime=btc_regime)
+    breakout_results = score_breakout_trend_1_5d(features, volume_map, config.raw, btc_regime=btc_regime, volume_source_map=volume_source_map)
     logger.info(f"  ✓ Breakout Trend 1-5D rows: {len(breakout_results)} scored")
     
     logger.info("  Scoring Pullbacks...")
-    pullback_results = score_pullbacks(features, volume_map, config.raw)
+    pullback_results = score_pullbacks(features, volume_map, config.raw, volume_source_map=volume_source_map)
     logger.info(f"  ✓ Pullbacks: {len(pullback_results)} scored")
 
     global_top20 = compute_global_top20(
@@ -5361,7 +5498,7 @@ def compute_discovery_fields(
 
 ### `scanner/pipeline/output.py`
 
-**SHA256:** `c8dc98e8c0d86465aaa755db9f5ec229100cc5581fa8ebe9b98f3f9642c495f3`
+**SHA256:** `eb763f0a16fccd712eb8833247caa823e2d4f86afc81d11da64abf23824cd6a7`
 
 ```python
 """
@@ -5608,6 +5745,17 @@ class ReportGenerator:
             if fail_reasons:
                 lines.append(f"**Execution Gate Fail Reasons:** {', '.join(fail_reasons)}")
             lines.append("")
+
+        global_volume_24h_usd = self._sanitize_optional_metric(data.get('global_volume_24h_usd'))
+        turnover_24h = self._sanitize_optional_metric(data.get('turnover_24h'))
+        mexc_share_24h = self._sanitize_optional_metric(data.get('mexc_share_24h'))
+        lines.append(
+            "**Market Activity:** "
+            f"global_volume_24h_usd={global_volume_24h_usd}, "
+            f"turnover_24h={turnover_24h}, "
+            f"mexc_share_24h={mexc_share_24h}"
+        )
+        lines.append("")
         
         # Components
         components = data.get('components', {})
@@ -5650,8 +5798,27 @@ class ReportGenerator:
         for idx, entry in enumerate(entries, start=1):
             ranked_entry = dict(entry)
             ranked_entry["rank"] = idx
+            ranked_entry["global_volume_24h_usd"] = ReportGenerator._sanitize_optional_metric(entry.get("global_volume_24h_usd"))
+            ranked_entry["turnover_24h"] = ReportGenerator._sanitize_optional_metric(entry.get("turnover_24h"))
+            ranked_entry["mexc_share_24h"] = ReportGenerator._sanitize_optional_metric(entry.get("mexc_share_24h"))
             ranked.append(ranked_entry)
         return ranked
+
+
+    @staticmethod
+    def _sanitize_optional_metric(value: Any) -> Any:
+        """Return nullable numeric metric; invalid values become None."""
+        if value is None:
+            return None
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError):
+            return None
+        if numeric < 0:
+            return None
+        if numeric != numeric:  # NaN
+            return None
+        return numeric
 
     def generate_json_report(
         self,
@@ -7841,7 +8008,7 @@ if __name__ == "__main__":
 
 ### `scanner/pipeline/scoring/breakout.py`
 
-**SHA256:** `3a0836794b08574fa54e9c28edffbfb7cb6b3a4d4ef905b995d0491164019073`
+**SHA256:** `4ae5f7361ad335fbf538fc4bf31dd5d6bf5838445887d6b4717927003ebcefec`
 
 ```python
 """Breakout scoring."""
@@ -7902,7 +8069,7 @@ class BreakoutScorer:
             return idx + 1
         return None
 
-    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float) -> Dict[str, Any]:
+    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float, volume_source_used: str = "mexc") -> Dict[str, Any]:
         f1d = features.get("1d", {})
         f4h = features.get("4h", {})
 
@@ -7947,7 +8114,7 @@ class BreakoutScorer:
             penalty_multiplier *= factor
         final_score = max(0.0, min(100.0, raw_score * penalty_multiplier))
 
-        reasons = self._generate_reasons(breakout_score, volume_score, trend_score, momentum_score, f1d, f4h, flags)
+        reasons = self._generate_reasons(breakout_score, volume_score, trend_score, momentum_score, f1d, f4h, flags, volume_source_used)
 
         return {
             "score": round(final_score, 2),
@@ -7963,6 +8130,7 @@ class BreakoutScorer:
             "penalties": {name: factor for name, factor in penalties},
             "flags": flags,
             "reasons": reasons,
+            "volume_source_used": volume_source_used,
         }
 
     def _score_breakout(self, f1d: Dict[str, Any]) -> float:
@@ -8022,8 +8190,8 @@ class BreakoutScorer:
         return max(0.0, min(100.0, (float(r7) / self.momentum_divisor) * 100.0))
 
     def _generate_reasons(self, breakout_score: float, volume_score: float, trend_score: float, momentum_score: float,
-                          f1d: Dict[str, Any], f4h: Dict[str, Any], flags: List[str]) -> List[str]:
-        reasons = []
+                          f1d: Dict[str, Any], f4h: Dict[str, Any], flags: List[str], volume_source_used: str) -> List[str]:
+        reasons = [f"Volume source used: {volume_source_used}"]
         dist = f1d.get("breakout_dist_20", 0)
         if breakout_score > 70:
             reasons.append(f"Strong breakout ({dist:.1f}% above 20d high)")
@@ -8060,7 +8228,7 @@ class BreakoutScorer:
         return reasons
 
 
-def score_breakouts(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any]) -> List[Dict[str, Any]]:
+def score_breakouts(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any], volume_source_map: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
     scorer = BreakoutScorer(config)
     results = []
     root = config.raw if hasattr(config, "raw") else config
@@ -8083,7 +8251,8 @@ def score_breakouts(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
             continue
         volume = volumes.get(symbol, 0)
         try:
-            score_result = scorer.score(symbol, features, volume)
+            volume_source_used = (volume_source_map or {}).get(symbol, "mexc")
+            score_result = scorer.score(symbol, features, volume, volume_source_used=volume_source_used)
             trade_levels = breakout_trade_levels(features, target_multipliers)
             results.append(
                 {
@@ -8105,6 +8274,7 @@ def score_breakouts(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
                     "flags": score_result["flags"],
                     "risk_flags": features.get("risk_flags", []),
                     "reasons": score_result["reasons"],
+                    "volume_source_used": score_result["volume_source_used"],
                     "analysis": {"trade_levels": trade_levels},
                     "discovery": features.get("discovery", False),
                     "discovery_age_days": features.get("discovery_age_days"),
@@ -8332,7 +8502,7 @@ Each module:
 
 ### `scanner/pipeline/scoring/pullback.py`
 
-**SHA256:** `428deaae6337fdfdbcfbda4ca2bbaa7f9394d4e73d87d458de16a18ba76d90c6`
+**SHA256:** `d8dc800d12ebb789dc2da6220ef693916c00a733d475245d5762ce468e4f7d9b`
 
 ```python
 """Pullback scoring."""
@@ -8383,7 +8553,7 @@ class PullbackScorer:
             return idx + 1
         return None
 
-    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float) -> Dict[str, Any]:
+    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float, volume_source_used: str = "mexc") -> Dict[str, Any]:
         f1d = features.get("1d", {})
         f4h = features.get("4h", {})
 
@@ -8424,7 +8594,7 @@ class PullbackScorer:
             penalty_multiplier *= factor
         final_score = max(0.0, min(100.0, raw_score * penalty_multiplier))
 
-        reasons = self._generate_reasons(trend_score, pullback_score, rebound_score, volume_score, f1d, f4h, flags)
+        reasons = self._generate_reasons(trend_score, pullback_score, rebound_score, volume_score, f1d, f4h, flags, volume_source_used)
 
         return {
             "score": round(final_score, 2),
@@ -8440,6 +8610,7 @@ class PullbackScorer:
             "penalties": {name: factor for name, factor in penalties},
             "flags": flags,
             "reasons": reasons,
+            "volume_source_used": volume_source_used,
         }
 
     def _score_trend(self, f1d: Dict[str, Any]) -> float:
@@ -8515,8 +8686,8 @@ class PullbackScorer:
         return ratio * 70.0
 
     def _generate_reasons(self, trend_score: float, pullback_score: float, rebound_score: float, volume_score: float,
-                          f1d: Dict[str, Any], f4h: Dict[str, Any], flags: List[str]) -> List[str]:
-        reasons = []
+                          f1d: Dict[str, Any], f4h: Dict[str, Any], flags: List[str], volume_source_used: str) -> List[str]:
+        reasons = [f"Volume source used: {volume_source_used}"]
 
         dist_ema50 = f1d.get("dist_ema50_pct", 0)
         if trend_score > 70:
@@ -8558,7 +8729,7 @@ class PullbackScorer:
         return reasons
 
 
-def score_pullbacks(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any]) -> List[Dict[str, Any]]:
+def score_pullbacks(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any], volume_source_map: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
     scorer = PullbackScorer(config)
     results = []
     root = config.raw if hasattr(config, "raw") else config
@@ -8582,7 +8753,8 @@ def score_pullbacks(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
             continue
         volume = volumes.get(symbol, 0)
         try:
-            score_result = scorer.score(symbol, features, volume)
+            volume_source_used = (volume_source_map or {}).get(symbol, "mexc")
+            score_result = scorer.score(symbol, features, volume, volume_source_used=volume_source_used)
             trade_levels = pullback_trade_levels(features, target_multipliers, pb_tol_pct=pb_tol_pct)
             results.append(
                 {
@@ -8604,6 +8776,7 @@ def score_pullbacks(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
                     "flags": score_result["flags"],
                     "risk_flags": features.get("risk_flags", []),
                     "reasons": score_result["reasons"],
+                    "volume_source_used": score_result["volume_source_used"],
                     "analysis": {"trade_levels": trade_levels},
                     "discovery": features.get("discovery", False),
                     "discovery_age_days": features.get("discovery_age_days"),
@@ -8621,7 +8794,7 @@ def score_pullbacks(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
 
 ### `scanner/pipeline/scoring/reversal.py`
 
-**SHA256:** `7085be2ad8938ce478058308d9f05459a18b306ff2a25fc683ffc4df9c368f5d`
+**SHA256:** `da7195b9835ab5c01eb7c061801192c2c7c9ebe978cd11324ab16ae32da65bb1`
 
 ```python
 """
@@ -8684,7 +8857,7 @@ class ReversalScorer:
             return idx + 1
         return None
 
-    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float) -> Dict[str, Any]:
+    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float, volume_source_used: str = "mexc") -> Dict[str, Any]:
         f1d = features.get("1d", {})
         f4h = features.get("4h", {})
 
@@ -8726,7 +8899,7 @@ class ReversalScorer:
 
         final_score = max(0.0, min(100.0, raw_score * penalty_multiplier))
 
-        reasons = self._generate_reasons(drawdown_score, base_score, reclaim_score, volume_score, f1d, f4h, flags)
+        reasons = self._generate_reasons(drawdown_score, base_score, reclaim_score, volume_score, f1d, f4h, flags, volume_source_used)
 
         return {
             "score": round(final_score, 2),
@@ -8742,6 +8915,7 @@ class ReversalScorer:
             "penalties": {name: factor for name, factor in penalties},
             "flags": flags,
             "reasons": reasons,
+            "volume_source_used": volume_source_used,
         }
 
     def _score_drawdown(self, f1d: Dict[str, Any]) -> float:
@@ -8820,8 +8994,9 @@ class ReversalScorer:
         f1d: Dict[str, Any],
         f4h: Dict[str, Any],
         flags: List[str],
+        volume_source_used: str,
     ) -> List[str]:
-        reasons = []
+        reasons = [f"Volume source used: {volume_source_used}"]
 
         dd = f1d.get("drawdown_from_ath")
         if dd and dd < 0:
@@ -8858,7 +9033,7 @@ class ReversalScorer:
         return reasons
 
 
-def score_reversals(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any]) -> List[Dict[str, Any]]:
+def score_reversals(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any], volume_source_map: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
     scorer = ReversalScorer(config)
     results = []
     root = config.raw if hasattr(config, "raw") else config
@@ -8882,7 +9057,8 @@ def score_reversals(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
             continue
         volume = volumes.get(symbol, 0)
         try:
-            score_result = scorer.score(symbol, features, volume)
+            volume_source_used = (volume_source_map or {}).get(symbol, "mexc")
+            score_result = scorer.score(symbol, features, volume, volume_source_used=volume_source_used)
             trade_levels = reversal_trade_levels(features, target_multipliers)
             results.append(
                 {
@@ -8904,6 +9080,7 @@ def score_reversals(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
                     "flags": score_result["flags"],
                     "risk_flags": features.get("risk_flags", []),
                     "reasons": score_result["reasons"],
+                    "volume_source_used": score_result["volume_source_used"],
                     "analysis": {"trade_levels": trade_levels},
                     "discovery": features.get("discovery", False),
                     "discovery_age_days": features.get("discovery_age_days"),
@@ -8921,7 +9098,7 @@ def score_reversals(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
 
 ### `scanner/pipeline/scoring/breakout_trend_1_5d.py`
 
-**SHA256:** `26a85c2c3faf2e6d98fdb8cb90aa59e51f8d55b3dae525719e641aa7eccd6b70`
+**SHA256:** `8fcb001bd14e58815aae8af06e925f301d940857727263a18ebf0308b9aa1dbd`
 
 ```python
 """Breakout Trend 1-5D scoring (immediate + retest)."""
@@ -9224,6 +9401,7 @@ def score_breakout_trend_1_5d(
     volumes: Dict[str, float],
     config: Dict[str, Any],
     btc_regime: Optional[Dict[str, Any]] = None,
+    volume_source_map: Optional[Dict[str, str]] = None,
 ) -> List[Dict[str, Any]]:
     scorer = BreakoutTrend1to5DScorer(config)
     root = config.raw if hasattr(config, "raw") else config
@@ -9238,6 +9416,9 @@ def score_breakout_trend_1_5d(
         if (candles_1d is not None and candles_1d < min_1d) or (candles_4h is not None and candles_4h < min_4h):
             continue
         rows = scorer.score_symbol(symbol, feature_row, float(volumes.get(symbol, 0.0)), btc_regime)
+        volume_source_used = (volume_source_map or {}).get(symbol, "mexc")
+        for row in rows:
+            row["volume_source_used"] = volume_source_used
         results.extend(rows)
 
     results.sort(key=lambda x: (float(x.get("final_score", 0.0)), x.get("setup_id") == "breakout_retest_1_5d"), reverse=True)
@@ -9336,7 +9517,7 @@ last_updated_utc: "2026-02-25T14:41:04Z"
 
 ### `docs/canonical/CONFIGURATION.md`
 
-**SHA256:** `d0fa97ae78f32d34d15b49d346a64eb13a202f8767dbce1991ee38bd19cd7349`
+**SHA256:** `bc52c3177be5580f738c1b837bb0a855ff11053a4a7a41c04ecb9442bb28cf17`
 
 ```markdown
 # Configuration — Keys, Defaults, Limits (Canonical)
@@ -9360,6 +9541,11 @@ If the implementation deviates, either:
 limits:
   universe:
     market_cap_usd_default: {min: 100_000_000, max: 10_000_000_000}
+    volume_gates_default:
+      min_turnover_24h: 0.03
+      min_mexc_quote_volume_24h_usdt: 5_000_000
+      min_mexc_share_24h: 0.01
+      fallback_when_turnover_unavailable: "require only min_mexc_quote_volume_24h_usdt"
   outputs:
     global_top_n_default: 20
 
@@ -9425,6 +9611,10 @@ rolling_percent_rank_time_series:
   nan_policy:
     population_excludes_nan: true
   formula: "(count_less + 0.5*count_equal) / N"
+
+scoring:
+  volume_source_default: mexc
+  volume_source_values: [mexc, global_fallback_mexc]
 ```
 
 ## 2) Units & conventions
@@ -9444,6 +9634,9 @@ Canonical rule:
 |---|---|
 | limits.universe.market_cap_usd_default.min | universe_filters.market_cap.min_usd |
 | limits.universe.market_cap_usd_default.max | universe_filters.market_cap.max_usd |
+| limits.universe.volume_gates_default.min_turnover_24h | universe_filters.volume.min_turnover_24h |
+| limits.universe.volume_gates_default.min_mexc_quote_volume_24h_usdt | universe_filters.volume.min_mexc_quote_volume_24h_usdt |
+| limits.universe.volume_gates_default.min_mexc_share_24h | universe_filters.volume.min_mexc_share_24h |
 | limits.outputs.global_top_n_default | outputs.global_top_n |
 | liquidity.orderbook_top_k_default | liquidity.orderbook_top_k |
 | liquidity.slippage_notional_usdt_default | liquidity.slippage_notional_usdt |
@@ -9474,20 +9667,40 @@ Canonical rule:
 | features.bb.stddev_default | features.bollinger.stddev |
 | features.bb.rank_lookback_4h_default | features.bollinger.rank_lookback_bars.4h |
 | features.atr_pct_rank_lookback_1d_default | features.atr_rank_lookback_bars.1d |
+| scoring.volume_source_default | scoring.volume_source |
 
 Notes:
 - `general.shortlist_size` is a *prefetch/workload budget* and is not the same as output top-n.
+- Legacy alias for backward compatibility:
+  - `universe_filters.volume.min_quote_volume_24h` aliases to `universe_filters.volume.min_mexc_quote_volume_24h_usdt`.
+  - If both keys are present, `min_mexc_quote_volume_24h_usdt` wins.
+
+### Volume-gate semantics (deterministic)
+- `min_turnover_24h` unit: ratio in `[0, +inf)`; default `0.03`.
+- `min_mexc_quote_volume_24h_usdt` unit: USDT in `[0, +inf)`; default `5_000_000`.
+- `min_mexc_share_24h` unit: ratio in `[0, 1]`; default `0.01`.
+- Missing key => canonical default applies.
+- Invalid value (NaN, non-castable, negative, out-of-range for share) => config validation error (fail-fast).
 
 
 ## 4) Setup-specific runtime keys (scoring.breakout_trend_1_5d)
 - `risk_off_min_quote_volume_24h` default: `15_000_000`
 - `trigger_4h_lookback_bars` default: `30`
 
+
+## 5) Scoring volume source
+- `scoring.volume_source` steuert die 24h-Volumenquelle für Setup-Scoring (`volume_map`).
+- Defaults/Values:
+  - `mexc` (default): nutze `quote_volume_24h` (MEXC)
+  - `global_fallback_mexc`: nutze `global_volume_24h_usd`, fallback auf `quote_volume_24h` falls global fehlt
+- Missing key => default `mexc`.
+- Invalid value => Config-Validation-Error.
+
 ```
 
 ### `docs/canonical/OUTPUT_SCHEMA.md`
 
-**SHA256:** `314313561ba1be8c148d7d30035d2522cca05e13d1f08d7e86428ea49ae8beec`
+**SHA256:** `aeb33ed76f4f428823e504adff0d60ad72a692141e8e2e1c01809c813f5918ef`
 
 ```markdown
 # Output Schema — JSON / Markdown / Excel (Canonical)
@@ -9546,10 +9759,21 @@ Optional:
 ### 1.2 Candidate row (required, minimal set)
 - `symbol`, `setup_id`
 - `base_score`, `final_score`, `global_score`
-- Liquidity: `proxy_liquidity_score`, `quote_volume_24h_usd`, `spread_bps`, `slippage_bps`, `liquidity_grade`
+- Liquidity: `proxy_liquidity_score`, `quote_volume_24h_usd`, `spread_bps`, `slippage_bps`, `liquidity_grade`, `volume_source_used` (`mexc` | `global`)
 - Execution gate (breakout trend rows): `execution_gate_pass`, `execution_gate_fail_reasons`, `spread_pct`, `depth_bid_0_5pct_usd`, `depth_ask_0_5pct_usd`, `depth_bid_1pct_usd`, `depth_ask_1pct_usd`, `orderbook_ok`
 - `proxy_liquidity_score` is a percent-rank on scale `[0.0, 100.0]` (not rank01).
 - Optional discovery: `discovery`, `age_days`, `discovery_source` ("cmc_date_added" | "first_seen_ts" | null)
+
+### 1.2.1 Report-layer market activity fields (additive, nullable)
+For JSON/Markdown/Excel reports, candidate rows MAY include the following additive fields:
+- `global_volume_24h_usd` (number | null)
+- `turnover_24h` (number | null)
+- `mexc_share_24h` (number | null)
+
+Rules:
+- Missing value => MUST remain `null` in JSON and empty cell in Excel.
+- Invalid report-layer numeric (`NaN`, negative, non-castable) => treat as `null` in report serialization.
+- These fields are informational only and MUST NOT alter ranking/selection/scoring.
 
 ### 1.3 Ordering and limits
 - Top-n inclusion: `SCORING/GLOBAL_RANKING_TOP20.md`
@@ -9565,7 +9789,7 @@ If present:
 
 ### `docs/canonical/VERIFICATION_FOR_AI.md`
 
-**SHA256:** `e804be58a82d6fd675d306bb84c34725df7c570c9f8679ca4be64696542d5fa2`
+**SHA256:** `1e86923cb4294671062d4a2fab7480c89d76ebf635569443656d1ea711faa6bb`
 
 ```markdown
 # Verification for AI — Golden Fixtures, Invariants, Checklist (Canonical)
@@ -9616,6 +9840,14 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - `global_volume_24h_usd` is nullable and sourced from CMC `quote.USD.volume_24h`; missing value stays `null`.
 - `turnover_24h` is `null` when `market_cap_usd` is missing or zero.
 - `mexc_share_24h` is `null` when `global_volume_24h_usd` is missing or zero.
+
+
+## Universe volume-gate verification boundaries
+- Config defaults when keys are missing: `min_turnover_24h=0.03`, `min_mexc_quote_volume_24h_usdt=5_000_000`, `min_mexc_share_24h=0.01`.
+- Legacy alias behavior: `universe_filters.volume.min_quote_volume_24h` aliases to `min_mexc_quote_volume_24h_usdt` only when the new key is absent; if both exist, new key wins.
+- Primary path (turnover available): all three gates are required (turnover + mexc min volume + mexc share).
+- Fallback path (turnover unavailable): require only mexc min volume; `mexc_share_24h` is not evaluated.
+- Invalid per-symbol values (`NaN`, negative, non-castable) are rejected deterministically at liquidity gate stage.
 
 ```
 
@@ -9684,7 +9916,7 @@ Population definitions remain as specified in feature docs.
 
 ### `docs/canonical/SCORING/SCORE_BREAKOUT_TREND_1_5D.md`
 
-**SHA256:** `6d202c7a91e39cb709634c1339b20aba8e7d2d254ede26ddd003e0ca6220eaf7`
+**SHA256:** `4a69da1e9e15f826a28e271c31db67a77be719e8ffd3b43d01b9e0151599864a`
 
 ```markdown
 # SCORE_BREAKOUT_TREND_1_5D — Immediate + Retest (Canonical)
@@ -9763,6 +9995,11 @@ Canonical Default für diesen Setup-Typ:
 - BTC Risk-Off Override: `quote_volume_24h_usd >= 15_000_000` (nur wenn BTC Risk-Off)
 
 > Der genaue Feldname im Code kann abweichen; canonical meint Quote-Volumen in USD.
+
+### 2.3 Configurable volume source for scoring
+- `scoring.volume_source = mexc` (default): verwende MEXC `quote_volume_24h` für score-nahe Liquiditäts-/Penalty-Checks.
+- `scoring.volume_source = global_fallback_mexc`: verwende `global_volume_24h_usd` wenn vorhanden, sonst MEXC `quote_volume_24h`.
+- Output rows enthalten `volume_source_used` (`global` | `mexc`) zur deterministischen Nachvollziehbarkeit.
 
 ---
 
@@ -10146,4 +10383,4 @@ discovery_source_allowed:
 
 ---
 
-_Generated by GitHub Actions • 2026-02-28 16:57 UTC_
+_Generated by GitHub Actions • 2026-02-28 18:29 UTC_
