@@ -46,7 +46,7 @@ class PullbackScorer:
             return idx + 1
         return None
 
-    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float) -> Dict[str, Any]:
+    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float, volume_source_used: str = "mexc") -> Dict[str, Any]:
         f1d = features.get("1d", {})
         f4h = features.get("4h", {})
 
@@ -87,7 +87,7 @@ class PullbackScorer:
             penalty_multiplier *= factor
         final_score = max(0.0, min(100.0, raw_score * penalty_multiplier))
 
-        reasons = self._generate_reasons(trend_score, pullback_score, rebound_score, volume_score, f1d, f4h, flags)
+        reasons = self._generate_reasons(trend_score, pullback_score, rebound_score, volume_score, f1d, f4h, flags, volume_source_used)
 
         return {
             "score": round(final_score, 2),
@@ -103,6 +103,7 @@ class PullbackScorer:
             "penalties": {name: factor for name, factor in penalties},
             "flags": flags,
             "reasons": reasons,
+            "volume_source_used": volume_source_used,
         }
 
     def _score_trend(self, f1d: Dict[str, Any]) -> float:
@@ -178,8 +179,8 @@ class PullbackScorer:
         return ratio * 70.0
 
     def _generate_reasons(self, trend_score: float, pullback_score: float, rebound_score: float, volume_score: float,
-                          f1d: Dict[str, Any], f4h: Dict[str, Any], flags: List[str]) -> List[str]:
-        reasons = []
+                          f1d: Dict[str, Any], f4h: Dict[str, Any], flags: List[str], volume_source_used: str) -> List[str]:
+        reasons = [f"Volume source used: {volume_source_used}"]
 
         dist_ema50 = f1d.get("dist_ema50_pct", 0)
         if trend_score > 70:
@@ -221,7 +222,7 @@ class PullbackScorer:
         return reasons
 
 
-def score_pullbacks(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any]) -> List[Dict[str, Any]]:
+def score_pullbacks(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any], volume_source_map: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
     scorer = PullbackScorer(config)
     results = []
     root = config.raw if hasattr(config, "raw") else config
@@ -245,7 +246,8 @@ def score_pullbacks(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
             continue
         volume = volumes.get(symbol, 0)
         try:
-            score_result = scorer.score(symbol, features, volume)
+            volume_source_used = (volume_source_map or {}).get(symbol, "mexc")
+            score_result = scorer.score(symbol, features, volume, volume_source_used=volume_source_used)
             trade_levels = pullback_trade_levels(features, target_multipliers, pb_tol_pct=pb_tol_pct)
             results.append(
                 {
@@ -267,6 +269,7 @@ def score_pullbacks(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
                     "flags": score_result["flags"],
                     "risk_flags": features.get("risk_flags", []),
                     "reasons": score_result["reasons"],
+                    "volume_source_used": score_result["volume_source_used"],
                     "analysis": {"trade_levels": trade_levels},
                     "discovery": features.get("discovery", False),
                     "discovery_age_days": features.get("discovery_age_days"),

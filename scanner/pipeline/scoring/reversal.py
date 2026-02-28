@@ -58,7 +58,7 @@ class ReversalScorer:
             return idx + 1
         return None
 
-    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float) -> Dict[str, Any]:
+    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float, volume_source_used: str = "mexc") -> Dict[str, Any]:
         f1d = features.get("1d", {})
         f4h = features.get("4h", {})
 
@@ -100,7 +100,7 @@ class ReversalScorer:
 
         final_score = max(0.0, min(100.0, raw_score * penalty_multiplier))
 
-        reasons = self._generate_reasons(drawdown_score, base_score, reclaim_score, volume_score, f1d, f4h, flags)
+        reasons = self._generate_reasons(drawdown_score, base_score, reclaim_score, volume_score, f1d, f4h, flags, volume_source_used)
 
         return {
             "score": round(final_score, 2),
@@ -116,6 +116,7 @@ class ReversalScorer:
             "penalties": {name: factor for name, factor in penalties},
             "flags": flags,
             "reasons": reasons,
+            "volume_source_used": volume_source_used,
         }
 
     def _score_drawdown(self, f1d: Dict[str, Any]) -> float:
@@ -194,8 +195,9 @@ class ReversalScorer:
         f1d: Dict[str, Any],
         f4h: Dict[str, Any],
         flags: List[str],
+        volume_source_used: str,
     ) -> List[str]:
-        reasons = []
+        reasons = [f"Volume source used: {volume_source_used}"]
 
         dd = f1d.get("drawdown_from_ath")
         if dd and dd < 0:
@@ -232,7 +234,7 @@ class ReversalScorer:
         return reasons
 
 
-def score_reversals(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any]) -> List[Dict[str, Any]]:
+def score_reversals(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any], volume_source_map: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
     scorer = ReversalScorer(config)
     results = []
     root = config.raw if hasattr(config, "raw") else config
@@ -256,7 +258,8 @@ def score_reversals(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
             continue
         volume = volumes.get(symbol, 0)
         try:
-            score_result = scorer.score(symbol, features, volume)
+            volume_source_used = (volume_source_map or {}).get(symbol, "mexc")
+            score_result = scorer.score(symbol, features, volume, volume_source_used=volume_source_used)
             trade_levels = reversal_trade_levels(features, target_multipliers)
             results.append(
                 {
@@ -278,6 +281,7 @@ def score_reversals(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
                     "flags": score_result["flags"],
                     "risk_flags": features.get("risk_flags", []),
                     "reasons": score_result["reasons"],
+                    "volume_source_used": score_result["volume_source_used"],
                     "analysis": {"trade_levels": trade_levels},
                     "discovery": features.get("discovery", False),
                     "discovery_age_days": features.get("discovery_age_days"),

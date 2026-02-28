@@ -56,7 +56,7 @@ class BreakoutScorer:
             return idx + 1
         return None
 
-    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float) -> Dict[str, Any]:
+    def score(self, symbol: str, features: Dict[str, Any], quote_volume_24h: float, volume_source_used: str = "mexc") -> Dict[str, Any]:
         f1d = features.get("1d", {})
         f4h = features.get("4h", {})
 
@@ -101,7 +101,7 @@ class BreakoutScorer:
             penalty_multiplier *= factor
         final_score = max(0.0, min(100.0, raw_score * penalty_multiplier))
 
-        reasons = self._generate_reasons(breakout_score, volume_score, trend_score, momentum_score, f1d, f4h, flags)
+        reasons = self._generate_reasons(breakout_score, volume_score, trend_score, momentum_score, f1d, f4h, flags, volume_source_used)
 
         return {
             "score": round(final_score, 2),
@@ -117,6 +117,7 @@ class BreakoutScorer:
             "penalties": {name: factor for name, factor in penalties},
             "flags": flags,
             "reasons": reasons,
+            "volume_source_used": volume_source_used,
         }
 
     def _score_breakout(self, f1d: Dict[str, Any]) -> float:
@@ -176,8 +177,8 @@ class BreakoutScorer:
         return max(0.0, min(100.0, (float(r7) / self.momentum_divisor) * 100.0))
 
     def _generate_reasons(self, breakout_score: float, volume_score: float, trend_score: float, momentum_score: float,
-                          f1d: Dict[str, Any], f4h: Dict[str, Any], flags: List[str]) -> List[str]:
-        reasons = []
+                          f1d: Dict[str, Any], f4h: Dict[str, Any], flags: List[str], volume_source_used: str) -> List[str]:
+        reasons = [f"Volume source used: {volume_source_used}"]
         dist = f1d.get("breakout_dist_20", 0)
         if breakout_score > 70:
             reasons.append(f"Strong breakout ({dist:.1f}% above 20d high)")
@@ -214,7 +215,7 @@ class BreakoutScorer:
         return reasons
 
 
-def score_breakouts(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any]) -> List[Dict[str, Any]]:
+def score_breakouts(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str, float], config: Dict[str, Any], volume_source_map: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
     scorer = BreakoutScorer(config)
     results = []
     root = config.raw if hasattr(config, "raw") else config
@@ -237,7 +238,8 @@ def score_breakouts(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
             continue
         volume = volumes.get(symbol, 0)
         try:
-            score_result = scorer.score(symbol, features, volume)
+            volume_source_used = (volume_source_map or {}).get(symbol, "mexc")
+            score_result = scorer.score(symbol, features, volume, volume_source_used=volume_source_used)
             trade_levels = breakout_trade_levels(features, target_multipliers)
             results.append(
                 {
@@ -259,6 +261,7 @@ def score_breakouts(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
                     "flags": score_result["flags"],
                     "risk_flags": features.get("risk_flags", []),
                     "reasons": score_result["reasons"],
+                    "volume_source_used": score_result["volume_source_used"],
                     "analysis": {"trade_levels": trade_levels},
                     "discovery": features.get("discovery", False),
                     "discovery_age_days": features.get("discovery_age_days"),

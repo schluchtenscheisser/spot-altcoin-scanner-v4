@@ -54,7 +54,7 @@ Optional:
 ### 1.2 Candidate row (required, minimal set)
 - `symbol`, `setup_id`
 - `base_score`, `final_score`, `global_score`
-- Liquidity: `proxy_liquidity_score`, `quote_volume_24h_usd`, `spread_bps`, `slippage_bps`, `liquidity_grade`
+- Liquidity: `proxy_liquidity_score`, `quote_volume_24h_usd`, `spread_bps`, `slippage_bps`, `liquidity_grade`, `volume_source_used` (`mexc` | `global`)
 - Execution gate (breakout trend rows): `execution_gate_pass`, `execution_gate_fail_reasons`, `spread_pct`, `depth_bid_0_5pct_usd`, `depth_ask_0_5pct_usd`, `depth_bid_1pct_usd`, `depth_ask_1pct_usd`, `orderbook_ok`
 - `proxy_liquidity_score` is a percent-rank on scale `[0.0, 100.0]` (not rank01).
 - Optional discovery: `discovery`, `age_days`, `discovery_source` ("cmc_date_added" | "first_seen_ts" | null)
