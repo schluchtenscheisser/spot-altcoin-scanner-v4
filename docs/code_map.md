@@ -1,7 +1,7 @@
 # 📘 Code Map — Automatically Generated
 
 **Repository:** schluchtenscheisser/spot-altcoin-scanner  
-**Last Updated:** 2026-02-28 12:35 UTC  
+**Last Updated:** 2026-02-28 12:52 UTC  
 **Generator:** scripts/update_codemap.py
 
 ---
@@ -20,7 +20,7 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 - **Total Modules:** 42
 - **Total Classes:** 19
-- **Total Functions:** 273
+- **Total Functions:** 279
 
 ---
 
@@ -202,9 +202,9 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 ### 📄 `scanner/pipeline/liquidity.py`
 
-**Functions:** `_compute_buy_vwap, _root_config, _to_levels, apply_liquidity_metrics_to_shortlist, compute_orderbook_liquidity_metrics, fetch_orderbooks_for_top_k, get_grade_thresholds_bps, get_orderbook_top_k, get_slippage_notional_usdt, select_top_k_for_orderbook`
+**Functions:** `_band_label, _compute_buy_vwap, _empty_orderbook_metrics, _root_config, _to_levels, apply_liquidity_metrics_to_shortlist, compute_orderbook_liquidity_metrics, compute_orderbook_metrics, fetch_orderbooks_for_top_k, get_grade_thresholds_bps, get_orderbook_top_k, get_slippage_notional_usdt, select_top_k_for_orderbook`
 
-**Module Variables:** `a_max, asks, b_max, best_ask, best_bid, bids, c_max, cfg, fetched, grade` _(+22 more)_
+**Module Variables:** `a_max, ask_cutoff, ask_depth, asks, b_max, band_f, bands_cfg, bands_pct, best_ask, best_bid` _(+32 more)_
 
 **Imports:** `__future__, logging, typing`
 
@@ -228,7 +228,7 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 **Functions:** `__init__, _format_setup_entry, _with_rank, generate_json_report, generate_markdown_report, save_reports`
 
-**Module Variables:** `analysis, breakout_immediate, breakout_retest, btc_checks, btc_regime, coin_name, components, excel_config, excel_gen, excel_path` _(+24 more)_
+**Module Variables:** `analysis, breakout_immediate, breakout_retest, btc_checks, btc_regime, coin_name, components, excel_config, excel_gen, excel_path` _(+25 more)_
 
 **Imports:** `datetime, excel_output, json, logging, pathlib, scanner.schema, typing`
 
@@ -278,9 +278,9 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 **Classes:** `BreakoutTrend1to5DScorer`
 
-**Functions:** `__init__, _anti_chase_multiplier, _bb_score, _breakout_distance_score, _btc_multiplier, _calc_high_20d_excluding_current, _find_breakout_indices, _overextension_multiplier, _trend_score, _volume_score, score_breakout_trend_1_5d, score_symbol`
+**Functions:** `__init__, _anti_chase_multiplier, _band_label, _band_reason, _bb_score, _breakout_distance_score, _btc_multiplier, _calc_high_20d_excluding_current, _evaluate_execution_gate, _find_breakout_indices, _overextension_multiplier, _trend_score, _volume_score, score_breakout_trend_1_5d, score_symbol`
 
-**Module Variables:** `alt_r3, alt_r7, anti, base, base_score, bb_rank, bb_score, breakout_distance_score, breakout_idxs, breakout_indices` _(+48 more)_
+**Module Variables:** `alt_r3, alt_r7, anti, ask, base, base_score, bb_rank, bb_score, bf, bid` _(+56 more)_
 
 **Imports:** `__future__, typing`
 
@@ -654,9 +654,12 @@ _This section shows which functions call which other functions, helping identify
 
 | Calling Function | Internal Calls | External Calls |
 |------------------|----------------|----------------|
+| `_band_label` | — | `is_integer`, `replace` |
+| `_empty_orderbook_metrics` | `_band_label` | — |
 | `_to_levels` | — | `append` |
-| `apply_liquidity_metrics_to_shortlist` | `compute_orderbook_liquidity_metrics`, `get_grade_thresholds_bps`, `get_slippage_notional_usdt` | `append`, `get`, `update` |
+| `apply_liquidity_metrics_to_shortlist` | `_empty_orderbook_metrics`, `_root_config`, `compute_orderbook_liquidity_metrics`, `compute_orderbook_metrics`, `get_grade_thresholds_bps`, `get_slippage_notional_usdt` | `append`, `get`, `update` |
 | `compute_orderbook_liquidity_metrics` | `_compute_buy_vwap`, `_to_levels` | `get` |
+| `compute_orderbook_metrics` | `_band_label`, `_empty_orderbook_metrics`, `_to_levels` | `get` |
 | `fetch_orderbooks_for_top_k` | `get_orderbook_top_k`, `select_top_k_for_orderbook` | `add`, `debug`, `get`, `get_orderbook`, `warning` |
 | `get_grade_thresholds_bps` | `_root_config` | `get` |
 | `get_orderbook_top_k` | `_root_config` | `get` |
@@ -721,13 +724,16 @@ _This section shows which functions call which other functions, helping identify
 
 | Calling Function | Internal Calls | External Calls |
 |------------------|----------------|----------------|
-| `__init__` | — | `get` |
+| `__init__` | — | `get`, `items` |
+| `_band_label` | — | `is_integer`, `replace` |
+| `_band_reason` | — | `replace` |
 | `_btc_multiplier` | — | `get` |
 | `_calc_high_20d_excluding_current` | — | `get` |
+| `_evaluate_execution_gate` | `_band_label`, `_band_reason` | `append`, `get` |
 | `_find_breakout_indices` | — | `get` |
 | `_trend_score` | — | `get` |
 | `score_breakout_trend_1_5d` | `score_symbol` | `BreakoutTrend1to5DScorer`, `extend`, `get`, `items`, `sort` |
-| `score_symbol` | `_anti_chase_multiplier`, `_bb_score`, `_breakout_distance_score`, `_btc_multiplier`, `_calc_high_20d_excluding_current`, `_find_breakout_indices`, `_overextension_multiplier`, `_trend_score`, `_volume_score` | `append`, `get` |
+| `score_symbol` | `_anti_chase_multiplier`, `_bb_score`, `_breakout_distance_score`, `_btc_multiplier`, `_calc_high_20d_excluding_current`, `_evaluate_execution_gate`, `_find_breakout_indices`, `_overextension_multiplier`, `_trend_score`, `_volume_score` | `append`, `get` |
 
 ### 📄 scanner/pipeline/scoring/pullback.py
 
@@ -918,17 +924,17 @@ _Modules with high external call counts may benefit from refactoring._
 | `scanner/tools/backfill_btc_regime.py` | 11 | 27 | 38 | 🔴 High |
 | `scanner/clients/mexc_client.py` | 7 | 28 | 35 | 🔴 High |
 | `scanner/pipeline/output.py` | 4 | 31 | 35 | 🔴 High |
+| `scanner/pipeline/liquidity.py` | 17 | 17 | 34 | ⚠️ Medium |
 | `scanner/clients/marketcap_client.py` | 4 | 27 | 31 | 🔴 High |
+| `scanner/pipeline/scoring/breakout_trend_1_5d.py` | 13 | 18 | 31 | ⚠️ Medium |
 | `scanner/pipeline/scoring/reversal.py` | 9 | 21 | 30 | 🔴 High |
 | `scanner/pipeline/runtime_market_meta.py` | 12 | 17 | 29 | ⚠️ Medium |
 | `scanner/pipeline/scoring/breakout.py` | 7 | 20 | 27 | 🔴 High |
 | `scanner/pipeline/scoring/pullback.py` | 7 | 20 | 27 | 🔴 High |
 | `scanner/config.py` | 0 | 26 | 26 | 🔴 High |
 | `scanner/clients/mapping.py` | 4 | 21 | 25 | 🔴 High |
-| `scanner/pipeline/liquidity.py` | 10 | 14 | 24 | ⚠️ Medium |
 | `scanner/pipeline/snapshot.py` | 2 | 22 | 24 | 🔴 High |
 | `scanner/backtest/e2_model.py` | 10 | 13 | 23 | ⚠️ Medium |
-| `scanner/pipeline/scoring/breakout_trend_1_5d.py` | 10 | 12 | 22 | ⚠️ Medium |
 | `scanner/pipeline/ohlcv.py` | 1 | 15 | 16 | 🔴 High |
 | `scanner/utils/io_utils.py` | 5 | 10 | 15 | 🔴 High |
 | `scanner/utils/logging_utils.py` | 1 | 14 | 15 | 🔴 High |
@@ -962,4 +968,4 @@ _Modules with high external call counts may benefit from refactoring._
 
 ---
 
-_Generated by GitHub Actions • 2026-02-28 12:35 UTC_
+_Generated by GitHub Actions • 2026-02-28 12:52 UTC_
