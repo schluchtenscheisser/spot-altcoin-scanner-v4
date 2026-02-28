@@ -1,7 +1,7 @@
 # 📘 Code Map — Automatically Generated
 
 **Repository:** schluchtenscheisser/spot-altcoin-scanner  
-**Last Updated:** 2026-02-28 16:06 UTC  
+**Last Updated:** 2026-02-28 16:52 UTC  
 **Generator:** scripts/update_codemap.py
 
 ---
@@ -20,7 +20,7 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 - **Total Modules:** 42
 - **Total Classes:** 19
-- **Total Functions:** 279
+- **Total Functions:** 283
 
 ---
 
@@ -116,9 +116,9 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 ### 📄 `scanner/pipeline/__init__.py`
 
-**Functions:** `run_pipeline`
+**Functions:** `_compute_mexc_share_24h, _compute_turnover_24h, _extract_cmc_global_volume_24h, _to_optional_float, run_pipeline`
 
-**Module Variables:** `asof_dt, asof_iso, asof_ts_ms, before_liquidity_gate, breakout_results, btc_regime, cmc, cmc_listings, cmc_listings_ts_utc, cmc_symbol_map` _(+41 more)_
+**Module Variables:** `asof_dt, asof_iso, asof_ts_ms, before_liquidity_gate, breakout_results, btc_regime, cmc, cmc_data, cmc_listings, cmc_listings_ts_utc` _(+46 more)_
 
 **Imports:** `__future__, clients.mapping, clients.marketcap_client, clients.mexc_client, config, discovery, features, filters` _(+13 more)_
 
@@ -250,7 +250,7 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 **Functions:** `__init__, _build_exchange_symbol_map, _build_identity, _build_quality, _build_symbol_info, _build_ticker, _extract_filter_value, _to_float, _to_int, export`
 
-**Module Variables:** `ask, bid, cmc_data, exchange_symbol, exchange_symbol_map, fdv, fdv_to_mcap, identity, logger, mapping` _(+21 more)_
+**Module Variables:** `ask, bid, cmc_data, exchange_symbol, exchange_symbol_map, fdv, fdv_to_mcap, global_volume_24h_usd, identity, identity_payload` _(+27 more)_
 
 **Imports:** `__future__, clients.mapping, config, logging, pathlib, typing, utils.io_utils, utils.time_utils`
 
@@ -554,7 +554,8 @@ _This section shows which functions call which other functions, helping identify
 
 | Calling Function | Internal Calls | External Calls |
 |------------------|----------------|----------------|
-| `run_pipeline` | — | `FeatureEngine`, `MEXCClient`, `MarketCapClient`, `OHLCVFetcher`, `ReportGenerator`, `RuntimeMarketMetaExporter`, `ShortlistSelector`, `SnapshotManager`, `SymbolMapper`, `UniverseFilters`, `_get_market_cap`, `append`, `apply_all`, `apply_liquidity_metrics_to_shortlist`, `build_symbol_map`, `compute_all`, `compute_btc_regime`, `compute_discovery_fields`, `compute_global_top20`, `create_snapshot`, `export`, `fetch_all`, `fetch_orderbooks_for_top_k`, `get`, `get_24h_tickers`, `get_exchange_info`, `get_listings`, `info`, `keys`, `map_symbol`, `map_universe`, `replace`, `save_reports`, `score_breakout_trend_1_5d`, `score_pullbacks`, `score_reversals`, `select`, `strftime`, `timestamp_to_ms`, `update`, `upper`, `utc_now` |
+| `_extract_cmc_global_volume_24h` | `_to_optional_float` | `get` |
+| `run_pipeline` | `_compute_mexc_share_24h`, `_compute_turnover_24h`, `_extract_cmc_global_volume_24h`, `_to_optional_float` | `FeatureEngine`, `MEXCClient`, `MarketCapClient`, `OHLCVFetcher`, `ReportGenerator`, `RuntimeMarketMetaExporter`, `ShortlistSelector`, `SnapshotManager`, `SymbolMapper`, `UniverseFilters`, `_get_market_cap`, `append`, `apply_all`, `apply_liquidity_metrics_to_shortlist`, `build_symbol_map`, `compute_all`, `compute_btc_regime`, `compute_discovery_fields`, `compute_global_top20`, `create_snapshot`, `export`, `fetch_all`, `fetch_orderbooks_for_top_k`, `get`, `get_24h_tickers`, `get_exchange_info`, `get_listings`, `info`, `keys`, `map_symbol`, `map_universe`, `replace`, `save_reports`, `score_breakout_trend_1_5d`, `score_pullbacks`, `score_reversals`, `select`, `strftime`, `timestamp_to_ms`, `update`, `upper`, `utc_now` |
 
 ### 📄 scanner/pipeline/backtest_runner.py
 
@@ -704,7 +705,7 @@ _This section shows which functions call which other functions, helping identify
 | `_build_symbol_info` | `_extract_filter_value`, `_to_float`, `_to_int` | `get` |
 | `_build_ticker` | `_to_float`, `_to_int` | `get` |
 | `_extract_filter_value` | — | `get` |
-| `export` | `_build_exchange_symbol_map`, `_build_identity`, `_build_quality`, `_build_symbol_info`, `_build_ticker` | `get`, `info`, `keys`, `save_json`, `strftime`, `utc_now` |
+| `export` | `_build_exchange_symbol_map`, `_build_identity`, `_build_quality`, `_build_symbol_info`, `_build_ticker` | `get`, `info`, `keys`, `pop`, `save_json`, `strftime`, `utc_now` |
 
 ### 📄 scanner/pipeline/scoring/breakout.py
 
@@ -917,7 +918,7 @@ _Modules with high external call counts may benefit from refactoring._
 | `scanner/tools/backfill_snapshots.py` | 18 | 60 | 78 | 🔴 High |
 | `scanner/pipeline/features.py` | 29 | 47 | 76 | 🔴 High |
 | `scanner/pipeline/filters.py` | 17 | 33 | 50 | 🔴 High |
-| `scanner/pipeline/__init__.py` | 0 | 42 | 42 | 🔴 High |
+| `scanner/pipeline/__init__.py` | 5 | 43 | 48 | 🔴 High |
 | `scanner/tools/export_evaluation_dataset.py` | 10 | 31 | 41 | 🔴 High |
 | `scanner/pipeline/backtest_runner.py` | 15 | 25 | 40 | 🔴 High |
 | `scanner/pipeline/excel_output.py` | 5 | 34 | 39 | 🔴 High |
@@ -927,8 +928,8 @@ _Modules with high external call counts may benefit from refactoring._
 | `scanner/pipeline/liquidity.py` | 17 | 17 | 34 | ⚠️ Medium |
 | `scanner/clients/marketcap_client.py` | 4 | 27 | 31 | 🔴 High |
 | `scanner/pipeline/scoring/breakout_trend_1_5d.py` | 13 | 18 | 31 | ⚠️ Medium |
+| `scanner/pipeline/runtime_market_meta.py` | 12 | 18 | 30 | 🔴 High |
 | `scanner/pipeline/scoring/reversal.py` | 9 | 21 | 30 | 🔴 High |
-| `scanner/pipeline/runtime_market_meta.py` | 12 | 17 | 29 | ⚠️ Medium |
 | `scanner/pipeline/scoring/breakout.py` | 7 | 20 | 27 | 🔴 High |
 | `scanner/pipeline/scoring/pullback.py` | 7 | 20 | 27 | 🔴 High |
 | `scanner/config.py` | 0 | 26 | 26 | 🔴 High |
@@ -968,4 +969,4 @@ _Modules with high external call counts may benefit from refactoring._
 
 ---
 
-_Generated by GitHub Actions • 2026-02-28 16:06 UTC_
+_Generated by GitHub Actions • 2026-02-28 16:52 UTC_
