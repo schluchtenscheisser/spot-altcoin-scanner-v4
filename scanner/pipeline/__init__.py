@@ -31,6 +31,35 @@ from .regime import compute_btc_regime
 logger = logging.getLogger(__name__)
 
 
+def _to_optional_float(value):
+    if value in (None, ""):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _extract_cmc_global_volume_24h(mapping_result):
+    if not mapping_result or not mapping_result.mapped:
+        return None
+    cmc_data = mapping_result.cmc_data or {}
+    quote_usd = cmc_data.get('quote', {}).get('USD', {})
+    return _to_optional_float(quote_usd.get('volume_24h'))
+
+
+def _compute_turnover_24h(global_volume_24h_usd, market_cap):
+    if global_volume_24h_usd is None or market_cap in (None, 0):
+        return None
+    return global_volume_24h_usd / market_cap
+
+
+def _compute_mexc_share_24h(mexc_quote_volume_24h_usdt, global_volume_24h_usd):
+    if mexc_quote_volume_24h_usdt is None or global_volume_24h_usd in (None, 0):
+        return None
+    return mexc_quote_volume_24h_usdt / global_volume_24h_usd
+
+
 def run_pipeline(config: ScannerConfig) -> None:
     """
     Orchestrates the full daily pipeline:
@@ -113,12 +142,18 @@ def run_pipeline(config: ScannerConfig) -> None:
             continue
         
         ticker = ticker_map.get(symbol, {})
-        
+        quote_volume_24h = _to_optional_float(ticker.get('quoteVolume'))
+        market_cap = _to_optional_float(result._get_market_cap())
+        global_volume_24h_usd = _extract_cmc_global_volume_24h(result)
+
         symbols_with_data.append({
             'symbol': symbol,
             'base': symbol.replace('USDT', ''),
-            'quote_volume_24h': float(ticker.get('quoteVolume', 0)),
-            'market_cap': result._get_market_cap()
+            'quote_volume_24h': quote_volume_24h,
+            'market_cap': market_cap,
+            'global_volume_24h_usd': global_volume_24h_usd,
+            'turnover_24h': _compute_turnover_24h(global_volume_24h_usd, market_cap),
+            'mexc_share_24h': _compute_mexc_share_24h(quote_volume_24h, global_volume_24h_usd),
         })
     
     # Step 4: Apply hard filters
@@ -193,6 +228,9 @@ def run_pipeline(config: ScannerConfig) -> None:
         if shortlist_entry:
             features[symbol]['market_cap'] = shortlist_entry.get('market_cap')
             features[symbol]['quote_volume_24h'] = shortlist_entry.get('quote_volume_24h')
+            features[symbol]['global_volume_24h_usd'] = shortlist_entry.get('global_volume_24h_usd')
+            features[symbol]['turnover_24h'] = shortlist_entry.get('turnover_24h')
+            features[symbol]['mexc_share_24h'] = shortlist_entry.get('mexc_share_24h')
             features[symbol]['proxy_liquidity_score'] = shortlist_entry.get('proxy_liquidity_score')
             features[symbol]['spread_bps'] = shortlist_entry.get('spread_bps')
             features[symbol]['slippage_bps'] = shortlist_entry.get('slippage_bps')
@@ -209,6 +247,9 @@ def run_pipeline(config: ScannerConfig) -> None:
         else:
             features[symbol]['market_cap'] = None
             features[symbol]['quote_volume_24h'] = None
+            features[symbol]['global_volume_24h_usd'] = None
+            features[symbol]['turnover_24h'] = None
+            features[symbol]['mexc_share_24h'] = None
             features[symbol]['proxy_liquidity_score'] = None
             features[symbol]['spread_bps'] = None
             features[symbol]['slippage_bps'] = None
