@@ -298,6 +298,7 @@ def score_breakout_trend_1_5d(
     volumes: Dict[str, float],
     config: Dict[str, Any],
     btc_regime: Optional[Dict[str, Any]] = None,
+    volume_source_map: Optional[Dict[str, str]] = None,
 ) -> List[Dict[str, Any]]:
     scorer = BreakoutTrend1to5DScorer(config)
     root = config.raw if hasattr(config, "raw") else config
@@ -312,6 +313,9 @@ def score_breakout_trend_1_5d(
         if (candles_1d is not None and candles_1d < min_1d) or (candles_4h is not None and candles_4h < min_4h):
             continue
         rows = scorer.score_symbol(symbol, feature_row, float(volumes.get(symbol, 0.0)), btc_regime)
+        volume_source_used = (volume_source_map or {}).get(symbol, "mexc")
+        for row in rows:
+            row["volume_source_used"] = volume_source_used
         results.extend(rows)
 
     results.sort(key=lambda x: (float(x.get("final_score", 0.0)), x.get("setup_id") == "breakout_retest_1_5d"), reverse=True)

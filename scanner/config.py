@@ -90,6 +90,10 @@ class ScannerConfig:
     def min_quote_volume_24h(self) -> float:
         """Backward-compatible alias for runtime metadata export."""
         return self.min_mexc_quote_volume_24h_usdt
+
+    @property
+    def scoring_volume_source(self) -> str:
+        return str(self.raw.get("scoring", {}).get("volume_source", "mexc"))
     
     @property
     def min_history_days_1d(self) -> int:
@@ -180,5 +184,11 @@ def validate_config(config: ScannerConfig) -> List[str]:
 
     if not (0 <= config.min_mexc_share_24h <= 1):
         errors.append(f"min_mexc_share_24h ({config.min_mexc_share_24h}) must be in [0, 1]")
+
+    valid_volume_sources = ["mexc", "global_fallback_mexc"]
+    if config.scoring_volume_source not in valid_volume_sources:
+        errors.append(
+            f"scoring.volume_source ({config.scoring_volume_source}) must be one of {valid_volume_sources}"
+        )
     
     return errors

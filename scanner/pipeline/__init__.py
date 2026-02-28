@@ -60,6 +60,32 @@ def _compute_mexc_share_24h(mexc_quote_volume_24h_usdt, global_volume_24h_usd):
     return mexc_quote_volume_24h_usdt / global_volume_24h_usd
 
 
+def _build_scoring_volume_maps(shortlist, root_config):
+    scoring_cfg = root_config.get('scoring', {}) if isinstance(root_config, dict) else {}
+    volume_source = str(scoring_cfg.get('volume_source', 'mexc'))
+
+    volume_map = {}
+    volume_source_map = {}
+    for row in shortlist:
+        symbol = row.get('symbol')
+        if not symbol:
+            continue
+
+        mexc_volume = _to_optional_float(row.get('quote_volume_24h'))
+        global_volume = _to_optional_float(row.get('global_volume_24h_usd'))
+
+        selected_volume = mexc_volume
+        selected_source = 'mexc'
+        if volume_source == 'global_fallback_mexc' and global_volume is not None:
+            selected_volume = global_volume
+            selected_source = 'global'
+
+        volume_map[symbol] = float(selected_volume or 0.0)
+        volume_source_map[symbol] = selected_source
+
+    return volume_map, volume_source_map
+
+
 def run_pipeline(config: ScannerConfig) -> None:
     """
     Orchestrates the full daily pipeline:
@@ -286,22 +312,22 @@ def run_pipeline(config: ScannerConfig) -> None:
 
     logger.info(f"✓ Enriched {len(features)} symbols with price, name, market cap, and volume")
     
-    # Prepare volume map for scoring (backwards compatibility)
-    volume_map = {s['symbol']: s['quote_volume_24h'] for s in shortlist}
+    # Prepare volume map for scoring
+    volume_map, volume_source_map = _build_scoring_volume_maps(shortlist, config.raw)
     
     # Step 10: Compute scores (breakout / pullback / reversal)
     logger.info("\n[10/12] Scoring setups...")
     
     logger.info("  Scoring Reversals...")
-    reversal_results = score_reversals(features, volume_map, config.raw)
+    reversal_results = score_reversals(features, volume_map, config.raw, volume_source_map=volume_source_map)
     logger.info(f"  ✓ Reversals: {len(reversal_results)} scored")
     
     logger.info("  Scoring Breakout Trend 1-5D...")
-    breakout_results = score_breakout_trend_1_5d(features, volume_map, config.raw, btc_regime=btc_regime)
+    breakout_results = score_breakout_trend_1_5d(features, volume_map, config.raw, btc_regime=btc_regime, volume_source_map=volume_source_map)
     logger.info(f"  ✓ Breakout Trend 1-5D rows: {len(breakout_results)} scored")
     
     logger.info("  Scoring Pullbacks...")
-    pullback_results = score_pullbacks(features, volume_map, config.raw)
+    pullback_results = score_pullbacks(features, volume_map, config.raw, volume_source_map=volume_source_map)
     logger.info(f"  ✓ Pullbacks: {len(pullback_results)} scored")
 
     global_top20 = compute_global_top20(

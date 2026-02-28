@@ -75,6 +75,11 @@ Canonical Default für diesen Setup-Typ:
 
 > Der genaue Feldname im Code kann abweichen; canonical meint Quote-Volumen in USD.
 
+### 2.3 Configurable volume source for scoring
+- `scoring.volume_source = mexc` (default): verwende MEXC `quote_volume_24h` für score-nahe Liquiditäts-/Penalty-Checks.
+- `scoring.volume_source = global_fallback_mexc`: verwende `global_volume_24h_usd` wenn vorhanden, sonst MEXC `quote_volume_24h`.
+- Output rows enthalten `volume_source_used` (`global` | `mexc`) zur deterministischen Nachvollziehbarkeit.
+
 ---
 
 ## 3) Setup-spezifische 1D Gates (Hard)

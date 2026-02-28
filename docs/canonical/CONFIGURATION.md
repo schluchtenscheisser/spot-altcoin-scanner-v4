@@ -89,6 +89,10 @@ rolling_percent_rank_time_series:
   nan_policy:
     population_excludes_nan: true
   formula: "(count_less + 0.5*count_equal) / N"
+
+scoring:
+  volume_source_default: mexc
+  volume_source_values: [mexc, global_fallback_mexc]
 ```
 
 ## 2) Units & conventions
@@ -141,6 +145,7 @@ Canonical rule:
 | features.bb.stddev_default | features.bollinger.stddev |
 | features.bb.rank_lookback_4h_default | features.bollinger.rank_lookback_bars.4h |
 | features.atr_pct_rank_lookback_1d_default | features.atr_rank_lookback_bars.1d |
+| scoring.volume_source_default | scoring.volume_source |
 
 Notes:
 - `general.shortlist_size` is a *prefetch/workload budget* and is not the same as output top-n.
@@ -152,3 +157,12 @@ Notes:
 ## 4) Setup-specific runtime keys (scoring.breakout_trend_1_5d)
 - `risk_off_min_quote_volume_24h` default: `15_000_000`
 - `trigger_4h_lookback_bars` default: `30`
+
+
+## 5) Scoring volume source
+- `scoring.volume_source` steuert die 24h-Volumenquelle für Setup-Scoring (`volume_map`).
+- Defaults/Values:
+  - `mexc` (default): nutze `quote_volume_24h` (MEXC)
+  - `global_fallback_mexc`: nutze `global_volume_24h_usd`, fallback auf `quote_volume_24h` falls global fehlt
+- Missing key => default `mexc`.
+- Invalid value => Config-Validation-Error.
