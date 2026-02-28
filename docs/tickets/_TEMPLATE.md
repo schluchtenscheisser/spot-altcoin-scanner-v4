@@ -5,6 +5,35 @@
 > Naming convention (recommended): `YYYY-MM-DD__<priority>__<short_slug>.md`
 > - priority: P0 | P1 | P2 | P3
 
+## Implementation Notes (optional but useful)
+### Ticket-Autor Checkliste (No-Guesswork, Pflicht bei Code-Tickets)
+
+> Ziel: Codex soll nicht interpretieren müssen. Deshalb müssen Defaults, Missing-Keys, Nullability und “nicht evaluiert” vs “evaluiert aber fehlgeschlagen” explizit im Ticket stehen und getestet werden.
+
+#### A) Defaults / Config-Semantik (Pflicht, wenn Config gelesen/validiert wird)
+- [ ] **Kein raw-dict Default drift:** Wenn dieses Ticket Config-Werte liest/validiert, muss es **dieselben Defaults** verwenden wie `ScannerConfig` (oder die zentrale Config-Accessor-Logik).  
+      **Regel:** *fehlender Key ≠ invalid* — Missing muss entweder Default sein oder explizit als Failure spezifiziert sein.
+- [ ] **Missing vs Invalid getrennt:** Für jeden geprüften Config-Key ist das Verhalten für:
+  - (1) Key fehlt
+  - (2) Key vorhanden aber ungültig
+  - (3) Key vorhanden und gültig  
+  explizit beschrieben.
+- [ ] **Keine “silent fallbacks”:** Wenn Fallbacks erlaubt sind, sind sie explizit dokumentiert + getestet. Andernfalls: bei ungültigen Werten klarer Fehler.
+
+#### B) Nullability / Schema / Output (Pflicht, wenn Outputs betroffen sind)
+- [ ] **Nullable Felder explizit:** Für jedes Output-Feld ist klar definiert, wann es `null` sein darf/muss (z. B. “unevaluable → null, nicht False erzwingen”).
+- [ ] **Kein bool()-Coercion:** Es darf kein implizites `bool(x)` oder “falsy → False” geben, wenn `null` semantisch wichtig ist.
+
+#### C) Edgecases, die oft übersehen werden (Pflicht, wenn relevant)
+- [ ] **Nicht evaluiert ≠ evaluiert aber fail:** z. B. “nicht gefetched (Budget)” vs “gefetched aber malformed/outage”.
+- [ ] **Namespace/Kollisionen:** Wenn IDs/Dateinamen aus Zeitstempeln abgeleitet werden: Kollisionen bei gleicher Minute/Sekunde sind adressiert.
+- [ ] **Strict/Preflight Atomizität:** Wenn `--strict-*` existiert: Preflight prüft alles *vor* Writes, und Failure hinterlässt **0 Partial Writes**.
+
+#### D) Tests (Pflicht bei Logikänderungen)
+- [ ] Mindestens 1 Test: **Missing key → Default greift** (oder bewusstes Fail, wenn so spezifiziert)
+- [ ] Mindestens 1 Test: **Invalid value → klarer Fehler/Reason**
+- [ ] Mindestens 1 Test: **Edgecase**, der im Ticket neu geregelt wird (z. B. “not fetched vs fetched fail”, “strict preflight atomic”)
+
 ---
 
 ## Title
