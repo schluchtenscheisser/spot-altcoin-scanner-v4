@@ -5,7 +5,7 @@
 > Naming convention (recommended): `YYYY-MM-DD__<priority>__<short_slug>.md`
 > - priority: P0 | P1 | P2 | P3
 
-## Implementation Notes (optional but useful)
+## Implementation Notes
 ### Ticket-Autor Checkliste (No-Guesswork, Pflicht bei Code-Tickets)
 
 > Ziel: Codex soll nicht interpretieren müssen. Deshalb müssen Defaults, Missing-Keys, Nullability und “nicht evaluiert” vs “evaluiert aber fehlgeschlagen” explizit im Ticket stehen und getestet werden.
