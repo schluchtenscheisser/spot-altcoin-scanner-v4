@@ -1,7 +1,7 @@
 # Spot Altcoin Scanner • GPT Snapshot
 
-**Generated:** 2026-02-28 16:05 UTC  
-**Commit:** `095fdfb` (095fdfbf76fba03f61d9a70887e1891312a6ace1)  
+**Generated:** 2026-02-28 16:53 UTC  
+**Commit:** `df99c71` (df99c71762cd39395ed03cedf8873da3c436cab1)  
 **Status:** MVP Complete (Phase 6)  
 
 ---
@@ -38,7 +38,7 @@
 | `scanner/clients/mexc_client.py` | `MEXCClient` | - |
 | `scanner/config.py` | `ScannerConfig` | `load_config`, `validate_config` |
 | `scanner/main.py` | - | `parse_args`, `main` |
-| `scanner/pipeline/__init__.py` | - | `run_pipeline` |
+| `scanner/pipeline/__init__.py` | - | `_to_optional_float`, `_extract_cmc_global_volume_24h`, `_compute_turnover_24h`, `_compute_mexc_share_24h`, `run_pipeline` |
 | `scanner/pipeline/backtest_runner.py` | - | `_float_or_none`, `_extract_backtest_config`, `_setup_triggered`, `_evaluate_candidate`, `_summarize` ... (+4 more) |
 | `scanner/pipeline/cross_section.py` | - | `percent_rank_average_ties` |
 | `scanner/pipeline/discovery.py` | - | `_iso_to_ts_ms`, `compute_discovery_fields` |
@@ -75,7 +75,7 @@
 **Statistics:**
 - Total Modules: 42
 - Total Classes: 19
-- Total Functions: 113
+- Total Functions: 117
 
 ---
 
@@ -4072,7 +4072,7 @@ class ExcelReportGenerator:
 
 ### `scanner/pipeline/__init__.py`
 
-**SHA256:** `e77c912650e5831e95b025d74b68b3e13e90bc79557678987bc017114c8e832b`
+**SHA256:** `004420ef41edb342a181a202d2ede08efa64a8dd1f73967ac4add8d1bb4feef0`
 
 ```python
 """
@@ -4106,6 +4106,35 @@ from .discovery import compute_discovery_fields
 from .regime import compute_btc_regime
 
 logger = logging.getLogger(__name__)
+
+
+def _to_optional_float(value):
+    if value in (None, ""):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _extract_cmc_global_volume_24h(mapping_result):
+    if not mapping_result or not mapping_result.mapped:
+        return None
+    cmc_data = mapping_result.cmc_data or {}
+    quote_usd = cmc_data.get('quote', {}).get('USD', {})
+    return _to_optional_float(quote_usd.get('volume_24h'))
+
+
+def _compute_turnover_24h(global_volume_24h_usd, market_cap):
+    if global_volume_24h_usd is None or market_cap in (None, 0):
+        return None
+    return global_volume_24h_usd / market_cap
+
+
+def _compute_mexc_share_24h(mexc_quote_volume_24h_usdt, global_volume_24h_usd):
+    if mexc_quote_volume_24h_usdt is None or global_volume_24h_usd in (None, 0):
+        return None
+    return mexc_quote_volume_24h_usdt / global_volume_24h_usd
 
 
 def run_pipeline(config: ScannerConfig) -> None:
@@ -4190,12 +4219,18 @@ def run_pipeline(config: ScannerConfig) -> None:
             continue
         
         ticker = ticker_map.get(symbol, {})
-        
+        quote_volume_24h = _to_optional_float(ticker.get('quoteVolume'))
+        market_cap = _to_optional_float(result._get_market_cap())
+        global_volume_24h_usd = _extract_cmc_global_volume_24h(result)
+
         symbols_with_data.append({
             'symbol': symbol,
             'base': symbol.replace('USDT', ''),
-            'quote_volume_24h': float(ticker.get('quoteVolume', 0)),
-            'market_cap': result._get_market_cap()
+            'quote_volume_24h': quote_volume_24h,
+            'market_cap': market_cap,
+            'global_volume_24h_usd': global_volume_24h_usd,
+            'turnover_24h': _compute_turnover_24h(global_volume_24h_usd, market_cap),
+            'mexc_share_24h': _compute_mexc_share_24h(quote_volume_24h, global_volume_24h_usd),
         })
     
     # Step 4: Apply hard filters
@@ -4270,6 +4305,9 @@ def run_pipeline(config: ScannerConfig) -> None:
         if shortlist_entry:
             features[symbol]['market_cap'] = shortlist_entry.get('market_cap')
             features[symbol]['quote_volume_24h'] = shortlist_entry.get('quote_volume_24h')
+            features[symbol]['global_volume_24h_usd'] = shortlist_entry.get('global_volume_24h_usd')
+            features[symbol]['turnover_24h'] = shortlist_entry.get('turnover_24h')
+            features[symbol]['mexc_share_24h'] = shortlist_entry.get('mexc_share_24h')
             features[symbol]['proxy_liquidity_score'] = shortlist_entry.get('proxy_liquidity_score')
             features[symbol]['spread_bps'] = shortlist_entry.get('spread_bps')
             features[symbol]['slippage_bps'] = shortlist_entry.get('slippage_bps')
@@ -4286,6 +4324,9 @@ def run_pipeline(config: ScannerConfig) -> None:
         else:
             features[symbol]['market_cap'] = None
             features[symbol]['quote_volume_24h'] = None
+            features[symbol]['global_volume_24h_usd'] = None
+            features[symbol]['turnover_24h'] = None
+            features[symbol]['mexc_share_24h'] = None
             features[symbol]['proxy_liquidity_score'] = None
             features[symbol]['spread_bps'] = None
             features[symbol]['slippage_bps'] = None
@@ -6460,7 +6501,7 @@ def run_backtest_from_history(
 
 ### `scanner/pipeline/runtime_market_meta.py`
 
-**SHA256:** `141820c4f9c0998fbcb5580cb89b09a76922183ded4d24a59841428e81dee150`
+**SHA256:** `2f7acaa18f785a04b7a0baabb6702ce7475814237acebea03f9d822059661f65`
 
 ```python
 """Runtime market metadata export for each pipeline run."""
@@ -6550,6 +6591,7 @@ class RuntimeMarketMetaExporter:
             fdv_to_mcap = fdv / market_cap
 
         return {
+            "_cmc_quote_usd": quote_usd,
             "cmc_id": cmc_data.get("id"),
             "name": cmc_data.get("name"),
             "symbol": cmc_data.get("symbol"),
@@ -6592,7 +6634,7 @@ class RuntimeMarketMetaExporter:
             "max_notional": self._to_float(max_notional),
         }
 
-    def _build_ticker(self, ticker: Dict[str, Any]) -> Dict[str, Any]:
+    def _build_ticker(self, ticker: Dict[str, Any], identity: Dict[str, Any]) -> Dict[str, Any]:
         bid = self._to_float(ticker.get("bidPrice"))
         ask = self._to_float(ticker.get("askPrice"))
         mid = None
@@ -6603,11 +6645,28 @@ class RuntimeMarketMetaExporter:
             if mid != 0:
                 spread_pct = ((ask - bid) / mid) * 100
 
+        quote_volume_24h = self._to_float(ticker.get("quoteVolume"))
+        global_volume_24h_usd = self._to_float(
+            ((identity.get("_cmc_quote_usd") or {}).get("volume_24h"))
+        )
+
+        turnover_24h = None
+        market_cap_usd = identity.get("market_cap_usd")
+        if global_volume_24h_usd is not None and market_cap_usd not in (None, 0):
+            turnover_24h = global_volume_24h_usd / market_cap_usd
+
+        mexc_share_24h = None
+        if quote_volume_24h is not None and global_volume_24h_usd not in (None, 0):
+            mexc_share_24h = quote_volume_24h / global_volume_24h_usd
+
         return {
             "last_price": self._to_float(ticker.get("lastPrice")),
             "high_24h": self._to_float(ticker.get("highPrice")),
             "low_24h": self._to_float(ticker.get("lowPrice")),
-            "quote_volume_24h": self._to_float(ticker.get("quoteVolume")),
+            "quote_volume_24h": quote_volume_24h,
+            "global_volume_24h_usd": global_volume_24h_usd,
+            "turnover_24h": turnover_24h,
+            "mexc_share_24h": mexc_share_24h,
             "price_change_pct_24h": self._to_float(ticker.get("priceChangePercent")),
             "bid_price": bid,
             "ask_price": ask,
@@ -6672,7 +6731,7 @@ class RuntimeMarketMetaExporter:
 
             identity = self._build_identity(mapping)
             symbol_info = self._build_symbol_info(symbol, exchange_symbol)
-            ticker_24h = self._build_ticker(ticker)
+            ticker_24h = self._build_ticker(ticker, identity)
 
             quality = self._build_quality(
                 symbol=symbol,
@@ -6682,8 +6741,11 @@ class RuntimeMarketMetaExporter:
                 has_ohlcv=symbol in ohlcv_data,
             )
 
+            identity_payload = dict(identity)
+            identity_payload.pop("_cmc_quote_usd", None)
+
             coins[symbol] = {
-                "identity": identity,
+                "identity": identity_payload,
                 "mexc": {
                     "symbol_info": symbol_info,
                     "ticker_24h": ticker_24h,
@@ -9503,7 +9565,7 @@ If present:
 
 ### `docs/canonical/VERIFICATION_FOR_AI.md`
 
-**SHA256:** `77e08e2575c30f4f5a189af11fdf2c95b95f85217bc32c230287e7a81a025c97`
+**SHA256:** `e804be58a82d6fd675d306bb84c34725df7c570c9f8679ca4be64696542d5fa2`
 
 ```markdown
 # Verification for AI — Golden Fixtures, Invariants, Checklist (Canonical)
@@ -9548,6 +9610,12 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - Gate pass example: `max_spread_pct=2.5`, `min_depth_usd[1.0]=900`.
 - Gate fail by spread: `max_spread_pct=1.0` => includes `SPREAD_TOO_WIDE`.
 - Gate fail by depth: high min depth for 1.0 band => includes `DEPTH_TOO_LOW_1_0`.
+
+
+## Runtime market meta verification boundaries
+- `global_volume_24h_usd` is nullable and sourced from CMC `quote.USD.volume_24h`; missing value stays `null`.
+- `turnover_24h` is `null` when `market_cap_usd` is missing or zero.
+- `mexc_share_24h` is `null` when `global_volume_24h_usd` is missing or zero.
 
 ```
 
@@ -10078,4 +10146,4 @@ discovery_source_allowed:
 
 ---
 
-_Generated by GitHub Actions • 2026-02-28 16:05 UTC_
+_Generated by GitHub Actions • 2026-02-28 16:53 UTC_
