@@ -1,7 +1,7 @@
 # Spot Altcoin Scanner • GPT Snapshot
 
-**Generated:** 2026-02-28 11:35 UTC  
-**Commit:** `bec02d6` (bec02d6d37a4c03c363c34179989fbb12e75bad2)  
+**Generated:** 2026-02-28 11:44 UTC  
+**Commit:** `5db09e1` (5db09e12d676636b6dc4c4b491e36ab0126b3e3d)  
 **Status:** MVP Complete (Phase 6)  
 
 ---
@@ -205,7 +205,7 @@ This is a research tool, not financial advice. Use at your own risk.
 
 ### `config/config.yml`
 
-**SHA256:** `7caa6d67868d90514e630a442baa45c04fa94f8be73dcccab43ae8b9c17a003d`
+**SHA256:** `5c5c39541b6ad2dc464e89718e7dc453d7c02a7f36a73862366766db0a9681f9`
 
 ```yaml
 version:
@@ -310,6 +310,7 @@ scoring:
 
   breakout_trend_1_5d:
     risk_off_min_quote_volume_24h: 15000000
+    trigger_4h_lookback_bars: 30
 
   pullback:
     weights_mode: "compat"
@@ -8701,14 +8702,14 @@ def score_reversals(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
 
 ### `scanner/pipeline/scoring/breakout_trend_1_5d.py`
 
-**SHA256:** `3fa8b85f8b4577349c95d37c42f5dd39c0c2f6288bb5c585c1a2485e9da8013a`
+**SHA256:** `c68831ba1de4d3845143f0424f4d26609b417cf5c1235d2b56562ec8d1ea2e51`
 
 ```python
 """Breakout Trend 1-5D scoring (immediate + retest)."""
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class BreakoutTrend1to5DScorer:
@@ -8717,6 +8718,7 @@ class BreakoutTrend1to5DScorer:
         cfg = root.get("scoring", {}).get("breakout_trend_1_5d", {})
 
         self.min_24h_risk_off = float(cfg.get("risk_off_min_quote_volume_24h", 15_000_000))
+        self.trigger_4h_lookback_bars = int(cfg.get("trigger_4h_lookback_bars", 30))
 
     @staticmethod
     def _calc_high_20d_excluding_current(f1d: Dict[str, Any]) -> Optional[float]:
@@ -8726,16 +8728,15 @@ class BreakoutTrend1to5DScorer:
         window = highs[-21:-1]
         return float(max(window)) if window else None
 
-    @staticmethod
-    def _find_first_breakout_idx(f4h: Dict[str, Any], high_20d_1d: float) -> Optional[int]:
+    def _find_breakout_indices(self, f4h: Dict[str, Any], high_20d_1d: float) -> Optional[Tuple[int, int]]:
         closes = f4h.get("close_series") or []
         if not closes:
             return None
-        start = max(0, len(closes) - 6)
-        for idx in range(start, len(closes)):
-            if float(closes[idx]) > high_20d_1d:
-                return idx
-        return None
+        start = max(0, len(closes) - self.trigger_4h_lookback_bars)
+        breakout_idxs = [idx for idx in range(start, len(closes)) if float(closes[idx]) > high_20d_1d]
+        if not breakout_idxs:
+            return None
+        return breakout_idxs[0], breakout_idxs[-1]
 
     @staticmethod
     def _anti_chase_multiplier(r7: float) -> float:
@@ -8793,22 +8794,21 @@ class BreakoutTrend1to5DScorer:
 
     @staticmethod
     def _bb_score(rank: float) -> float:
-        if rank <= 0.2:
+        rank_pct = rank * 100.0 if rank <= 1.0 else rank
+        if rank_pct <= 20.0:
             return 100.0
-        if rank <= 0.6:
-            return 100.0 - (rank - 0.2) * (60.0 / 0.4)
+        if rank_pct <= 60.0:
+            return 100.0 - (rank_pct - 20.0) * (60.0 / 40.0)
         return 0.0
 
     def _btc_multiplier(
         self,
         feature_row: Dict[str, Any],
         btc_regime: Optional[Dict[str, Any]],
-    ) -> Optional[float]:
-        if not btc_regime or btc_regime.get("state") == "RISK_ON":
-            return 1.0
-
-        if float(feature_row.get("quote_volume_24h") or 0.0) < self.min_24h_risk_off:
-            return None
+    ) -> Tuple[float, str, bool, bool]:
+        state = (btc_regime or {}).get("state") or "UNKNOWN"
+        if not btc_regime or state == "RISK_ON":
+            return 1.0, state, False, False
 
         f1d = feature_row.get("1d", {})
         alt_r7 = float(f1d.get("r_7") or 0.0)
@@ -8816,8 +8816,10 @@ class BreakoutTrend1to5DScorer:
         btc_r7 = float((btc_regime.get("btc_returns") or {}).get("r_7") or 0.0)
         btc_r3 = float((btc_regime.get("btc_returns") or {}).get("r_3") or 0.0)
 
-        override = (alt_r7 - btc_r7) >= 7.5 or (alt_r3 - btc_r3) >= 3.5
-        return 0.85 if override else None
+        rs_override = (alt_r7 - btc_r7) >= 7.5 or (alt_r3 - btc_r3) >= 3.5
+        liq_ok = float(feature_row.get("quote_volume_24h") or 0.0) >= self.min_24h_risk_off
+        multiplier = 0.85 if rs_override and liq_ok else 0.75
+        return multiplier, state, rs_override, liq_ok
 
     def score_symbol(
         self,
@@ -8833,9 +8835,10 @@ class BreakoutTrend1to5DScorer:
         if high_20 is None:
             return []
 
-        first_breakout_idx = self._find_first_breakout_idx(f4h, high_20)
-        if first_breakout_idx is None:
+        breakout_indices = self._find_breakout_indices(f4h, high_20)
+        if breakout_indices is None:
             return []
+        first_breakout_idx, last_breakout_idx = breakout_indices
 
         if not (
             float(f1d.get("close") or 0.0) > float(f1d.get("ema_20") or 0.0)
@@ -8851,8 +8854,9 @@ class BreakoutTrend1to5DScorer:
         if dist_ema20 >= 28.0:
             return []
 
-        close_4h_last = float(f4h.get("close") or 0.0)
-        dist_pct = ((close_4h_last / high_20) - 1.0) * 100.0
+        closes = f4h.get("close_series") or []
+        close_4h_trigger = float(closes[last_breakout_idx]) if last_breakout_idx < len(closes) else float(f4h.get("close") or 0.0)
+        dist_pct = ((close_4h_trigger / high_20) - 1.0) * 100.0
 
         spike_1d = float(f1d.get("volume_quote_spike") or 0.0)
         spike_4h = float(f4h.get("volume_quote_spike") or 0.0)
@@ -8873,9 +8877,9 @@ class BreakoutTrend1to5DScorer:
 
         anti = self._anti_chase_multiplier(float(f1d.get("r_7") or 0.0))
         over = self._overextension_multiplier(dist_ema20)
-        btc_mult = self._btc_multiplier({**feature_row, "quote_volume_24h": quote_volume_24h}, btc_regime)
-        if btc_mult is None:
-            return []
+        btc_mult, btc_state, btc_rs_override, btc_liq_ok_risk_off = self._btc_multiplier(
+            {**feature_row, "quote_volume_24h": quote_volume_24h}, btc_regime
+        )
 
         final_score = max(0.0, min(100.0, base_score * anti * over * btc_mult))
 
@@ -8895,6 +8899,9 @@ class BreakoutTrend1to5DScorer:
             "overextension_multiplier": round(over, 6),
             "anti_chase_multiplier": round(anti, 6),
             "btc_multiplier": round(btc_mult, 6),
+            "btc_state": btc_state,
+            "btc_rs_override": btc_rs_override,
+            "btc_liq_ok_risk_off": btc_liq_ok_risk_off,
             "breakout_distance_score": round(breakout_distance_score, 6),
             "volume_score": round(volume_score, 6),
             "trend_score": round(trend_score, 6),
@@ -8915,7 +8922,6 @@ class BreakoutTrend1to5DScorer:
         results: List[Dict[str, Any]] = [{**base, "setup_id": "breakout_immediate_1_5d", "retest_valid": False, "retest_invalidated": False}]
 
         lows = f4h.get("low_series") or []
-        closes = f4h.get("close_series") or []
         zone_low = high_20 * 0.99
         zone_high = high_20 * 1.01
         retest_valid = False
@@ -9056,7 +9062,7 @@ last_updated_utc: "2026-02-25T14:41:04Z"
 
 ### `docs/canonical/CONFIGURATION.md`
 
-**SHA256:** `9d54e751aaccf0de83671552f7521ee8a348e48bf4d61988c8bfd810ba2659d7`
+**SHA256:** `03dd936581f5d84262e90c69f650e5c4417655f2a59a1fcdd8ad340899a675d0`
 
 ```markdown
 # Configuration — Keys, Defaults, Limits (Canonical)
@@ -9184,6 +9190,11 @@ Canonical rule:
 Notes:
 - `general.shortlist_size` is a *prefetch/workload budget* and is not the same as output top-n.
 
+
+## 4) Setup-specific runtime keys (scoring.breakout_trend_1_5d)
+- `risk_off_min_quote_volume_24h` default: `15_000_000`
+- `trigger_4h_lookback_bars` default: `30`
+
 ```
 
 ### `docs/canonical/OUTPUT_SCHEMA.md`
@@ -9265,7 +9276,7 @@ If present:
 
 ### `docs/canonical/VERIFICATION_FOR_AI.md`
 
-**SHA256:** `a854f3bddc9ff98e36cf19af9609b09b37890813f455d186d546c3bb4aaf9dca`
+**SHA256:** `fd2f45ddacbac9e377709ce2ced03edb63cb0e99bd29cd68c4a8276c69cfa17f`
 
 ```markdown
 # Verification for AI — Golden Fixtures, Invariants, Checklist (Canonical)
@@ -9296,6 +9307,13 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - `thresholds_pct` parsing:
   - `null` or missing uses defaults `[10,20]`.
   - scalar input (e.g. `10` or `"10"`) raises `ValueError("thresholds_pct must be list-like or null")`.
+
+
+## Breakout Trend 1-5D verification boundaries
+- Trigger lookup window uses `trigger_4h_lookback_bars` (default 30), not a fixed 6-bar window.
+- `_find_breakout_indices` returns `(first_breakout_idx, last_breakout_idx)` over the configured trigger window.
+- In `RISK_OFF`, BTC multiplier never excludes candidates: `0.85` when `rs_override AND liq_ok`, otherwise `0.75`.
+- `bb_width_rank_120_4h` is interpreted on percent scale `[0..100]`; defensive rank01 input (`<=1.0`) is multiplied by 100 before scoring.
 
 ```
 
@@ -9364,7 +9382,7 @@ Population definitions remain as specified in feature docs.
 
 ### `docs/canonical/SCORING/SCORE_BREAKOUT_TREND_1_5D.md`
 
-**SHA256:** `69eceb455bf39d7ab09ce59d67f3d70d7c334a076bf63c3ba218d91cc8e4ba11`
+**SHA256:** `fad638e5af77946d67b974c1be54ec4cfcff50f4b4b078b2b6ad5b7b1f57e12f`
 
 ```markdown
 # SCORE_BREAKOUT_TREND_1_5D — Immediate + Retest (Canonical)
@@ -9486,16 +9504,20 @@ Wichtig:
 
 ---
 
-## 5) Trigger-Definition (4H “fresh window”)
+## 5) Trigger-Definition (4H lookback window)
 
-### 5.1 Fresh Trigger Window (4H)
+### 5.1 Trigger Window (4H)
 Sei `t4h` der Index der letzten abgeschlossenen 4H Candle.
 
-Das Trigger-Fenster umfasst die letzten 6 abgeschlossenen 4H Candles:
-- Window: `[t4h-5 .. t4h]`
+Das Trigger-Fenster umfasst die letzten `N` abgeschlossenen 4H Candles mit
+- `N = trigger_4h_lookback_bars`
+- canonical default: `N = 30` (≈ 5 Tage)
+
+Window:
+- `[t4h-(N-1) .. t4h]`
 
 ### 5.2 Trigger Condition
-- `triggered = any(close_4h[i] > high_20d_1d for i in [t4h-5 .. t4h])`
+- `triggered = any(close_4h[i] > high_20d_1d for i in [t4h-(N-1) .. t4h])`
 
 Wenn `triggered == false`:
 - Setup ist **invalid** (nicht in Top-Listen).
@@ -9510,9 +9532,14 @@ Wenn `triggered == false`:
 - `zone_low  = high_20d_1d * (1 - 0.01)`
 - `zone_high = high_20d_1d * (1 + 0.01)`
 
-### 6.2 First breakout index
-Im Trigger Window `[t4h-5 .. t4h]`:
+### 6.2 Breakout-Indizes im Trigger Window
+Im Trigger Window `[t4h-(N-1) .. t4h]`:
 - `first_breakout_idx = first index i where close_4h[i] > high_20d_1d`
+- `last_breakout_idx = last index i where close_4h[i] > high_20d_1d`
+
+Usage:
+- Immediate-Setup verwendet `last_breakout_idx` (jüngster Breakout im 5D-Fenster).
+- Retest-Setup verwendet `first_breakout_idx` als Startpunkt des 12x4H-Fensters.
 
 ### 6.3 Retest Search Window
 Suche in den nächsten 12 abgeschlossenen 4H Candles nach dem ersten Breakout:
@@ -9574,13 +9601,14 @@ Voraussetzung: Trend Gate ist erfüllt (sonst Setup invalid).
 
 ### 7.4 BB Score (Compression Bonus)
 Input:
-- `r = bb_width_rank_120_4h` in `[0..1]`
+- `r = bb_width_rank_120_4h` im Percent-Scale `[0..100]`
+- Defensive compatibility: wenn `r <= 1.0`, dann `rank_pct = r*100`
 
-Mapping:
-- Wenn `r <= 0.20` → `100`
-- Wenn `0.20 < r <= 0.60` → linear `100 -> 40`:
-  - `100 - (r - 0.20) * (100-40) / (0.60-0.20)`
-- Wenn `r > 0.60` → `0`
+Mapping auf `rank_pct`:
+- Wenn `rank_pct <= 20` → `100`
+- Wenn `20 < rank_pct <= 60` → linear `100 -> 40`:
+  - `100 - (rank_pct - 20) * (100-40) / (60-20)`
+- Wenn `rank_pct > 60` → `0`
 
 ### 7.5 Base Score (fixed weights)
 Fixed weights:
@@ -9626,14 +9654,10 @@ Wenn `btc_risk_on == true`:
 - `btc_multiplier = 1.0`
 
 Wenn `btc_risk_on == false` (Risk-Off):
-- Kandidat ist nur eligible wenn:
-  - `quote_volume_24h_usd >= 15_000_000`
-  - UND RS override true:
-    - `(alt_r7_1d - btc_r7_1d) >= 7.5` ODER `(alt_r3_1d - btc_r3_1d) >= 3.5`
-- Wenn eligible:
-  - `btc_multiplier = 0.85`
-- Sonst:
-  - setup invalid
+- `rs_override = ((alt_r7_1d - btc_r7_1d) >= 7.5) OR ((alt_r3_1d - btc_r3_1d) >= 3.5)`
+- `liq_ok = quote_volume_24h_usd >= 15_000_000`
+- `btc_multiplier = 0.85` wenn `rs_override AND liq_ok`, sonst `0.75`
+- Kandidat bleibt immer gelistet (kein Hard-Exclude durch BTC-Regime)
 
 ---
 
@@ -9657,6 +9681,7 @@ Mindestens:
 - ATR: `atr_pct_rank_120_1d`
 - BB: `bb_width_pct_4h`, `bb_width_rank_120_4h`
 - Multipliers: `anti_chase_multiplier`, `overextension_multiplier`, `btc_multiplier`
+- BTC Regime Flags: `btc_state`, `btc_rs_override`, `btc_liq_ok_risk_off`
 - Gates/Flags: `triggered`, `retest_valid`, `retest_invalidated` (wo relevant)
 
 ### 10.3 Dedup (global)
@@ -9805,4 +9830,4 @@ discovery_source_allowed:
 
 ---
 
-_Generated by GitHub Actions • 2026-02-28 11:35 UTC_
+_Generated by GitHub Actions • 2026-02-28 11:44 UTC_
