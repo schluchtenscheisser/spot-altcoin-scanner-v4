@@ -1,15 +1,15 @@
 {
   "meta": {
-    "run_id": "1772428755798",
-    "asof_utc": "2026-03-02T05:19:15Z",
-    "generated_at_utc": "2026-03-02T05:19:28Z",
+    "run_id": "1772483488444",
+    "asof_utc": "2026-03-02T20:31:28Z",
+    "generated_at_utc": "2026-03-02T20:31:39Z",
     "mexc": {
       "api_base": "https://api.mexc.com",
-      "exchange_info_ts_utc": "2026-03-02T05:19:15Z",
-      "tickers_24h_ts_utc": "2026-03-02T05:19:16Z"
+      "exchange_info_ts_utc": "2026-03-02T20:31:28Z",
+      "tickers_24h_ts_utc": "2026-03-02T20:31:29Z"
     },
     "cmc": {
-      "listings_ts_utc": "2026-03-02T05:19:16Z",
+      "listings_ts_utc": "2026-03-02T20:31:29Z",
       "source": "CoinMarketCap"
     },
     "config": {
@@ -19,19 +19,24 @@
     }
   },
   "universe": {
-    "count": 13,
+    "count": 18,
     "symbols": [
       "AAVEUSDT",
-      "ADAUSDT",
+      "APTUSDT",
+      "ASTERUSDT",
       "AVAXUSDT",
       "BCHUSDT",
       "DOTUSDT",
+      "ENAUSDT",
+      "FILUSDT",
       "HYPEUSDT",
       "LINKUSDT",
       "LTCUSDT",
       "NEARUSDT",
       "PEPEUSDT",
       "SUIUSDT",
+      "TAOUSDT",
+      "TONUSDT",
       "UNIUSDT",
       "ZECUSDT"
     ]
@@ -80,13 +85,13 @@
           "token_address": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9"
         },
         "is_token": true,
-        "market_cap_usd": 1764785889.5553381,
-        "circulating_supply": 15330504.44584455,
+        "market_cap_usd": 1878949410.58261,
+        "circulating_supply": 15330559.23572497,
         "total_supply": 16000000.0,
         "max_supply": null,
-        "fdv_usd": 1841855519.67,
-        "fdv_to_mcap": 1.0436708104766639,
-        "rank": 39
+        "fdv_usd": 1960997645.75,
+        "fdv_to_mcap": 1.0436670805000274,
+        "rank": 38
       },
       "mexc": {
         "symbol_info": {
@@ -104,20 +109,20 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 115.14,
-          "high_24h": 116.58,
+          "last_price": 122.48,
+          "high_24h": 126.92,
           "low_24h": 110.58,
-          "quote_volume_24h": 10202293.42,
-          "global_volume_24h_usd": 528839482.66604495,
-          "turnover_24h": 0.2996621209382478,
-          "mexc_share_24h": 0.01929185273491127,
-          "price_change_pct_24h": -0.0056,
-          "bid_price": 115.16,
-          "ask_price": 115.17,
-          "spread_pct": 0.008683193678639445,
-          "mid_price": 115.16499999999999,
+          "quote_volume_24h": 11784122.4,
+          "global_volume_24h_usd": 619833098.7360663,
+          "turnover_24h": 0.3298828032543321,
+          "mexc_share_24h": 0.019011766916012734,
+          "price_change_pct_24h": 0.1006,
+          "bid_price": 122.39,
+          "ask_price": 122.4,
+          "spread_pct": 0.0081702683933209,
+          "mid_price": 122.39500000000001,
           "trades_24h": null,
-          "base_volume_24h": 89358.718
+          "base_volume_24h": 99929.248
         }
       },
       "quality": {
@@ -130,45 +135,37 @@
         "notes": null
       }
     },
-    "ADAUSDT": {
+    "APTUSDT": {
       "identity": {
-        "cmc_id": 2010,
-        "name": "Cardano",
-        "symbol": "ADA",
-        "slug": "cardano",
+        "cmc_id": 21794,
+        "name": "Aptos",
+        "symbol": "APT",
+        "slug": "aptos",
         "category": null,
         "tags": [
-          "dpos",
-          "pos",
-          "platform",
-          "research",
-          "smart-contracts",
-          "staking",
-          "cardano-ecosystem",
-          "cardano",
+          "binance-labs-portfolio",
+          "circle-ventures-portfolio",
           "layer-1",
-          "alleged-sec-securities",
-          "2017-2018-alt-season",
+          "ftx-bankruptcy-estate",
+          "move-vm",
           "made-in-america",
-          "us-strategic-crypto-reserve",
           "binance-ecosystem",
-          "binance-listing",
-          "iso-20022"
+          "binance-listing"
         ],
         "platform": null,
         "is_token": false,
-        "market_cap_usd": 9917694982.931194,
-        "circulating_supply": 36078864112.21547,
-        "total_supply": 44994838422.19901,
-        "max_supply": 45000000000.0,
-        "fdv_usd": 12370020099.41,
-        "fdv_to_mcap": 1.2472676484505087,
-        "rank": 10
+        "market_cap_usd": 754769022.2700024,
+        "circulating_supply": 780445339.222358,
+        "total_supply": 1198054019.1091566,
+        "max_supply": null,
+        "fdv_usd": 1158638555.69,
+        "fdv_to_mcap": 1.535090234897746,
+        "rank": 64
       },
       "mexc": {
         "symbol_info": {
-          "mexc_symbol": "ADAUSDT",
-          "base_asset": "ADA",
+          "mexc_symbol": "APTUSDT",
+          "base_asset": "APT",
           "quote_asset": "USDT",
           "status": "1",
           "price_precision": 4,
@@ -181,20 +178,94 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 0.2753,
-          "high_24h": 0.2866,
-          "low_24h": 0.2691,
-          "quote_volume_24h": 15903143.153,
-          "global_volume_24h_usd": 544304990.3503668,
-          "turnover_24h": 0.054882207134534844,
-          "mexc_share_24h": 0.029217338504949612,
-          "price_change_pct_24h": -0.0357,
-          "bid_price": 0.2752,
-          "ask_price": 0.2753,
-          "spread_pct": 0.036330608537689005,
-          "mid_price": 0.27525,
+          "last_price": 0.9673,
+          "high_24h": 0.9877,
+          "low_24h": 0.9061,
+          "quote_volume_24h": 7027419.3222,
+          "global_volume_24h_usd": 112059274.20326424,
+          "turnover_24h": 0.1484683007607292,
+          "mexc_share_24h": 0.06271162625462814,
+          "price_change_pct_24h": 0.0635,
+          "bid_price": 0.967,
+          "ask_price": 0.9679,
+          "spread_pct": 0.09302806346581342,
+          "mid_price": 0.9674499999999999,
           "trades_24h": null,
-          "base_volume_24h": 57357093.94
+          "base_volume_24h": 7381322.26
+        }
+      },
+      "quality": {
+        "has_scanner_features": true,
+        "has_ohlcv": true,
+        "missing_fields": [
+          "tick_size",
+          "min_notional"
+        ],
+        "notes": null
+      }
+    },
+    "ASTERUSDT": {
+      "identity": {
+        "cmc_id": 36341,
+        "name": "Aster",
+        "symbol": "ASTER",
+        "slug": "aster",
+        "category": null,
+        "tags": [
+          "decentralized-exchange-dex-token",
+          "defi",
+          "derivatives",
+          "dex",
+          "bnb-chain-ecosystem",
+          "binance-ecosystem",
+          "binance-listing",
+          "perp-dex-coins",
+          "made-in-china"
+        ],
+        "platform": {
+          "name": "BNB Smart Chain (BEP20)",
+          "symbol": "BNB",
+          "token_address": "0x000Ae314E2A2172a039B26378814C252734f556A"
+        },
+        "is_token": true,
+        "market_cap_usd": 1691615192.24926,
+        "circulating_supply": 2476232866.913392,
+        "total_supply": 7822985112.003392,
+        "max_supply": 8000000000.0,
+        "fdv_usd": 5465124754.14,
+        "fdv_to_mcap": 3.230713923107586,
+        "rank": 41
+      },
+      "mexc": {
+        "symbol_info": {
+          "mexc_symbol": "ASTERUSDT",
+          "base_asset": "ASTER",
+          "quote_asset": "USDT",
+          "status": "1",
+          "price_precision": 4,
+          "quantity_precision": 2,
+          "tick_size": null,
+          "step_size": null,
+          "min_qty": null,
+          "max_qty": null,
+          "min_notional": null,
+          "max_notional": null
+        },
+        "ticker_24h": {
+          "last_price": 0.6823,
+          "high_24h": 0.7229,
+          "low_24h": 0.675,
+          "quote_volume_24h": 6453438.7684,
+          "global_volume_24h_usd": 149799007.05374312,
+          "turnover_24h": 0.0885538317107229,
+          "mexc_share_24h": 0.043080651169367976,
+          "price_change_pct_24h": -0.0283,
+          "bid_price": 0.6825,
+          "ask_price": 0.6827,
+          "spread_pct": 0.029299736302370052,
+          "mid_price": 0.6826,
+          "trades_24h": null,
+          "base_volume_24h": 9235289.55
         }
       },
       "quality": {
@@ -230,12 +301,12 @@
         ],
         "platform": null,
         "is_token": false,
-        "market_cap_usd": 3916149553.6788898,
+        "market_cap_usd": 3979732280.1893616,
         "circulating_supply": 431771961.1772119,
         "total_supply": 463441061.1772119,
         "max_supply": 715748719.0,
-        "fdv_usd": 6491804189.45,
-        "fdv_to_mcap": 1.6577007850355208,
+        "fdv_usd": 6597205325.1,
+        "fdv_to_mcap": 1.6577007850352425,
         "rank": 24
       },
       "mexc": {
@@ -254,20 +325,20 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 9.073,
-          "high_24h": 9.297,
+          "last_price": 9.213,
+          "high_24h": 9.476,
           "low_24h": 8.845,
-          "quote_volume_24h": 14244369.543,
-          "global_volume_24h_usd": 326323747.51676494,
-          "turnover_24h": 0.08332770315429132,
-          "mexc_share_24h": 0.043651035670544305,
-          "price_change_pct_24h": -0.0205,
-          "bid_price": 9.074,
-          "ask_price": 9.077,
-          "spread_pct": 0.03305602997080176,
-          "mid_price": 9.0755,
+          "quote_volume_24h": 17315715.444,
+          "global_volume_24h_usd": 394257065.83839506,
+          "turnover_24h": 0.09906622809804576,
+          "mexc_share_24h": 0.043919860782146804,
+          "price_change_pct_24h": 0.0373,
+          "bid_price": 9.215,
+          "ask_price": 9.218,
+          "spread_pct": 0.03255031736559555,
+          "mid_price": 9.2165,
           "trades_24h": null,
-          "base_volume_24h": 1567909.69
+          "base_volume_24h": 1896242.2
         }
       },
       "quality": {
@@ -304,12 +375,12 @@
         ],
         "platform": null,
         "is_token": false,
-        "market_cap_usd": 8985198768.982199,
-        "circulating_supply": 20001675.0,
-        "total_supply": 20001675.0,
+        "market_cap_usd": 8856430068.534023,
+        "circulating_supply": 20001946.875,
+        "total_supply": 20001946.875,
         "max_supply": 21000000.0,
-        "fdv_usd": 9433668637.68,
-        "fdv_to_mcap": 1.0499120698638258,
+        "fdv_usd": 9298346436.05,
+        "fdv_to_mcap": 1.0498977990111455,
         "rank": 11
       },
       "mexc": {
@@ -328,20 +399,20 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 449.7,
-          "high_24h": 460.1,
+          "last_price": 442.2,
+          "high_24h": 454.2,
           "low_24h": 432.0,
-          "quote_volume_24h": 6408947.3,
-          "global_volume_24h_usd": 317450655.7132597,
-          "turnover_24h": 0.03533039878974419,
-          "mexc_share_24h": 0.0201887984310511,
-          "price_change_pct_24h": -0.02,
-          "bid_price": 449.6,
-          "ask_price": 449.7,
-          "spread_pct": 0.022239519626368488,
-          "mid_price": 449.65,
+          "quote_volume_24h": 8132657.8,
+          "global_volume_24h_usd": 406565779.1607104,
+          "turnover_24h": 0.045906282329851666,
+          "mexc_share_24h": 0.02000330135209255,
+          "price_change_pct_24h": 0.0195,
+          "bid_price": 442.3,
+          "ask_price": 442.4,
+          "spread_pct": 0.022606533288112556,
+          "mid_price": 442.35,
           "trades_24h": null,
-          "base_volume_24h": 14420.572
+          "base_volume_24h": 18312.66355
         }
       },
       "quality": {
@@ -395,13 +466,13 @@
         ],
         "platform": null,
         "is_token": false,
-        "market_cap_usd": 2583519182.954428,
-        "circulating_supply": 1670431596.4633684,
-        "total_supply": 1670431596.4633684,
+        "market_cap_usd": 2547140422.1342998,
+        "circulating_supply": 1670623173.52143,
+        "total_supply": 1670623173.52143,
         "max_supply": 2100000000.0,
-        "fdv_usd": 3247897307.31,
-        "fdv_to_mcap": 1.2571601282231668,
-        "rank": 32
+        "fdv_usd": 3201796174.78,
+        "fdv_to_mcap": 1.2570159646310946,
+        "rank": 33
       },
       "mexc": {
         "symbol_info": {
@@ -419,20 +490,176 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 1.543,
-          "high_24h": 1.622,
-          "low_24h": 1.504,
-          "quote_volume_24h": 7889922.661,
-          "global_volume_24h_usd": 209623625.2039989,
-          "turnover_24h": 0.08113879184139836,
-          "mexc_share_24h": 0.03763851833647941,
-          "price_change_pct_24h": -0.0344,
-          "bid_price": 1.544,
-          "ask_price": 1.545,
-          "spread_pct": 0.06474587245062415,
-          "mid_price": 1.5445,
+          "last_price": 1.521,
+          "high_24h": 1.602,
+          "low_24h": 1.498,
+          "quote_volume_24h": 11704413.417,
+          "global_volume_24h_usd": 270822464.2359992,
+          "turnover_24h": 0.1063241201319681,
+          "mexc_share_24h": 0.04321803012175747,
+          "price_change_pct_24h": 0.0079,
+          "bid_price": 1.522,
+          "ask_price": 1.523,
+          "spread_pct": 0.06568144499178259,
+          "mid_price": 1.5225,
           "trades_24h": null,
-          "base_volume_24h": 5068378.67
+          "base_volume_24h": 7585873.46
+        }
+      },
+      "quality": {
+        "has_scanner_features": true,
+        "has_ohlcv": true,
+        "missing_fields": [
+          "tick_size",
+          "min_notional"
+        ],
+        "notes": null
+      }
+    },
+    "ENAUSDT": {
+      "identity": {
+        "cmc_id": 30171,
+        "name": "Ethena",
+        "symbol": "ENA",
+        "slug": "ethena",
+        "category": null,
+        "tags": [
+          "defi",
+          "ethereum-ecosystem",
+          "binance-labs-portfolio",
+          "okx-ventures-portfolio",
+          "cmc-crypto-yearbook-2024-2025",
+          "world-liberty-financial-portfolio",
+          "binance-ecosystem",
+          "binance-listing"
+        ],
+        "platform": {
+          "name": "Ethereum",
+          "symbol": "ETH",
+          "token_address": "0x57e114B691Db790C35207b2e685D4A43181e6061"
+        },
+        "is_token": true,
+        "market_cap_usd": 947974113.6113145,
+        "circulating_supply": 8225000000.0,
+        "total_supply": 15000000000.0,
+        "max_supply": 15000000000.0,
+        "fdv_usd": 1728828170.72,
+        "fdv_to_mcap": 1.8237082066872228,
+        "rank": 56
+      },
+      "mexc": {
+        "symbol_info": {
+          "mexc_symbol": "ENAUSDT",
+          "base_asset": "ENA",
+          "quote_asset": "USDT",
+          "status": "1",
+          "price_precision": 5,
+          "quantity_precision": 2,
+          "tick_size": null,
+          "step_size": null,
+          "min_qty": null,
+          "max_qty": null,
+          "min_notional": null,
+          "max_notional": null
+        },
+        "ticker_24h": {
+          "last_price": 0.11508,
+          "high_24h": 0.11739,
+          "low_24h": 0.1008,
+          "quote_volume_24h": 6062732.94015,
+          "global_volume_24h_usd": 148419830.6225288,
+          "turnover_24h": 0.15656527798752048,
+          "mexc_share_24h": 0.04084853698269705,
+          "price_change_pct_24h": 0.1359,
+          "bid_price": 0.11499,
+          "ask_price": 0.11513,
+          "spread_pct": 0.12167564748826808,
+          "mid_price": 0.11506,
+          "trades_24h": null,
+          "base_volume_24h": 55873086.01
+        }
+      },
+      "quality": {
+        "has_scanner_features": true,
+        "has_ohlcv": true,
+        "missing_fields": [
+          "tick_size",
+          "min_notional"
+        ],
+        "notes": null
+      }
+    },
+    "FILUSDT": {
+      "identity": {
+        "cmc_id": 2280,
+        "name": "Filecoin",
+        "symbol": "FIL",
+        "slug": "filecoin",
+        "category": null,
+        "tags": [
+          "mineable",
+          "ai-big-data",
+          "distributed-computing",
+          "filesharing",
+          "storage",
+          "polychain-capital-portfolio",
+          "blockchain-capital-portfolio",
+          "boostvc-portfolio",
+          "dcg-portfolio",
+          "hashkey-capital-portfolio",
+          "a16z-portfolio",
+          "winklevoss-capital-portfolio",
+          "pantera-capital-portfolio",
+          "web3",
+          "filecoin-ecosystem",
+          "layer-1",
+          "alleged-sec-securities",
+          "depin",
+          "2017-2018-alt-season",
+          "made-in-america",
+          "binance-ecosystem",
+          "binance-listing"
+        ],
+        "platform": null,
+        "is_token": false,
+        "market_cap_usd": 751927170.6822643,
+        "circulating_supply": 757617256.0,
+        "total_supply": 1958167649.0,
+        "max_supply": null,
+        "fdv_usd": 1943460828.5,
+        "fdv_to_mcap": 2.584639715488127,
+        "rank": 66
+      },
+      "mexc": {
+        "symbol_info": {
+          "mexc_symbol": "FILUSDT",
+          "base_asset": "FIL",
+          "quote_asset": "USDT",
+          "status": "1",
+          "price_precision": 4,
+          "quantity_precision": 3,
+          "tick_size": null,
+          "step_size": null,
+          "min_qty": null,
+          "max_qty": null,
+          "min_notional": null,
+          "max_notional": null
+        },
+        "ticker_24h": {
+          "last_price": 0.9918,
+          "high_24h": 1.0288,
+          "low_24h": 0.9414,
+          "quote_volume_24h": 5503527.3569,
+          "global_volume_24h_usd": 118939676.05372015,
+          "turnover_24h": 0.1581797821533696,
+          "mexc_share_24h": 0.0462715852228678,
+          "price_change_pct_24h": 0.0471,
+          "bid_price": 0.992,
+          "ask_price": 0.9927,
+          "spread_pct": 0.07053962815539214,
+          "mid_price": 0.9923500000000001,
+          "trades_24h": null,
+          "base_volume_24h": 5544049.066
         }
       },
       "quality": {
@@ -468,12 +695,12 @@
           "token_address": "0x0d01dc56dcaaca66ad901c959b4011ec"
         },
         "is_token": true,
-        "market_cap_usd": 7998975271.300771,
-        "circulating_supply": 258135894.13103515,
-        "total_supply": 957726681.987591,
+        "market_cap_usd": 8312445787.897068,
+        "circulating_supply": 258066278.35820872,
+        "total_supply": 957683368.7388489,
         "max_supply": 961671487.86,
-        "fdv_usd": 29799755188.65,
-        "fdv_to_mcap": 3.7254465950866793,
+        "fdv_usd": 30975926647.44,
+        "fdv_to_mcap": 3.7264515688680926,
         "rank": 13
       },
       "mexc": {
@@ -492,20 +719,20 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 31.04,
-          "high_24h": 32.74,
-          "low_24h": 30.41,
-          "quote_volume_24h": 13170652.54,
-          "global_volume_24h_usd": 348861448.98350036,
-          "turnover_24h": 0.04361326759380886,
-          "mexc_share_24h": 0.037753247251526824,
-          "price_change_pct_24h": 0.0016,
-          "bid_price": 31.07,
-          "ask_price": 31.08,
-          "spread_pct": 0.03218020917135321,
-          "mid_price": 31.075,
+          "last_price": 32.26,
+          "high_24h": 33.66,
+          "low_24h": 29.96,
+          "quote_volume_24h": 15244256.19,
+          "global_volume_24h_usd": 438055015.5784655,
+          "turnover_24h": 0.05269869142680897,
+          "mexc_share_24h": 0.03479986679268922,
+          "price_change_pct_24h": 0.028,
+          "bid_price": 32.21,
+          "ask_price": 32.22,
+          "spread_pct": 0.0310414403228248,
+          "mid_price": 32.215,
           "trades_24h": null,
-          "base_volume_24h": 418598.38
+          "base_volume_24h": 479242.93
         }
       },
       "quality": {
@@ -624,12 +851,12 @@
           "token_address": "0x514910771af9ca656af840dff83e8264ecf986ca"
         },
         "is_token": true,
-        "market_cap_usd": 6213145726.841823,
+        "market_cap_usd": 6377630971.767277,
         "circulating_supply": 708099970.4525867,
         "total_supply": 1000000000.0,
         "max_supply": 1000000000.0,
-        "fdv_usd": 8774390603.17,
-        "fdv_to_mcap": 1.4122299699592067,
+        "fdv_usd": 9006681595.67,
+        "fdv_to_mcap": 1.4122299699592369,
         "rank": 15
       },
       "mexc": {
@@ -648,20 +875,20 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 8.786,
-          "high_24h": 9.097,
+          "last_price": 9.001,
+          "high_24h": 9.271,
           "low_24h": 8.538,
-          "quote_volume_24h": 17103018.768,
-          "global_volume_24h_usd": 731421674.657754,
-          "turnover_24h": 0.11772163519324691,
-          "mexc_share_24h": 0.0233832539567587,
-          "price_change_pct_24h": -0.0291,
-          "bid_price": 8.785,
-          "ask_price": 8.789,
-          "spread_pct": 0.045521793558661205,
-          "mid_price": 8.786999999999999,
+          "quote_volume_24h": 24331778.562,
+          "global_volume_24h_usd": 860287201.6251225,
+          "turnover_24h": 0.13489134216662463,
+          "mexc_share_24h": 0.028283320402809824,
+          "price_change_pct_24h": 0.0473,
+          "bid_price": 9.0,
+          "ask_price": 9.004,
+          "spread_pct": 0.04443457009552944,
+          "mid_price": 9.001999999999999,
           "trades_24h": null,
-          "base_volume_24h": 1935177.72
+          "base_volume_24h": 2736544.92
         }
       },
       "quality": {
@@ -695,13 +922,13 @@
         ],
         "platform": null,
         "is_token": false,
-        "market_cap_usd": 4139963295.0196033,
-        "circulating_supply": 76904901.98347135,
+        "market_cap_usd": 4211006385.535361,
+        "circulating_supply": 76907045.73347135,
         "total_supply": 84000000.0,
         "max_supply": 84000000.0,
-        "fdv_usd": 4521908328.5,
-        "fdv_to_mcap": 1.0922580724181488,
-        "rank": 23
+        "fdv_usd": 4599377508.41,
+        "fdv_to_mcap": 1.0922276262056212,
+        "rank": 22
       },
       "mexc": {
         "symbol_info": {
@@ -719,20 +946,20 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 53.88,
-          "high_24h": 54.99,
+          "last_price": 54.7,
+          "high_24h": 55.71,
           "low_24h": 52.47,
-          "quote_volume_24h": 8116766.06,
-          "global_volume_24h_usd": 300266165.9200762,
-          "turnover_24h": 0.07252870243591239,
-          "mexc_share_24h": 0.027031903628331178,
-          "price_change_pct_24h": -0.0162,
-          "bid_price": 53.89,
-          "ask_price": 53.9,
-          "spread_pct": 0.018554596901378628,
-          "mid_price": 53.894999999999996,
+          "quote_volume_24h": 13135491.08,
+          "global_volume_24h_usd": 392603311.43708503,
+          "turnover_24h": 0.09323265639911205,
+          "mexc_share_24h": 0.0334574128575708,
+          "price_change_pct_24h": 0.0369,
+          "bid_price": 54.69,
+          "ask_price": 54.7,
+          "spread_pct": 0.01828320687449514,
+          "mid_price": 54.695,
           "trades_24h": null,
-          "base_volume_24h": 150898.4856
+          "base_volume_24h": 242515.194
         }
       },
       "quality": {
@@ -778,13 +1005,13 @@
         ],
         "platform": null,
         "is_token": false,
-        "market_cap_usd": 1520820504.1138508,
-        "circulating_supply": 1289095031.0,
-        "total_supply": 1289095031.0,
+        "market_cap_usd": 1701137781.4436038,
+        "circulating_supply": 1289147879.0,
+        "total_supply": 1289147879.0,
         "max_supply": null,
-        "fdv_usd": 1520820504.11,
-        "fdv_to_mcap": 0.9999999999974678,
-        "rank": 44
+        "fdv_usd": 1701137781.44,
+        "fdv_to_mcap": 0.9999999999978816,
+        "rank": 40
       },
       "mexc": {
         "symbol_info": {
@@ -802,20 +1029,20 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 1.1831,
-          "high_24h": 1.2221,
+          "last_price": 1.3186,
+          "high_24h": 1.3391,
           "low_24h": 1.1121,
-          "quote_volume_24h": 9495114.1925,
-          "global_volume_24h_usd": 239643664.6736679,
-          "turnover_24h": 0.15757524574755985,
-          "mexc_share_24h": 0.039621803503255,
-          "price_change_pct_24h": 0.023,
-          "bid_price": 1.1826,
-          "ask_price": 1.1833,
-          "spread_pct": 0.059174098651669386,
-          "mid_price": 1.18295,
+          "quote_volume_24h": 21671190.3912,
+          "global_volume_24h_usd": 515619515.79801816,
+          "turnover_24h": 0.30310273595855236,
+          "mexc_share_24h": 0.042029422330261794,
+          "price_change_pct_24h": 0.1804,
+          "bid_price": 1.3193,
+          "ask_price": 1.3199,
+          "spread_pct": 0.04546832373447681,
+          "mid_price": 1.3195999999999999,
           "trades_24h": null,
-          "base_volume_24h": 8125925.93
+          "base_volume_24h": 17463286.03
         }
       },
       "quality": {
@@ -848,12 +1075,12 @@
           "token_address": "0x6982508145454ce325ddbe47a25d4ec3d2311933"
         },
         "is_token": true,
-        "market_cap_usd": 1417310352.086402,
+        "market_cap_usd": 1476938030.6110048,
         "circulating_supply": 413772501517365.75,
         "total_supply": 413772501517365.75,
         "max_supply": 413772501517365.75,
-        "fdv_usd": 1417310352.09,
-        "fdv_to_mcap": 1.0000000000025386,
+        "fdv_usd": 1476938030.61,
+        "fdv_to_mcap": 0.9999999999993195,
         "rank": 47
       },
       "mexc": {
@@ -872,20 +1099,20 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 3.43e-06,
-          "high_24h": 3.669e-06,
-          "low_24h": 3.363e-06,
-          "quote_volume_24h": 12078525.8167046,
-          "global_volume_24h_usd": 355890332.79373187,
-          "turnover_24h": 0.2511026129667584,
-          "mexc_share_24h": 0.03393889831704171,
-          "price_change_pct_24h": -0.0607,
-          "bid_price": 3.427e-06,
-          "ask_price": 3.429e-06,
-          "spread_pct": 0.05834305717620042,
-          "mid_price": 3.428e-06,
+          "last_price": 3.569e-06,
+          "high_24h": 3.698e-06,
+          "low_24h": 3.367e-06,
+          "quote_volume_24h": 15139454.988474034,
+          "global_volume_24h_usd": 438578012.08132356,
+          "turnover_24h": 0.296950855751128,
+          "mexc_share_24h": 0.034519411761269034,
+          "price_change_pct_24h": 0.0577,
+          "bid_price": 3.564e-06,
+          "ask_price": 3.567e-06,
+          "spread_pct": 0.08413967185527421,
+          "mid_price": 3.5655e-06,
           "trades_24h": null,
-          "base_volume_24h": 3450862216057.0
+          "base_volume_24h": 4297777466525.0
         }
       },
       "quality": {
@@ -922,13 +1149,13 @@
         ],
         "platform": null,
         "is_token": false,
-        "market_cap_usd": 3506358837.1257687,
+        "market_cap_usd": 3634344818.648406,
         "circulating_supply": 3899984688.4154434,
         "total_supply": 10000000000.0,
         "max_supply": 10000000000.0,
-        "fdv_usd": 8990698982.85,
-        "fdv_to_mcap": 2.5641126309307958,
-        "rank": 26
+        "fdv_usd": 9318869454.65,
+        "fdv_to_mcap": 2.5641126309296207,
+        "rank": 25
       },
       "mexc": {
         "symbol_info": {
@@ -946,20 +1173,169 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 0.9009,
-          "high_24h": 0.9338,
+          "last_price": 0.9309,
+          "high_24h": 0.9674,
           "low_24h": 0.8664,
-          "quote_volume_24h": 27576412.95,
-          "global_volume_24h_usd": 780225268.3714583,
-          "turnover_24h": 0.22251723357870135,
-          "mexc_share_24h": 0.0353441679831255,
-          "price_change_pct_24h": -0.0316,
-          "bid_price": 0.9009,
-          "ask_price": 0.901,
-          "spread_pct": 0.011099395082966755,
-          "mid_price": 0.90095,
+          "quote_volume_24h": 29437147.1227,
+          "global_volume_24h_usd": 964364155.0817319,
+          "turnover_24h": 0.2653474568878068,
+          "mexc_share_24h": 0.03052492874976791,
+          "price_change_pct_24h": 0.0684,
+          "bid_price": 0.9303,
+          "ask_price": 0.9304,
+          "spread_pct": 0.010748642983822108,
+          "mid_price": 0.93035,
           "trades_24h": null,
-          "base_volume_24h": 30623594.01
+          "base_volume_24h": 32124642.96
+        }
+      },
+      "quality": {
+        "has_scanner_features": true,
+        "has_ohlcv": true,
+        "missing_fields": [
+          "tick_size",
+          "min_notional"
+        ],
+        "notes": null
+      }
+    },
+    "TAOUSDT": {
+      "identity": {
+        "cmc_id": 22974,
+        "name": "Bittensor",
+        "symbol": "TAO",
+        "slug": "bittensor",
+        "category": null,
+        "tags": [
+          "ai-big-data",
+          "distributed-computing",
+          "oracles",
+          "dao",
+          "polychain-capital-portfolio",
+          "dcg-portfolio",
+          "open-source",
+          "generative-ai",
+          "layer-1",
+          "depin",
+          "cmc-crypto-yearbook-2024-2025",
+          "binance-ecosystem",
+          "binance-listing",
+          "bittensor-ecosystem",
+          "robotics"
+        ],
+        "platform": {
+          "name": "Bittensor",
+          "symbol": "TAO",
+          "token_address": "0"
+        },
+        "is_token": true,
+        "market_cap_usd": 1992406495.1834466,
+        "circulating_supply": 10723691.61468726,
+        "total_supply": 21000000.0,
+        "max_supply": 21000000.0,
+        "fdv_usd": 3901691497.87,
+        "fdv_to_mcap": 1.9582808564929717,
+        "rank": 36
+      },
+      "mexc": {
+        "symbol_info": {
+          "mexc_symbol": "TAOUSDT",
+          "base_asset": "TAO",
+          "quote_asset": "USDT",
+          "status": "1",
+          "price_precision": 2,
+          "quantity_precision": 3,
+          "tick_size": null,
+          "step_size": null,
+          "min_qty": null,
+          "max_qty": null,
+          "min_notional": null,
+          "max_notional": null
+        },
+        "ticker_24h": {
+          "last_price": 185.61,
+          "high_24h": 195.05,
+          "low_24h": 172.36,
+          "quote_volume_24h": 5359680.15,
+          "global_volume_24h_usd": 145697212.28805327,
+          "turnover_24h": 0.07312624840376186,
+          "mexc_share_24h": 0.036786428963400813,
+          "price_change_pct_24h": 0.0735,
+          "bid_price": 185.54,
+          "ask_price": 185.62,
+          "spread_pct": 0.04310809354456973,
+          "mid_price": 185.57999999999998,
+          "trades_24h": null,
+          "base_volume_24h": 29396.666
+        }
+      },
+      "quality": {
+        "has_scanner_features": true,
+        "has_ohlcv": true,
+        "missing_fields": [
+          "tick_size",
+          "min_notional"
+        ],
+        "notes": null
+      }
+    },
+    "TONUSDT": {
+      "identity": {
+        "cmc_id": 11419,
+        "name": "Toncoin",
+        "symbol": "TON",
+        "slug": "toncoin",
+        "category": null,
+        "tags": [
+          "pos",
+          "layer-1",
+          "ftx-bankruptcy-estate",
+          "dwf-labs-portfolio",
+          "toncoin-ecosystem",
+          "cmc-crypto-yearbook-2024-2025",
+          "binance-ecosystem",
+          "binance-listing"
+        ],
+        "platform": null,
+        "is_token": false,
+        "market_cap_usd": 3016464055.602994,
+        "circulating_supply": 2452627326.133628,
+        "total_supply": 5155629028.222664,
+        "max_supply": null,
+        "fdv_usd": 6340861280.45,
+        "fdv_to_mcap": 2.10208415004052,
+        "rank": 29
+      },
+      "mexc": {
+        "symbol_info": {
+          "mexc_symbol": "TONUSDT",
+          "base_asset": "TON",
+          "quote_asset": "USDT",
+          "status": "1",
+          "price_precision": 3,
+          "quantity_precision": 2,
+          "tick_size": null,
+          "step_size": null,
+          "min_qty": null,
+          "max_qty": null,
+          "min_notional": null,
+          "max_notional": null
+        },
+        "ticker_24h": {
+          "last_price": 1.228,
+          "high_24h": 1.256,
+          "low_24h": 1.186,
+          "quote_volume_24h": 5354680.73,
+          "global_volume_24h_usd": 114010417.35357553,
+          "turnover_24h": 0.03779604704448724,
+          "mexc_share_24h": 0.04696659177550208,
+          "price_change_pct_24h": 0.0199,
+          "bid_price": 1.228,
+          "ask_price": 1.229,
+          "spread_pct": 0.08140008140009052,
+          "mid_price": 1.2285,
+          "trades_24h": null,
+          "base_volume_24h": 4397956.79
         }
       },
       "quality": {
@@ -1019,12 +1395,12 @@
           "token_address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
         },
         "is_token": true,
-        "market_cap_usd": 2414227404.2480993,
-        "circulating_supply": 633855562.7465303,
-        "total_supply": 898490420.0366303,
+        "market_cap_usd": 2484182778.2920003,
+        "circulating_supply": 633831562.7465303,
+        "total_supply": 898466420.0366303,
         "max_supply": null,
-        "fdv_usd": 3422167954.33,
-        "fdv_to_mcap": 1.417500252175217,
+        "fdv_usd": 3521368986.2,
+        "fdv_to_mcap": 1.4175160608033508,
         "rank": 34
       },
       "mexc": {
@@ -1043,20 +1419,20 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 3.813,
-          "high_24h": 3.852,
+          "last_price": 3.925,
+          "high_24h": 4.047,
           "low_24h": 3.667,
-          "quote_volume_24h": 6608066.698,
-          "global_volume_24h_usd": 247079508.19301403,
-          "turnover_24h": 0.10234309649465928,
-          "mexc_share_24h": 0.02674469747138196,
-          "price_change_pct_24h": -0.0033,
-          "bid_price": 3.812,
-          "ask_price": 3.815,
-          "spread_pct": 0.07866789038940904,
-          "mid_price": 3.8135,
+          "quote_volume_24h": 8293109.16,
+          "global_volume_24h_usd": 295796592.38172543,
+          "turnover_24h": 0.11907199219257947,
+          "mexc_share_24h": 0.028036527037802197,
+          "price_change_pct_24h": 0.061,
+          "bid_price": 3.925,
+          "ask_price": 3.926,
+          "spread_pct": 0.025474461852001883,
+          "mid_price": 3.9255,
           "trades_24h": null,
-          "base_volume_24h": 1746237.76
+          "base_volume_24h": 2151240.09
         }
       },
       "quality": {
@@ -1103,13 +1479,13 @@
         ],
         "platform": null,
         "is_token": false,
-        "market_cap_usd": 3580512594.2383704,
-        "circulating_supply": 16559364.4155448,
-        "total_supply": 16559364.4155448,
+        "market_cap_usd": 3632104250.287932,
+        "circulating_supply": 16560306.2905448,
+        "total_supply": 16560350.2905448,
         "max_supply": 21000000.0,
-        "fdv_usd": 4540679375.86,
-        "fdv_to_mcap": 1.2681646150796102,
-        "rank": 25
+        "fdv_usd": 4605844114.1,
+        "fdv_to_mcap": 1.2680924876357489,
+        "rank": 26
       },
       "mexc": {
         "symbol_info": {
@@ -1127,20 +1503,20 @@
           "max_notional": null
         },
         "ticker_24h": {
-          "last_price": 216.35,
-          "high_24h": 230.68,
-          "low_24h": 211.94,
-          "quote_volume_24h": 7338571.07,
-          "global_volume_24h_usd": 278006261.80668527,
-          "turnover_24h": 0.07764426307396398,
-          "mexc_share_24h": 0.026397143079830904,
-          "price_change_pct_24h": -0.0587,
-          "bid_price": 216.37,
-          "ask_price": 216.38,
-          "spread_pct": 0.004621606008083607,
-          "mid_price": 216.375,
+          "last_price": 219.12,
+          "high_24h": 226.2,
+          "low_24h": 211.36,
+          "quote_volume_24h": 7506197.56,
+          "global_volume_24h_usd": 284554206.45421463,
+          "turnover_24h": 0.0783441737476717,
+          "mexc_share_24h": 0.026378796692319368,
+          "price_change_pct_24h": 0.0278,
+          "bid_price": 219.21,
+          "ask_price": 219.22,
+          "spread_pct": 0.004561731633323862,
+          "mid_price": 219.215,
           "trades_24h": null,
-          "base_volume_24h": 33355.725992
+          "base_volume_24h": 34442.5878
         }
       },
       "quality": {
