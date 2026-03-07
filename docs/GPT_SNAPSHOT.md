@@ -1,7 +1,7 @@
 # Spot Altcoin Scanner • GPT Snapshot
 
-**Generated:** 2026-03-07 22:12 UTC  
-**Commit:** `18d9f17` (18d9f17b5ef3d52db175262137ec81d43c7c5ad9)  
+**Generated:** 2026-03-07 22:23 UTC  
+**Commit:** `da8a941` (da8a941d8aa2f3951c52eadba97433b7598be606)  
 **Status:** MVP Complete (Phase 6)  
 
 ---
@@ -46,7 +46,7 @@
 | `scanner/pipeline/features.py` | `FeatureEngine` | - |
 | `scanner/pipeline/filters.py` | `UniverseFilters` | - |
 | `scanner/pipeline/global_ranking.py` | - | `_config_get`, `compute_global_top20` |
-| `scanner/pipeline/liquidity.py` | - | `_root_config`, `get_orderbook_top_k`, `get_slippage_notional_usdt`, `get_grade_thresholds_bps`, `select_top_k_for_orderbook` ... (+8 more) |
+| `scanner/pipeline/liquidity.py` | - | `_root_config`, `get_orderbook_top_k`, `get_slippage_notional_usdt`, `get_grade_thresholds_bps`, `_read_tradeability_thresholds` ... (+14 more) |
 | `scanner/pipeline/ohlcv.py` | `OHLCVFetcher` | - |
 | `scanner/pipeline/output.py` | `ReportGenerator` | - |
 | `scanner/pipeline/regime.py` | - | `compute_btc_regime_from_1d_features`, `compute_btc_regime`, `_to_float` |
@@ -75,7 +75,7 @@
 **Statistics:**
 - Total Modules: 42
 - Total Classes: 19
-- Total Functions: 122
+- Total Functions: 128
 
 ---
 
@@ -3788,7 +3788,7 @@ def compute_global_top20(
 
 ### `scanner/pipeline/liquidity.py`
 
-**SHA256:** `3dda53b3daf7289895873fba12d30dfc812a893397dde6bdf19a216074ffa7be`
+**SHA256:** `d9ac0a9851119ca0fe9c12f4a835515f5f6e7d636b6dd6cadb4c4711a44feca6`
 
 ```python
 """Liquidity stage utilities (Top-K orderbook budget + slippage metrics)."""
@@ -3824,6 +3824,67 @@ def get_grade_thresholds_bps(config: Dict[str, Any]) -> Tuple[float, float, floa
     b_max = float(cfg.get("b_max", 50.0))
     c_max = float(cfg.get("c_max", 100.0))
     return a_max, b_max, c_max
+
+
+def _read_tradeability_thresholds(config: Dict[str, Any]) -> Tuple[float, float, float]:
+    if hasattr(config, "tradeability_class_thresholds"):
+        cfg = config.tradeability_class_thresholds
+    else:
+        root = _root_config(config)
+        cfg = root.get("tradeability", {}).get(
+            "class_thresholds",
+            {
+                "direct_ok_max_slippage_bps": 50,
+                "tranche_ok_max_slippage_bps": 100,
+                "marginal_max_slippage_bps": 150,
+            },
+        )
+
+    if not isinstance(cfg, dict):
+        raise ValueError("tradeability.class_thresholds must be an object")
+
+    required = [
+        "direct_ok_max_slippage_bps",
+        "tranche_ok_max_slippage_bps",
+        "marginal_max_slippage_bps",
+    ]
+    missing = [key for key in required if key not in cfg]
+    if missing:
+        raise ValueError(f"tradeability.class_thresholds missing keys: {missing}")
+
+    direct_max = float(cfg[required[0]])
+    tranche_max = float(cfg[required[1]])
+    marginal_max = float(cfg[required[2]])
+    if direct_max < 0 or tranche_max < 0 or marginal_max < 0:
+        raise ValueError("tradeability.class_thresholds values must be >= 0")
+    if not (direct_max <= tranche_max <= marginal_max):
+        raise ValueError(
+            "tradeability.class_thresholds must satisfy direct_ok_max_slippage_bps <= tranche_ok_max_slippage_bps <= marginal_max_slippage_bps"
+        )
+    return direct_max, tranche_max, marginal_max
+
+
+def _tradeability_params(config: Dict[str, Any]) -> Dict[str, float]:
+    direct_max, tranche_max, marginal_max = _read_tradeability_thresholds(config)
+    root = _root_config(config)
+    tradeability_cfg = root.get("tradeability", {})
+    return {
+        "notional_total_usdt": float(
+            config.tradeability_notional_total_usdt if hasattr(config, "tradeability_notional_total_usdt") else tradeability_cfg.get("notional_total_usdt", 20_000)
+        ),
+        "notional_chunk_usdt": float(
+            config.tradeability_notional_chunk_usdt if hasattr(config, "tradeability_notional_chunk_usdt") else tradeability_cfg.get("notional_chunk_usdt", 5_000)
+        ),
+        "max_tranches": int(config.tradeability_max_tranches if hasattr(config, "tradeability_max_tranches") else tradeability_cfg.get("max_tranches", 4)),
+        "band_pct": float(config.tradeability_band_pct if hasattr(config, "tradeability_band_pct") else tradeability_cfg.get("band_pct", 1.0)),
+        "max_spread_pct": float(config.tradeability_max_spread_pct if hasattr(config, "tradeability_max_spread_pct") else tradeability_cfg.get("max_spread_pct", 0.15)),
+        "min_depth_1pct_usd": float(
+            config.tradeability_min_depth_1pct_usd if hasattr(config, "tradeability_min_depth_1pct_usd") else tradeability_cfg.get("min_depth_1pct_usd", 200_000)
+        ),
+        "direct_ok_max_slippage_bps": direct_max,
+        "tranche_ok_max_slippage_bps": tranche_max,
+        "marginal_max_slippage_bps": marginal_max,
+    }
 
 
 def select_top_k_for_orderbook(candidates: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]]:
@@ -3906,6 +3967,115 @@ def _compute_buy_vwap(asks: List[Tuple[float, float]], notional_usdt: float) -> 
     if qty <= 0:
         return 0.0, True
     return spent / qty, remaining > 1e-9
+
+
+def _compute_slippage_bps(orderbook: Dict[str, Any], notional_usdt: float) -> float | None:
+    bids = _to_levels(orderbook.get("bids"))
+    asks = _to_levels(orderbook.get("asks"))
+    if not bids or not asks:
+        return None
+    best_bid = bids[0][0]
+    best_ask = asks[0][0]
+    mid = (best_bid + best_ask) / 2.0
+    if mid <= 0:
+        return None
+    vwap_ask, insufficient = _compute_buy_vwap(asks, notional_usdt)
+    if insufficient or vwap_ask <= 0:
+        return None
+    return round(((vwap_ask - mid) / mid) * 10_000.0, 6)
+
+
+def _is_orderbook_stale(orderbook: Dict[str, Any]) -> bool:
+    return bool(orderbook.get("stale") or orderbook.get("is_stale"))
+
+
+def _unknown_tradeability(reason: str) -> Dict[str, Any]:
+    return {
+        "slippage_bps_5k": None,
+        "slippage_bps_20k": None,
+        "tradeable_5k": None,
+        "tradeable_20k": None,
+        "tradeable_via_tranches": None,
+        "tradeability_class": "UNKNOWN",
+        "execution_mode": "none",
+        "tradeability_reason_keys": [reason],
+    }
+
+
+def compute_tradeability_metrics(orderbook: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+    params = _tradeability_params(config)
+    if _is_orderbook_stale(orderbook):
+        return _unknown_tradeability("orderbook_data_stale")
+
+    band_metrics = compute_orderbook_metrics(orderbook, [float(params["band_pct"])])
+    band_label = _band_label(float(params["band_pct"]))
+    depth_bid = band_metrics.get(f"depth_bid_{band_label}pct_usd")
+    depth_ask = band_metrics.get(f"depth_ask_{band_label}pct_usd")
+    spread_pct = band_metrics.get("spread_pct")
+
+    slippage_5k = _compute_slippage_bps(orderbook, float(params["notional_chunk_usdt"]))
+    slippage_20k = _compute_slippage_bps(orderbook, float(params["notional_total_usdt"]))
+
+    spread_ok = spread_pct is not None and float(spread_pct) <= float(params["max_spread_pct"])
+    depth_ok = (
+        depth_bid is not None
+        and depth_ask is not None
+        and float(depth_bid) >= float(params["min_depth_1pct_usd"])
+        and float(depth_ask) >= float(params["min_depth_1pct_usd"])
+    )
+
+    tradeable_20k = (
+        slippage_20k is not None and float(slippage_20k) <= float(params["direct_ok_max_slippage_bps"]) and spread_ok and depth_ok
+    )
+    tradeable_5k = (
+        slippage_5k is not None and float(slippage_5k) <= float(params["tranche_ok_max_slippage_bps"]) and spread_ok and depth_ok
+    )
+    tradeable_via_tranches = tradeable_5k and (float(params["notional_chunk_usdt"]) * int(params["max_tranches"]) >= float(params["notional_total_usdt"]))
+
+    reasons: Set[str] = set()
+    if not spread_ok:
+        reasons.add("spread_too_wide")
+    if not depth_ok:
+        reasons.add("depth_1pct_insufficient")
+    if slippage_20k is None or float(slippage_20k) > float(params["direct_ok_max_slippage_bps"]):
+        reasons.add("slippage_20k_too_high")
+    if slippage_5k is None or float(slippage_5k) > float(params["tranche_ok_max_slippage_bps"]):
+        reasons.add("slippage_5k_too_high")
+    if not tradeable_via_tranches:
+        reasons.add("tranche_execution_not_feasible")
+
+    if tradeable_20k:
+        tradeability_class = "DIRECT_OK"
+        execution_mode = "direct"
+        reasons = set()
+    elif tradeable_via_tranches:
+        tradeability_class = "TRANCHE_OK"
+        execution_mode = "tranches"
+        reasons = set()
+    else:
+        within_marginal = (slippage_20k is not None and float(slippage_20k) <= float(params["marginal_max_slippage_bps"])) or (
+            slippage_5k is not None and float(slippage_5k) <= float(params["marginal_max_slippage_bps"])
+        )
+        spread_borderline = spread_pct is not None and float(spread_pct) <= (float(params["max_spread_pct"]) * 1.25)
+        depth_borderline = (
+            depth_bid is not None
+            and depth_ask is not None
+            and float(depth_bid) >= float(params["min_depth_1pct_usd"]) * 0.8
+            and float(depth_ask) >= float(params["min_depth_1pct_usd"]) * 0.8
+        )
+        tradeability_class = "MARGINAL" if (within_marginal or spread_borderline or depth_borderline) else "FAIL"
+        execution_mode = "none"
+
+    return {
+        "slippage_bps_5k": slippage_5k,
+        "slippage_bps_20k": slippage_20k,
+        "tradeable_5k": tradeable_5k,
+        "tradeable_20k": tradeable_20k,
+        "tradeable_via_tranches": tradeable_via_tranches,
+        "tradeability_class": tradeability_class,
+        "execution_mode": execution_mode,
+        "tradeability_reason_keys": sorted(reasons),
+    }
 
 
 def compute_orderbook_liquidity_metrics(orderbook: Dict[str, Any], notional_usdt: float, thresholds_bps: Tuple[float, float, float]) -> Dict[str, Any]:
@@ -4036,6 +4206,7 @@ def apply_liquidity_metrics_to_shortlist(
             metrics = compute_orderbook_liquidity_metrics(orderbook, notional, thresholds)
             r.update(metrics)
             r.update(compute_orderbook_metrics(orderbook, bands_pct))
+            r.update(compute_tradeability_metrics(orderbook, config))
         elif selected_symbols is not None and symbol in selected_symbols:
             r.update(
                 {
@@ -4046,6 +4217,7 @@ def apply_liquidity_metrics_to_shortlist(
                 }
             )
             r.update(_empty_orderbook_metrics(bands_pct))
+            r.update(_unknown_tradeability("orderbook_data_missing"))
         else:
             r.update(
                 {
@@ -4058,6 +4230,7 @@ def apply_liquidity_metrics_to_shortlist(
             metrics = _empty_orderbook_metrics(bands_pct)
             metrics["orderbook_ok"] = None
             r.update(metrics)
+            r.update(_unknown_tradeability("orderbook_not_in_budget"))
         out.append(r)
     return out
 
@@ -10185,7 +10358,7 @@ No implicit bool/number coercion is allowed for nullable fields.
 
 ### `docs/canonical/VERIFICATION_FOR_AI.md`
 
-**SHA256:** `2513923e980fb181cbf481b55187588dd75bdf1a5a26776957f7ee02453f7c7f`
+**SHA256:** `a15d929970f324701fd237e035ccb7b06f00de56e2ec768369112f0b5d9ac2b1`
 
 ```markdown
 # Verification for AI — Golden Fixtures, Invariants, Checklist (Canonical)
@@ -10245,6 +10418,15 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - Legacy config defaults are still loaded for context fields: `min_turnover_24h=0.03`, `min_mexc_quote_volume_24h_usdt=5_000_000`, `min_mexc_share_24h=0.01`.
 - Legacy alias behavior remains: `universe_filters.volume.min_quote_volume_24h` aliases to `min_mexc_quote_volume_24h_usdt` only when the new key is absent; if both exist, new key wins.
 - Above the pre-shortlist floor, legacy market-cap/turnover/mexc-volume/mexc-share thresholds are soft-prior context only and do not hard-exclude symbols.
+
+
+## Tradeability verification boundaries
+- `tradeability_class` domain is exactly `{DIRECT_OK, TRANCHE_OK, MARGINAL, FAIL, UNKNOWN}` and `execution_mode` domain is `{direct, tranches, none}`.
+- `DIRECT_OK` requires all of: 20k-slippage <= direct threshold, spread gate pass, depth gate pass.
+- `TRANCHE_OK` requires not `DIRECT_OK`, 5k-slippage <= tranche threshold, and `notional_chunk_usdt * max_tranches >= notional_total_usdt`.
+- `MARGINAL` is fully evaluated, never UNKNOWN, and always uses `execution_mode=none`.
+- `UNKNOWN` must remain distinct from `FAIL`; required reason identities include `orderbook_data_missing`, `orderbook_data_stale`, `orderbook_not_in_budget`.
+- Missing tradeability config keys use canonical defaults; invalid threshold ordering raises a clear validation error (no silent coercion).
 
 ```
 
@@ -10785,4 +10967,4 @@ discovery_source_allowed:
 
 ---
 
-_Generated by GitHub Actions • 2026-03-07 22:12 UTC_
+_Generated by GitHub Actions • 2026-03-07 22:23 UTC_
