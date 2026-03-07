@@ -1,3 +1,5 @@
+> ARCHIVED (ticket): Implemented in PR for this ticket. Canonical truth is under `docs/canonical/`.
+
 ## Title
 [P0] PR-06 Tradeability-Berechnung inkl. Klassifikation V4.2.1 implementieren
 
