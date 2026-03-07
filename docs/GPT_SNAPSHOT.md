@@ -1,7 +1,7 @@
 # Spot Altcoin Scanner • GPT Snapshot
 
-**Generated:** 2026-03-07 15:39 UTC  
-**Commit:** `4fce1dc` (4fce1dc7d4400aeb3afb1eef7dab509552a9a6cf)  
+**Generated:** 2026-03-07 17:50 UTC  
+**Commit:** `5f95175` (5f951757d548c8915cafbb1866dce315d012d80c)  
 **Status:** MVP Complete (Phase 6)  
 
 ---
@@ -36,7 +36,7 @@
 | `scanner/clients/mapping.py` | `MappingResult`, `SymbolMapper` | - |
 | `scanner/clients/marketcap_client.py` | `MarketCapClient` | - |
 | `scanner/clients/mexc_client.py` | `MEXCClient` | - |
-| `scanner/config.py` | `ScannerConfig` | `load_config`, `validate_config` |
+| `scanner/config.py` | `ScannerConfig` | `load_config`, `_expect_number`, `validate_config` |
 | `scanner/main.py` | - | `parse_args`, `main` |
 | `scanner/pipeline/__init__.py` | - | `_to_optional_float`, `_extract_cmc_global_volume_24h`, `_compute_turnover_24h`, `_compute_mexc_share_24h`, `_build_scoring_volume_maps` ... (+2 more) |
 | `scanner/pipeline/backtest_runner.py` | - | `_float_or_none`, `_extract_backtest_config`, `_setup_triggered`, `_evaluate_candidate`, `_summarize` ... (+4 more) |
@@ -75,7 +75,7 @@
 **Statistics:**
 - Total Modules: 42
 - Total Classes: 19
-- Total Functions: 119
+- Total Functions: 120
 
 ---
 
@@ -205,7 +205,7 @@ This is a research tool, not financial advice. Use at your own risk.
 
 ### `config/config.yml`
 
-**SHA256:** `7bafcafc87d0d66f7f1ace6844fcf77d647f7b77431859df0870934ceefabfe2`
+**SHA256:** `142f91f53184592f66372204c64265a33af69f57a5b40d07541dfca60aedea56`
 
 ```yaml
 version:
@@ -218,6 +218,48 @@ general:
   shortlist_size: 100
   lookback_days_1d: 120
   lookback_days_4h: 30
+
+
+
+budget:
+  shortlist_size: 200
+  orderbook_top_k: 200
+  pre_shortlist_market_cap_floor_usd: 25000000
+
+tradeability:
+  enabled: true
+  notional_total_usdt: 20000
+  notional_chunk_usdt: 5000
+  max_tranches: 4
+  band_pct: 1.0
+  max_spread_pct: 0.15
+  min_depth_1pct_usd: 200000
+  class_thresholds:
+    direct_ok_max_slippage_bps: 50
+    tranche_ok_max_slippage_bps: 100
+    marginal_max_slippage_bps: 150
+
+risk:
+  enabled: true
+  stop_method: "atr_multiple"
+  atr_period: 14
+  atr_timeframe: "1d"
+  atr_multiple: 2.0
+  min_stop_distance_pct: 4.0
+  max_stop_distance_pct: 12.0
+  min_rr_to_tp10: 1.3
+
+decision:
+  enabled: true
+  min_score_for_enter: 65
+  min_score_for_wait: 40
+  require_tradeability_for_enter: true
+  require_risk_acceptable_for_enter: true
+
+btc_regime:
+  enabled: true
+  mode: "threshold_modifier"
+  risk_off_enter_boost: 15
 
 data_sources:
   mexc:
@@ -233,9 +275,11 @@ data_sources:
 
 universe_filters:
   market_cap:
+    legacy_soft_prior: true
     min_usd: 100000000      # 100M
     max_usd: 10000000000    # 10B
   volume:
+    legacy_soft_prior: true
     min_turnover_24h: 0.03
     min_mexc_quote_volume_24h_usdt: 5000000
     min_mexc_share_24h: 0.01
@@ -940,7 +984,7 @@ See /docs/spec.md for the full technical specification.
 
 ### `scanner/config.py`
 
-**SHA256:** `dee1d6b8918e9e409e8d7baff25a03adef16b812de4166a60c4f3a53ec8c2e70`
+**SHA256:** `71d1f40c8ada68720c141d2a9131997ccb6ef92f8b1b2c6490e039534f2c5f95`
 
 ```python
 """
@@ -964,58 +1008,77 @@ class ScannerConfig:
     Scanner configuration wrapper.
     Provides type-safe access to config values.
     """
+
     raw: Dict[str, Any]
-    
+
     # Version
     @property
     def spec_version(self) -> str:
         return self.raw.get("version", {}).get("spec", "1.0")
-    
+
     @property
     def config_version(self) -> str:
         return self.raw.get("version", {}).get("config", "1.0")
-    
+
     # General
     @property
     def run_mode(self) -> str:
         return self.raw.get("general", {}).get("run_mode", "standard")
-    
+
     @property
     def timezone(self) -> str:
         return self.raw.get("general", {}).get("timezone", "UTC")
-    
+
     @property
     def shortlist_size(self) -> int:
-        return self.raw.get("general", {}).get("shortlist_size", 100)
-    
+        budget_cfg = self.raw.get("budget", {})
+        if "shortlist_size" in budget_cfg:
+            return budget_cfg.get("shortlist_size", 200)
+        if "shortlist_size" in self.raw.get("general", {}):
+            return self.raw.get("general", {}).get("shortlist_size", 100)
+        return 200
+
     @property
     def lookback_days_1d(self) -> int:
         return self.raw.get("general", {}).get("lookback_days_1d", 120)
-    
+
     @property
     def lookback_days_4h(self) -> int:
         return self.raw.get("general", {}).get("lookback_days_4h", 30)
-    
+
     # Data Sources
     @property
     def mexc_enabled(self) -> bool:
         return self.raw.get("data_sources", {}).get("mexc", {}).get("enabled", True)
-    
+
     @property
     def cmc_api_key(self) -> str:
         """Get CMC API key from ENV or config."""
         env_var = self.raw.get("data_sources", {}).get("market_cap", {}).get("api_key_env_var", "CMC_API_KEY")
         return os.getenv(env_var, "")
-    
-    # Universe Filters
+
+    # Budget
+    @property
+    def budget_shortlist_size(self) -> int:
+        return int(self.raw.get("budget", {}).get("shortlist_size", 200))
+
+    @property
+    def budget_orderbook_top_k(self) -> int:
+        return int(self.raw.get("budget", {}).get("orderbook_top_k", 200))
+
+    @property
+    def pre_shortlist_market_cap_floor_usd(self) -> int:
+        return int(self.raw.get("budget", {}).get("pre_shortlist_market_cap_floor_usd", 25_000_000))
+
+    # Universe Filters (legacy soft priors)
     @property
     def market_cap_min(self) -> int:
         return self.raw.get("universe_filters", {}).get("market_cap", {}).get("min_usd", 100_000_000)
-    
+
     @property
     def market_cap_max(self) -> int:
         return self.raw.get("universe_filters", {}).get("market_cap", {}).get("max_usd", 10_000_000_000)
-    
+
     @property
     def min_turnover_24h(self) -> float:
         return float(self.raw.get("universe_filters", {}).get("volume", {}).get("min_turnover_24h", 0.03))
@@ -1039,33 +1102,140 @@ class ScannerConfig:
     @property
     def scoring_volume_source(self) -> str:
         return str(self.raw.get("scoring", {}).get("volume_source", "mexc"))
-    
+
     @property
     def min_history_days_1d(self) -> int:
         return self.raw.get("universe_filters", {}).get("history", {}).get("min_history_days_1d", 60)
-    
+
+    # Tradeability
+    @property
+    def tradeability_enabled(self) -> bool:
+        return self.raw.get("tradeability", {}).get("enabled", True)
+
+    @property
+    def tradeability_notional_total_usdt(self) -> float:
+        return float(self.raw.get("tradeability", {}).get("notional_total_usdt", 20_000))
+
+    @property
+    def tradeability_notional_chunk_usdt(self) -> float:
+        return float(self.raw.get("tradeability", {}).get("notional_chunk_usdt", 5_000))
+
+    @property
+    def tradeability_max_tranches(self) -> int:
+        return int(self.raw.get("tradeability", {}).get("max_tranches", 4))
+
+    @property
+    def tradeability_band_pct(self) -> float:
+        return float(self.raw.get("tradeability", {}).get("band_pct", 1.0))
+
+    @property
+    def tradeability_max_spread_pct(self) -> float:
+        return float(self.raw.get("tradeability", {}).get("max_spread_pct", 0.15))
+
+    @property
+    def tradeability_min_depth_1pct_usd(self) -> float:
+        return float(self.raw.get("tradeability", {}).get("min_depth_1pct_usd", 200_000))
+
+    @property
+    def tradeability_class_thresholds(self) -> Dict[str, Any]:
+        return self.raw.get("tradeability", {}).get(
+            "class_thresholds",
+            {
+                "direct_ok_max_slippage_bps": 50,
+                "tranche_ok_max_slippage_bps": 100,
+                "marginal_max_slippage_bps": 150,
+            },
+        )
+
+    # Risk
+    @property
+    def risk_enabled(self) -> bool:
+        return self.raw.get("risk", {}).get("enabled", True)
+
+    @property
+    def risk_stop_method(self) -> str:
+        return str(self.raw.get("risk", {}).get("stop_method", "atr_multiple"))
+
+    @property
+    def risk_atr_period(self) -> int:
+        return int(self.raw.get("risk", {}).get("atr_period", 14))
+
+    @property
+    def risk_atr_timeframe(self) -> str:
+        return str(self.raw.get("risk", {}).get("atr_timeframe", "1d"))
+
+    @property
+    def risk_atr_multiple(self) -> float:
+        return float(self.raw.get("risk", {}).get("atr_multiple", 2.0))
+
+    @property
+    def risk_min_stop_distance_pct(self) -> float:
+        return float(self.raw.get("risk", {}).get("min_stop_distance_pct", 4.0))
+
+    @property
+    def risk_max_stop_distance_pct(self) -> float:
+        return float(self.raw.get("risk", {}).get("max_stop_distance_pct", 12.0))
+
+    @property
+    def risk_min_rr_to_tp10(self) -> float:
+        return float(self.raw.get("risk", {}).get("min_rr_to_tp10", 1.3))
+
+    # Decision
+    @property
+    def decision_enabled(self) -> bool:
+        return self.raw.get("decision", {}).get("enabled", True)
+
+    @property
+    def decision_min_score_for_enter(self) -> int:
+        return int(self.raw.get("decision", {}).get("min_score_for_enter", 65))
+
+    @property
+    def decision_min_score_for_wait(self) -> int:
+        return int(self.raw.get("decision", {}).get("min_score_for_wait", 40))
+
+    @property
+    def decision_require_tradeability_for_enter(self) -> bool:
+        return self.raw.get("decision", {}).get("require_tradeability_for_enter", True)
+
+    @property
+    def decision_require_risk_acceptable_for_enter(self) -> bool:
+        return self.raw.get("decision", {}).get("require_risk_acceptable_for_enter", True)
+
+    # BTC regime
+    @property
+    def btc_regime_enabled(self) -> bool:
+        return self.raw.get("btc_regime", {}).get("enabled", True)
+
+    @property
+    def btc_regime_mode(self) -> str:
+        return str(self.raw.get("btc_regime", {}).get("mode", "threshold_modifier"))
+
+    @property
+    def btc_regime_risk_off_enter_boost(self) -> float:
+        return float(self.raw.get("btc_regime", {}).get("risk_off_enter_boost", 15))
+
     # Exclusions
     @property
     def exclude_stablecoins(self) -> bool:
         return self.raw.get("exclusions", {}).get("exclude_stablecoins", True)
-    
+
     @property
     def exclude_wrapped(self) -> bool:
         return self.raw.get("exclusions", {}).get("exclude_wrapped_tokens", True)
-    
+
     @property
     def exclude_leveraged(self) -> bool:
         return self.raw.get("exclusions", {}).get("exclude_leveraged_tokens", True)
-    
+
     # Logging
     @property
     def log_level(self) -> str:
         return self.raw.get("logging", {}).get("level", "INFO")
-    
+
     @property
     def log_to_file(self) -> bool:
         return self.raw.get("logging", {}).get("log_to_file", True)
-    
+
     @property
     def log_file(self) -> str:
         return self.raw.get("logging", {}).get("file", "logs/scanner.log")
@@ -1074,46 +1244,63 @@ class ScannerConfig:
 def load_config(path: str | Path | None = None) -> ScannerConfig:
     """
     Load configuration from YAML file.
-    
+
     Args:
         path: Path to config.yml (default: config/config.yml)
-        
+
     Returns:
         ScannerConfig instance
-        
+
     Raises:
         FileNotFoundError: If config file doesn't exist
         yaml.YAMLError: If config is invalid YAML
     """
     cfg_path = Path(path) if path else Path(CONFIG_PATH)
-    
+
     if not cfg_path.exists():
         raise FileNotFoundError(f"Config file not found: {cfg_path}")
-    
+
     with open(cfg_path, "r", encoding="utf-8") as f:
         raw = yaml.safe_load(f)
-    
+
     return ScannerConfig(raw=raw)
+
+
+def _expect_number(errors: List[str], value: Any, field_name: str, *, minimum: float | None = None, maximum: float | None = None) -> float | None:
+    if isinstance(value, bool) or value is None:
+        errors.append(f"{field_name} must be numeric")
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        errors.append(f"{field_name} must be numeric")
+        return None
+
+    if minimum is not None and number < minimum:
+        errors.append(f"{field_name} ({number}) must be >= {minimum}")
+    if maximum is not None and number > maximum:
+        errors.append(f"{field_name} ({number}) must be <= {maximum}")
+    return number
 
 
 def validate_config(config: ScannerConfig) -> List[str]:
     """
     Validate configuration.
-    
+
     Returns:
         List of validation errors (empty if valid)
     """
     errors = []
-    
+
     # Check run_mode
     valid_modes = ["standard", "fast", "offline", "backtest"]
     if config.run_mode not in valid_modes:
         errors.append(f"Invalid run_mode: {config.run_mode}. Must be one of {valid_modes}")
-    
+
     # Check market cap range
     if config.market_cap_min >= config.market_cap_max:
         errors.append(f"market_cap_min ({config.market_cap_min}) must be < market_cap_max ({config.market_cap_max})")
-    
+
     # Check CMC API key (if needed)
     if not config.cmc_api_key and config.run_mode == "standard":
         errors.append("CMC_API_KEY environment variable not set")
@@ -1135,7 +1322,92 @@ def validate_config(config: ScannerConfig) -> List[str]:
         errors.append(
             f"scoring.volume_source ({config.scoring_volume_source}) must be one of {valid_volume_sources}"
         )
-    
+
+    # Budget defaults / limits
+    _expect_number(errors, config.raw.get("budget", {}).get("shortlist_size", 200), "budget.shortlist_size", minimum=1)
+    _expect_number(errors, config.raw.get("budget", {}).get("orderbook_top_k", 200), "budget.orderbook_top_k", minimum=1)
+    _expect_number(
+        errors,
+        config.raw.get("budget", {}).get("pre_shortlist_market_cap_floor_usd", 25_000_000),
+        "budget.pre_shortlist_market_cap_floor_usd",
+        minimum=0,
+    )
+
+    # Tradeability block
+    tradeability_cfg = config.raw.get("tradeability", {})
+    if "enabled" in tradeability_cfg and not isinstance(tradeability_cfg.get("enabled"), bool):
+        errors.append("tradeability.enabled must be boolean")
+    _expect_number(errors, tradeability_cfg.get("notional_total_usdt", 20_000), "tradeability.notional_total_usdt", minimum=0)
+    _expect_number(errors, tradeability_cfg.get("notional_chunk_usdt", 5_000), "tradeability.notional_chunk_usdt", minimum=0)
+    _expect_number(errors, tradeability_cfg.get("max_tranches", 4), "tradeability.max_tranches", minimum=1)
+    _expect_number(errors, tradeability_cfg.get("band_pct", 1.0), "tradeability.band_pct", minimum=0)
+    _expect_number(errors, tradeability_cfg.get("max_spread_pct", 0.15), "tradeability.max_spread_pct", minimum=0)
+    _expect_number(errors, tradeability_cfg.get("min_depth_1pct_usd", 200_000), "tradeability.min_depth_1pct_usd", minimum=0)
+
+    class_thresholds = tradeability_cfg.get("class_thresholds")
+    if class_thresholds is None:
+        class_thresholds = {
+            "direct_ok_max_slippage_bps": 50,
+            "tranche_ok_max_slippage_bps": 100,
+            "marginal_max_slippage_bps": 150,
+        }
+    if not isinstance(class_thresholds, dict):
+        errors.append("tradeability.class_thresholds must be an object")
+    else:
+        required = [
+            "direct_ok_max_slippage_bps",
+            "tranche_ok_max_slippage_bps",
+            "marginal_max_slippage_bps",
+        ]
+        missing = [key for key in required if key not in class_thresholds]
+        if missing:
+            errors.append(f"tradeability.class_thresholds missing keys: {missing}")
+        else:
+            d = _expect_number(errors, class_thresholds.get(required[0]), f"tradeability.class_thresholds.{required[0]}", minimum=0)
+            t = _expect_number(errors, class_thresholds.get(required[1]), f"tradeability.class_thresholds.{required[1]}", minimum=0)
+            m = _expect_number(errors, class_thresholds.get(required[2]), f"tradeability.class_thresholds.{required[2]}", minimum=0)
+            if d is not None and t is not None and m is not None and not (d <= t <= m):
+                errors.append(
+                    "tradeability.class_thresholds must satisfy direct_ok_max_slippage_bps <= tranche_ok_max_slippage_bps <= marginal_max_slippage_bps"
+                )
+
+    # Risk block
+    risk_cfg = config.raw.get("risk", {})
+    if "enabled" in risk_cfg and not isinstance(risk_cfg.get("enabled"), bool):
+        errors.append("risk.enabled must be boolean")
+    if str(risk_cfg.get("stop_method", "atr_multiple")) != "atr_multiple":
+        errors.append("risk.stop_method must be 'atr_multiple' in Phase 1")
+    _expect_number(errors, risk_cfg.get("atr_period", 14), "risk.atr_period", minimum=1)
+    if str(risk_cfg.get("atr_timeframe", "1d")) not in ["1d"]:
+        errors.append("risk.atr_timeframe must be '1d' in Phase 1")
+    _expect_number(errors, risk_cfg.get("atr_multiple", 2.0), "risk.atr_multiple", minimum=0)
+    min_stop = _expect_number(errors, risk_cfg.get("min_stop_distance_pct", 4.0), "risk.min_stop_distance_pct", minimum=0)
+    max_stop = _expect_number(errors, risk_cfg.get("max_stop_distance_pct", 12.0), "risk.max_stop_distance_pct", minimum=0)
+    if min_stop is not None and max_stop is not None and min_stop > max_stop:
+        errors.append("risk.min_stop_distance_pct must be <= risk.max_stop_distance_pct")
+    _expect_number(errors, risk_cfg.get("min_rr_to_tp10", 1.3), "risk.min_rr_to_tp10", minimum=0)
+
+    # Decision block
+    decision_cfg = config.raw.get("decision", {})
+    if "enabled" in decision_cfg and not isinstance(decision_cfg.get("enabled"), bool):
+        errors.append("decision.enabled must be boolean")
+    min_enter = _expect_number(errors, decision_cfg.get("min_score_for_enter", 65), "decision.min_score_for_enter", minimum=0, maximum=100)
+    min_wait = _expect_number(errors, decision_cfg.get("min_score_for_wait", 40), "decision.min_score_for_wait", minimum=0, maximum=100)
+    if min_enter is not None and min_wait is not None and min_wait > min_enter:
+        errors.append("decision.min_score_for_wait must be <= decision.min_score_for_enter")
+    for bool_key in ["require_tradeability_for_enter", "require_risk_acceptable_for_enter"]:
+        if bool_key in decision_cfg and not isinstance(decision_cfg.get(bool_key), bool):
+            errors.append(f"decision.{bool_key} must be boolean")
+
+    # BTC regime block
+    btc_cfg = config.raw.get("btc_regime", {})
+    if "enabled" in btc_cfg and not isinstance(btc_cfg.get("enabled"), bool):
+        errors.append("btc_regime.enabled must be boolean")
+    mode = str(btc_cfg.get("mode", "threshold_modifier"))
+    if mode != "threshold_modifier":
+        errors.append("btc_regime.mode must be 'threshold_modifier'")
+    _expect_number(errors, btc_cfg.get("risk_off_enter_boost", 15), "btc_regime.risk_off_enter_boost")
+
     return errors
 
 ```
@@ -2957,17 +3229,18 @@ def _to_float(value: Any) -> Optional[float]:
 
 ### `scanner/pipeline/filters.py`
 
-**SHA256:** `5623be4b5db9b38245567641667ebe2e6443180e1cb2023f9632d22eaa61894d`
+**SHA256:** `edb0370c285a8bda17c9a86317ea80723e819787b3b2eb1847bb9616ec6c7301`
 
 ```python
-"""
-Universe Filtering
-==================
+"""Universe filtering for pre-shortlist pool construction.
 
-Filters the MEXC universe to create a tradable shortlist:
-1. Market Cap Filter (100M - 3B USD)
-2. Liquidity Filter (minimum volume)
-3. Exclusions (stablecoins, wrapped tokens, leveraged tokens)
+Hard excludes in this stage are intentionally limited to:
+- pre-shortlist market-cap floor guardrail
+- quote asset allowlist
+- safety exclusions (stable/wrapped/leveraged/etc.)
+- hard risk blockers (denylist + major unlock)
+
+Legacy market-cap/volume/share limits are loaded as soft-prior context only.
 """
 
 import logging
@@ -2998,11 +3271,16 @@ class UniverseFilters:
         volume_cfg = universe_cfg.get('volume', {})
         history_cfg = universe_cfg.get('history', {})
 
-        # Market Cap bounds (in USD)
+        budget_cfg = config.get('budget', {})
+
+        # Market Cap context bounds (in USD, no hard exclude semantics).
         self.mcap_min = mcap_cfg.get('min_usd', legacy_filters.get('mcap_min', 100_000_000))  # 100M
         self.mcap_max = mcap_cfg.get('max_usd', legacy_filters.get('mcap_max', 3_000_000_000))  # 3B
 
-        # Liquidity gates (global turnover + MEXC volume/share with fallback)
+        # Hard pre-shortlist floor guardrail.
+        self.pre_shortlist_market_cap_floor_usd = float(budget_cfg.get('pre_shortlist_market_cap_floor_usd', 25_000_000))
+
+        # Liquidity context (legacy hard gates are now soft priors only)
         self.min_turnover_24h = float(volume_cfg.get('min_turnover_24h', 0.03))
         if 'min_mexc_quote_volume_24h_usdt' in volume_cfg:
             self.min_mexc_quote_volume_24h_usdt = float(volume_cfg.get('min_mexc_quote_volume_24h_usdt', 5_000_000))
@@ -3066,10 +3344,11 @@ class UniverseFilters:
         ) = self._load_unlock_overrides(self.unlock_overrides_path)
         
         logger.info(
-            f"Filters initialized: MCAP {self.mcap_min/1e6:.0f}M-{self.mcap_max/1e9:.1f}B, "
-            f"Turnover>={self.min_turnover_24h:.4f}, "
-            f"MEXC Vol>={self.min_mexc_quote_volume_24h_usdt/1e6:.1f}M, "
-            f"MEXC Share>={self.min_mexc_share_24h:.4f}"
+            f"Filters initialized: pre-shortlist MCAP floor>={self.pre_shortlist_market_cap_floor_usd/1e6:.1f}M, "
+            f"legacy MCAP context {self.mcap_min/1e6:.0f}M-{self.mcap_max/1e9:.1f}B, "
+            f"legacy liquidity priors turnover>={self.min_turnover_24h:.4f}, "
+            f"mexc_volume>={self.min_mexc_quote_volume_24h_usdt/1e6:.1f}M, "
+            f"mexc_share>={self.min_mexc_share_24h:.4f}"
         )
 
     @staticmethod
@@ -3181,9 +3460,9 @@ class UniverseFilters:
         original_count = len(symbols_with_data)
         logger.info(f"Starting filters with {original_count} symbols")
         
-        # Step 1: Market Cap filter
-        filtered = self._filter_mcap(symbols_with_data)
-        logger.info(f"After MCAP filter: {len(filtered)} symbols "
+        # Step 1: Hard pre-shortlist market-cap floor
+        filtered = self._filter_pre_shortlist_market_cap_floor(symbols_with_data)
+        logger.info(f"After pre-shortlist MCAP floor: {len(filtered)} symbols "
                    f"({len(filtered)/original_count*100:.1f}%)")
 
         # Step 2: Quote asset filter (USDT-only or stablecoin allowlist)
@@ -3191,9 +3470,9 @@ class UniverseFilters:
         logger.info(f"After Quote filter: {len(filtered)} symbols "
                    f"({len(filtered)/original_count*100:.1f}%)")
 
-        # Step 3: Liquidity filter
-        filtered = self._filter_liquidity(filtered)
-        logger.info(f"After Liquidity filter: {len(filtered)} symbols "
+        # Step 3: Liquidity stage is soft-prior only; no hard excludes.
+        filtered = self._apply_soft_liquidity_priors(filtered)
+        logger.info(f"After soft liquidity priors: {len(filtered)} symbols "
                    f"({len(filtered)/original_count*100:.1f}%)")
 
         # Step 4: Exclusions
@@ -3211,8 +3490,8 @@ class UniverseFilters:
         
         return filtered
     
-    def _filter_mcap(self, symbols: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Filter by market cap range."""
+    def _filter_pre_shortlist_market_cap_floor(self, symbols: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Apply hard pre-shortlist market-cap floor guardrail."""
         filtered = []
         
         for sym_data in symbols:
@@ -3222,8 +3501,8 @@ class UniverseFilters:
             if mcap is None:
                 continue
             
-            # Check bounds
-            if self.mcap_min <= mcap <= self.mcap_max:
+            # Hard guardrail: below floor is excluded before shortlist.
+            if mcap >= self.pre_shortlist_market_cap_floor_usd:
                 filtered.append(sym_data)
         
         return filtered
@@ -3256,51 +3535,9 @@ class UniverseFilters:
 
         return filtered
 
-    @staticmethod
-    def _is_valid_non_negative_number(value: Any) -> bool:
-        try:
-            num = float(value)
-        except (TypeError, ValueError):
-            return False
-        return num == num and num >= 0  # NaN check: NaN != NaN
-
-    def _filter_liquidity(self, symbols: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Apply turnover + MEXC volume/share gates with explicit turnover-missing fallback."""
-        filtered: List[Dict[str, Any]] = []
-
-        for sym_data in symbols:
-            mexc_volume = sym_data.get('quote_volume_24h')
-            if not self._is_valid_non_negative_number(mexc_volume):
-                continue
-            mexc_volume_f = float(mexc_volume)
-
-            turnover = sym_data.get('turnover_24h')
-            turnover_available = self._is_valid_non_negative_number(turnover)
-
-            # Fallback path: turnover unavailable -> require only MEXC minimum volume.
-            if not turnover_available:
-                if mexc_volume_f >= self.min_mexc_quote_volume_24h_usdt:
-                    filtered.append(sym_data)
-                continue
-
-            # Primary path: turnover available -> require turnover + MEXC volume + MEXC share.
-            turnover_f = float(turnover)
-            if turnover_f < self.min_turnover_24h:
-                continue
-
-            if mexc_volume_f < self.min_mexc_quote_volume_24h_usdt:
-                continue
-
-            mexc_share = sym_data.get('mexc_share_24h')
-            if not self._is_valid_non_negative_number(mexc_share):
-                continue
-
-            if float(mexc_share) < self.min_mexc_share_24h:
-                continue
-
-            filtered.append(sym_data)
-
-        return filtered
+    def _apply_soft_liquidity_priors(self, symbols: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Keep rows unchanged; liquidity metrics remain context/prior fields only."""
+        return symbols
     
     def _filter_exclusions(self, symbols: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Exclude stablecoins, wrapped tokens, leveraged tokens."""
@@ -3361,9 +3598,9 @@ class UniverseFilters:
         total = len(symbols)
         
         # Count what passes each filter
-        mcap_pass = len(self._filter_mcap(symbols))
+        mcap_pass = len(self._filter_pre_shortlist_market_cap_floor(symbols))
         quote_pass = len(self._filter_quote_assets(symbols))
-        liquidity_pass = len(self._filter_liquidity(symbols))
+        liquidity_pass = len(self._apply_soft_liquidity_priors(symbols))
         exclusion_pass = len(self._filter_exclusions(symbols))
         
         # Full pipeline
@@ -9552,7 +9789,7 @@ last_updated_utc: "2026-02-25T14:41:04Z"
 
 ### `docs/canonical/CONFIGURATION.md`
 
-**SHA256:** `bc52c3177be5580f738c1b837bb0a855ff11053a4a7a41c04ecb9442bb28cf17`
+**SHA256:** `32450a04d504b6d27a17b927df293caa0df86c09df9edb7f1dfbc72fd03ce136`
 
 ```markdown
 # Configuration — Keys, Defaults, Limits (Canonical)
@@ -9650,6 +9887,47 @@ rolling_percent_rank_time_series:
 scoring:
   volume_source_default: mexc
   volume_source_values: [mexc, global_fallback_mexc]
+
+budget:
+  shortlist_size_default: 200
+  orderbook_top_k_default: 200
+  pre_shortlist_market_cap_floor_usd_default: 25_000_000
+
+tradeability:
+  enabled_default: true
+  notional_total_usdt_default: 20_000
+  notional_chunk_usdt_default: 5_000
+  max_tranches_default: 4
+  band_pct_default: 1.0
+  max_spread_pct_default: 0.15
+  min_depth_1pct_usd_default: 200_000
+  class_thresholds_bps_default:
+    direct_ok_max_slippage_bps: 50
+    tranche_ok_max_slippage_bps: 100
+    marginal_max_slippage_bps: 150
+
+risk:
+  enabled_default: true
+  stop_method_default: atr_multiple
+  atr_period_default: 14
+  atr_timeframe_default: 1d
+  atr_multiple_default: 2.0
+  min_stop_distance_pct_default: 4.0
+  max_stop_distance_pct_default: 12.0
+  min_rr_to_tp10_default: 1.3
+
+decision:
+  enabled_default: true
+  min_score_for_enter_default: 65
+  min_score_for_wait_default: 40
+  require_tradeability_for_enter_default: true
+  require_risk_acceptable_for_enter_default: true
+
+btc_regime:
+  enabled_default: true
+  mode_default: threshold_modifier
+  mode_values: [threshold_modifier]
+  risk_off_enter_boost_default: 15
 ```
 
 ## 2) Units & conventions
@@ -9703,12 +9981,43 @@ Canonical rule:
 | features.bb.rank_lookback_4h_default | features.bollinger.rank_lookback_bars.4h |
 | features.atr_pct_rank_lookback_1d_default | features.atr_rank_lookback_bars.1d |
 | scoring.volume_source_default | scoring.volume_source |
+| budget.shortlist_size_default | budget.shortlist_size |
+| budget.orderbook_top_k_default | budget.orderbook_top_k |
+| budget.pre_shortlist_market_cap_floor_usd_default | budget.pre_shortlist_market_cap_floor_usd |
+| tradeability.enabled_default | tradeability.enabled |
+| tradeability.notional_total_usdt_default | tradeability.notional_total_usdt |
+| tradeability.notional_chunk_usdt_default | tradeability.notional_chunk_usdt |
+| tradeability.max_tranches_default | tradeability.max_tranches |
+| tradeability.band_pct_default | tradeability.band_pct |
+| tradeability.max_spread_pct_default | tradeability.max_spread_pct |
+| tradeability.min_depth_1pct_usd_default | tradeability.min_depth_1pct_usd |
+| tradeability.class_thresholds_bps_default.direct_ok_max_slippage_bps | tradeability.class_thresholds.direct_ok_max_slippage_bps |
+| tradeability.class_thresholds_bps_default.tranche_ok_max_slippage_bps | tradeability.class_thresholds.tranche_ok_max_slippage_bps |
+| tradeability.class_thresholds_bps_default.marginal_max_slippage_bps | tradeability.class_thresholds.marginal_max_slippage_bps |
+| risk.enabled_default | risk.enabled |
+| risk.stop_method_default | risk.stop_method |
+| risk.atr_period_default | risk.atr_period |
+| risk.atr_timeframe_default | risk.atr_timeframe |
+| risk.atr_multiple_default | risk.atr_multiple |
+| risk.min_stop_distance_pct_default | risk.min_stop_distance_pct |
+| risk.max_stop_distance_pct_default | risk.max_stop_distance_pct |
+| risk.min_rr_to_tp10_default | risk.min_rr_to_tp10 |
+| decision.enabled_default | decision.enabled |
+| decision.min_score_for_enter_default | decision.min_score_for_enter |
+| decision.min_score_for_wait_default | decision.min_score_for_wait |
+| decision.require_tradeability_for_enter_default | decision.require_tradeability_for_enter |
+| decision.require_risk_acceptable_for_enter_default | decision.require_risk_acceptable_for_enter |
+| btc_regime.enabled_default | btc_regime.enabled |
+| btc_regime.mode_default | btc_regime.mode |
+| btc_regime.risk_off_enter_boost_default | btc_regime.risk_off_enter_boost |
 
 Notes:
 - `general.shortlist_size` is a *prefetch/workload budget* and is not the same as output top-n.
 - Legacy alias for backward compatibility:
   - `universe_filters.volume.min_quote_volume_24h` aliases to `universe_filters.volume.min_mexc_quote_volume_24h_usdt`.
   - If both keys are present, `min_mexc_quote_volume_24h_usdt` wins.
+- Legacy soft-prior keys for backward compatibility:
+  - `universe_filters.market_cap.*` and `universe_filters.volume.*` remain readable and should be marked `legacy_soft_prior: true` in runtime config.
 
 ### Volume-gate semantics (deterministic)
 - `min_turnover_24h` unit: ratio in `[0, +inf)`; default `0.03`.
@@ -9811,7 +10120,7 @@ No implicit bool/number coercion is allowed for nullable fields.
 
 ### `docs/canonical/VERIFICATION_FOR_AI.md`
 
-**SHA256:** `1e86923cb4294671062d4a2fab7480c89d76ebf635569443656d1ea711faa6bb`
+**SHA256:** `2513923e980fb181cbf481b55187588dd75bdf1a5a26776957f7ee02453f7c7f`
 
 ```markdown
 # Verification for AI — Golden Fixtures, Invariants, Checklist (Canonical)
@@ -9864,12 +10173,13 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - `mexc_share_24h` is `null` when `global_volume_24h_usd` is missing or zero.
 
 
-## Universe volume-gate verification boundaries
-- Config defaults when keys are missing: `min_turnover_24h=0.03`, `min_mexc_quote_volume_24h_usdt=5_000_000`, `min_mexc_share_24h=0.01`.
-- Legacy alias behavior: `universe_filters.volume.min_quote_volume_24h` aliases to `min_mexc_quote_volume_24h_usdt` only when the new key is absent; if both exist, new key wins.
-- Primary path (turnover available): all three gates are required (turnover + mexc min volume + mexc share).
-- Fallback path (turnover unavailable): require only mexc min volume; `mexc_share_24h` is not evaluated.
-- Invalid per-symbol values (`NaN`, negative, non-castable) are rejected deterministically at liquidity gate stage.
+## Universe filter / soft-prior verification boundaries
+- Hard pre-shortlist guardrail: `budget.pre_shortlist_market_cap_floor_usd` excludes symbols with `market_cap < floor`; default floor is `25_000_000` when key is missing.
+- `budget.pre_shortlist_market_cap_floor_usd` invalid values (e.g. negative) must raise a clear validation error; no silent coercion.
+- Safety/risk hard excludes remain deterministic and hard (`stable/wrapped/leveraged`, denylist, major unlock blockers).
+- Legacy config defaults are still loaded for context fields: `min_turnover_24h=0.03`, `min_mexc_quote_volume_24h_usdt=5_000_000`, `min_mexc_share_24h=0.01`.
+- Legacy alias behavior remains: `universe_filters.volume.min_quote_volume_24h` aliases to `min_mexc_quote_volume_24h_usdt` only when the new key is absent; if both exist, new key wins.
+- Above the pre-shortlist floor, legacy market-cap/turnover/mexc-volume/mexc-share thresholds are soft-prior context only and do not hard-exclude symbols.
 
 ```
 
@@ -10410,4 +10720,4 @@ discovery_source_allowed:
 
 ---
 
-_Generated by GitHub Actions • 2026-03-07 15:39 UTC_
+_Generated by GitHub Actions • 2026-03-07 17:50 UTC_
