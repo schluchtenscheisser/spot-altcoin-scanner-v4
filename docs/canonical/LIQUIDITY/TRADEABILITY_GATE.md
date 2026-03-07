@@ -24,6 +24,20 @@ unknown_reason_family:
 - `FAIL`: Fully evaluated and hard-failed tradeability checks.
 - `UNKNOWN`: Not evaluable / not evaluated; no deterministic execution quality assessment available.
 
+## Classification criteria (Phase 1 V4.2.1)
+- Inputs (runtime-configurable with canonical defaults):
+  - `notional_total_usdt` (default `20_000`)
+  - `notional_chunk_usdt` (default `5_000`)
+  - `max_tranches` (default `4`)
+  - `max_spread_pct` (default `0.15`)
+  - `min_depth_1pct_usd` (default `200_000`)
+  - class thresholds: `direct_ok_max_slippage_bps=50`, `tranche_ok_max_slippage_bps=100`, `marginal_max_slippage_bps=150`
+- `DIRECT_OK` iff all hold: spread gate pass, depth gate pass, and `slippage_bps_20k <= direct_ok_max_slippage_bps`.
+- `TRANCHE_OK` iff not `DIRECT_OK` and all hold: spread/depth gates pass, `slippage_bps_5k <= tranche_ok_max_slippage_bps`, and `notional_chunk_usdt * max_tranches >= notional_total_usdt`.
+- `MARGINAL` iff fully evaluated and neither `DIRECT_OK` nor `TRANCHE_OK`, but still within marginal execution quality envelope.
+- `FAIL` iff fully evaluated and hard-fails tradeability quality envelope.
+- `UNKNOWN` iff required orderbook evidence is absent/not usable (`missing`, `stale`, or `not_in_budget`).
+
 ## Required invariants
 - `MARGINAL` is **not ENTER-fähig**.
 - `UNKNOWN` is **not WAIT-fähig**.
