@@ -1,7 +1,8 @@
 # Ticket Template (for AI-generated tickets)
 
 > Place new tickets in `docs/tickets/`.
->
+> Vor Ausarbeitung dieses Tickets ist die Ticket-Prüfschleife anzuwenden.
+> 
 > Naming convention (recommended): `YYYY-MM-DD__<priority>__<short_slug>.md`
 > - priority: P0 | P1 | P2 | P3
 
@@ -33,6 +34,7 @@
 - [ ] Mindestens 1 Test: **Missing key → Default greift** (oder bewusstes Fail, wenn so spezifiziert)
 - [ ] Mindestens 1 Test: **Invalid value → klarer Fehler/Reason**
 - [ ] Mindestens 1 Test: **Edgecase**, der im Ticket neu geregelt wird (z. B. “not fetched vs fetched fail”, “strict preflight atomic”)
+- [ ] Preflight gegen Canonical/Repo/Ticket-Drift durchgeführt
 
 ---
 
