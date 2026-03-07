@@ -93,6 +93,47 @@ rolling_percent_rank_time_series:
 scoring:
   volume_source_default: mexc
   volume_source_values: [mexc, global_fallback_mexc]
+
+budget:
+  shortlist_size_default: 200
+  orderbook_top_k_default: 200
+  pre_shortlist_market_cap_floor_usd_default: 25_000_000
+
+tradeability:
+  enabled_default: true
+  notional_total_usdt_default: 20_000
+  notional_chunk_usdt_default: 5_000
+  max_tranches_default: 4
+  band_pct_default: 1.0
+  max_spread_pct_default: 0.15
+  min_depth_1pct_usd_default: 200_000
+  class_thresholds_bps_default:
+    direct_ok_max_slippage_bps: 50
+    tranche_ok_max_slippage_bps: 100
+    marginal_max_slippage_bps: 150
+
+risk:
+  enabled_default: true
+  stop_method_default: atr_multiple
+  atr_period_default: 14
+  atr_timeframe_default: 1d
+  atr_multiple_default: 2.0
+  min_stop_distance_pct_default: 4.0
+  max_stop_distance_pct_default: 12.0
+  min_rr_to_tp10_default: 1.3
+
+decision:
+  enabled_default: true
+  min_score_for_enter_default: 65
+  min_score_for_wait_default: 40
+  require_tradeability_for_enter_default: true
+  require_risk_acceptable_for_enter_default: true
+
+btc_regime:
+  enabled_default: true
+  mode_default: threshold_modifier
+  mode_values: [threshold_modifier]
+  risk_off_enter_boost_default: 15
 ```
 
 ## 2) Units & conventions
@@ -146,12 +187,43 @@ Canonical rule:
 | features.bb.rank_lookback_4h_default | features.bollinger.rank_lookback_bars.4h |
 | features.atr_pct_rank_lookback_1d_default | features.atr_rank_lookback_bars.1d |
 | scoring.volume_source_default | scoring.volume_source |
+| budget.shortlist_size_default | budget.shortlist_size |
+| budget.orderbook_top_k_default | budget.orderbook_top_k |
+| budget.pre_shortlist_market_cap_floor_usd_default | budget.pre_shortlist_market_cap_floor_usd |
+| tradeability.enabled_default | tradeability.enabled |
+| tradeability.notional_total_usdt_default | tradeability.notional_total_usdt |
+| tradeability.notional_chunk_usdt_default | tradeability.notional_chunk_usdt |
+| tradeability.max_tranches_default | tradeability.max_tranches |
+| tradeability.band_pct_default | tradeability.band_pct |
+| tradeability.max_spread_pct_default | tradeability.max_spread_pct |
+| tradeability.min_depth_1pct_usd_default | tradeability.min_depth_1pct_usd |
+| tradeability.class_thresholds_bps_default.direct_ok_max_slippage_bps | tradeability.class_thresholds.direct_ok_max_slippage_bps |
+| tradeability.class_thresholds_bps_default.tranche_ok_max_slippage_bps | tradeability.class_thresholds.tranche_ok_max_slippage_bps |
+| tradeability.class_thresholds_bps_default.marginal_max_slippage_bps | tradeability.class_thresholds.marginal_max_slippage_bps |
+| risk.enabled_default | risk.enabled |
+| risk.stop_method_default | risk.stop_method |
+| risk.atr_period_default | risk.atr_period |
+| risk.atr_timeframe_default | risk.atr_timeframe |
+| risk.atr_multiple_default | risk.atr_multiple |
+| risk.min_stop_distance_pct_default | risk.min_stop_distance_pct |
+| risk.max_stop_distance_pct_default | risk.max_stop_distance_pct |
+| risk.min_rr_to_tp10_default | risk.min_rr_to_tp10 |
+| decision.enabled_default | decision.enabled |
+| decision.min_score_for_enter_default | decision.min_score_for_enter |
+| decision.min_score_for_wait_default | decision.min_score_for_wait |
+| decision.require_tradeability_for_enter_default | decision.require_tradeability_for_enter |
+| decision.require_risk_acceptable_for_enter_default | decision.require_risk_acceptable_for_enter |
+| btc_regime.enabled_default | btc_regime.enabled |
+| btc_regime.mode_default | btc_regime.mode |
+| btc_regime.risk_off_enter_boost_default | btc_regime.risk_off_enter_boost |
 
 Notes:
 - `general.shortlist_size` is a *prefetch/workload budget* and is not the same as output top-n.
 - Legacy alias for backward compatibility:
   - `universe_filters.volume.min_quote_volume_24h` aliases to `universe_filters.volume.min_mexc_quote_volume_24h_usdt`.
   - If both keys are present, `min_mexc_quote_volume_24h_usdt` wins.
+- Legacy soft-prior keys for backward compatibility:
+  - `universe_filters.market_cap.*` and `universe_filters.volume.*` remain readable and should be marked `legacy_soft_prior: true` in runtime config.
 
 ### Volume-gate semantics (deterministic)
 - `min_turnover_24h` unit: ratio in `[0, +inf)`; default `0.03`.
