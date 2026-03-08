@@ -134,6 +134,11 @@ btc_regime:
   mode_default: threshold_modifier
   mode_values: [threshold_modifier]
   risk_off_enter_boost_default: 15
+
+shadow:
+  mode_default: parallel
+  mode_values: [legacy_only, new_only, parallel]
+
 ```
 
 ## 2) Units & conventions
@@ -216,6 +221,7 @@ Canonical rule:
 | btc_regime.enabled_default | btc_regime.enabled |
 | btc_regime.mode_default | btc_regime.mode |
 | btc_regime.risk_off_enter_boost_default | btc_regime.risk_off_enter_boost |
+| shadow.mode_default | shadow.mode |
 
 Notes:
 - `general.shortlist_size` is a *prefetch/workload budget* and is not the same as output top-n.

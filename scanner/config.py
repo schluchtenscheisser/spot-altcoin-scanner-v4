@@ -249,6 +249,14 @@ class ScannerConfig:
     def btc_regime_risk_off_enter_boost(self) -> float:
         return float(self.raw.get("btc_regime", {}).get("risk_off_enter_boost", 15))
 
+    # Shadow mode
+    @property
+    def shadow_mode(self) -> str:
+        shadow_cfg = self.raw.get("shadow")
+        if isinstance(shadow_cfg, dict):
+            return str(shadow_cfg.get("mode", "parallel"))
+        return "parallel"
+
     # Exclusions
     @property
     def exclude_stablecoins(self) -> bool:
@@ -491,5 +499,26 @@ def validate_config(config: ScannerConfig) -> List[str]:
     if mode != "threshold_modifier":
         errors.append("btc_regime.mode must be 'threshold_modifier'")
     _expect_number(errors, btc_cfg.get("risk_off_enter_boost", 15), "btc_regime.risk_off_enter_boost")
+
+    # Shadow mode / parallel run block
+    shadow_cfg = config.raw.get("shadow")
+    if shadow_cfg is None:
+        shadow_cfg = {}
+    elif not isinstance(shadow_cfg, dict):
+        errors.append("shadow must be an object")
+        shadow_cfg = {}
+
+    shadow_mode = str(shadow_cfg.get("mode", "parallel"))
+    allowed_shadow_modes = ["legacy_only", "new_only", "parallel"]
+    if shadow_mode not in allowed_shadow_modes:
+        errors.append(f"shadow.mode ({shadow_mode}) must be one of {allowed_shadow_modes}")
+    else:
+        if shadow_mode in {"new_only", "parallel"}:
+            if not config.tradeability_enabled:
+                errors.append(f"shadow.mode={shadow_mode} requires tradeability.enabled=true")
+            if not config.risk_enabled:
+                errors.append(f"shadow.mode={shadow_mode} requires risk.enabled=true")
+            if not config.decision_enabled:
+                errors.append(f"shadow.mode={shadow_mode} requires decision.enabled=true")
 
     return errors

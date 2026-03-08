@@ -16,6 +16,7 @@ from scanner.schema import REPORT_META_VERSION, REPORT_SCHEMA_VERSION
 from .manifest import (
     build_config_hash,
     derive_feature_flags,
+    derive_pipeline_paths,
     read_canonical_schema_version,
     write_manifest_atomic,
 )
@@ -91,6 +92,7 @@ class ReportGenerator:
             "config_hash": build_config_hash(self.root_config),
             "canonical_schema_version": read_canonical_schema_version(Path("docs/canonical/CHANGELOG.md")),
             "feature_flags": derive_feature_flags(self.root_config),
+            "pipeline_paths": derive_pipeline_paths(self.root_config),
             "counts_per_stage": stage_counts,
             "shortlist_size_used": metadata.get("shortlist_size_used", self.root_config.get("budget", {}).get("shortlist_size", 200)),
             "orderbook_top_k_used": metadata.get("orderbook_top_k_used", self.root_config.get("budget", {}).get("orderbook_top_k", 200)),

@@ -51,6 +51,9 @@ btc_regime:
   mode: "threshold_modifier"
   risk_off_enter_boost: 15
 
+shadow:
+  mode: "parallel"   # legacy_only | new_only | parallel
+
 data_sources:
   mexc:
     enabled: true

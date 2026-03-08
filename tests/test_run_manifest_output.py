@@ -51,6 +51,7 @@ def test_generate_json_report_includes_required_run_manifest_fields() -> None:
         "config_hash",
         "canonical_schema_version",
         "feature_flags",
+        "pipeline_paths",
         "counts_per_stage",
         "shortlist_size_used",
         "orderbook_top_k_used",
@@ -64,7 +65,8 @@ def test_generate_json_report_includes_required_run_manifest_fields() -> None:
     assert manifest["counts_per_stage"]["tradeability_stopped"] == 8
     assert manifest["feature_flags"]["decision_enabled"] is True
     assert manifest["feature_flags"]["btc_regime_enabled"] is False
-    assert manifest["canonical_schema_version"] == "5.3.0"
+    assert manifest["canonical_schema_version"] == "5.4.0"
+    assert manifest["pipeline_paths"] == {"shadow_mode": "parallel", "legacy_path_enabled": True, "new_path_enabled": True}
     assert report["trade_candidates"] == []
 
 

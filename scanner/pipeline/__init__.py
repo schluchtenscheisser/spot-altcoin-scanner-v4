@@ -160,6 +160,9 @@ def run_pipeline(config: ScannerConfig) -> None:
     12. Write snapshot for backtests
     """
     run_mode = config.run_mode
+    shadow_mode = config.shadow_mode
+    legacy_path_enabled = shadow_mode in {"legacy_only", "parallel"}
+    new_path_enabled = shadow_mode in {"new_only", "parallel"}
     pipeline_start_time = time.perf_counter()
 
     # As-Of Timestamp (einmal pro Run)
@@ -412,7 +415,10 @@ def run_pipeline(config: ScannerConfig) -> None:
     breakout_results = _enrich_scored_entries_with_market_activity(breakout_results, features)
     pullback_results = _enrich_scored_entries_with_market_activity(pullback_results, features)
     global_top20 = _enrich_scored_entries_with_market_activity(global_top20, features)
-    global_top20 = apply_decision_layer(global_top20, config.raw, btc_regime=btc_regime)
+    if new_path_enabled:
+        global_top20 = apply_decision_layer(global_top20, config.raw, btc_regime=btc_regime)
+    else:
+        logger.info("  Shadow mode legacy_only: skipping decision layer")
 
     logger.info(f"  ✓ Global Top20: {len(global_top20)} entries")
 
@@ -433,6 +439,8 @@ def run_pipeline(config: ScannerConfig) -> None:
         'breakout_scored': len(breakout_results),
         'pullback_scored': len(pullback_results),
         'global_top20': len(global_top20),
+        'legacy_path_enabled': 1 if legacy_path_enabled else 0,
+        'new_path_enabled': 1 if new_path_enabled else 0,
     }
     warnings = []
     if tradeability_stopped:
@@ -440,11 +448,16 @@ def run_pipeline(config: ScannerConfig) -> None:
     if len(orderbooks) < len(selected_symbols):
         warnings.append('orderbook_partial_fetch')
 
+    legacy_reversal_results = reversal_results if legacy_path_enabled else []
+    legacy_breakout_results = breakout_results if legacy_path_enabled else []
+    legacy_pullback_results = pullback_results if legacy_path_enabled else []
+    trade_candidate_source = global_top20 if new_path_enabled else []
+
     report_paths = report_gen.save_reports(
-        reversal_results,
-        breakout_results,
-        pullback_results,
-        global_top20,
+        legacy_reversal_results,
+        legacy_breakout_results,
+        legacy_pullback_results,
+        trade_candidate_source,
         run_date,
         metadata={
             'mode': run_mode,
@@ -457,6 +470,11 @@ def run_pipeline(config: ScannerConfig) -> None:
             'duration_seconds': time.perf_counter() - pipeline_start_time,
             'shortlist_size_used': config.budget_shortlist_size,
             'orderbook_top_k_used': config.budget_orderbook_top_k,
+            'pipeline_paths': {
+                'shadow_mode': shadow_mode,
+                'legacy_path_enabled': legacy_path_enabled,
+                'new_path_enabled': new_path_enabled,
+            },
             'data_freshness': {
                 'exchange_info_ts_utc': exchange_info_ts_utc,
                 'tickers_24h_ts_utc': tickers_24h_ts_utc,
