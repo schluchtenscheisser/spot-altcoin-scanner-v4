@@ -1,7 +1,7 @@
 # Spot Altcoin Scanner • GPT Snapshot
 
-**Generated:** 2026-03-08 15:20 UTC  
-**Commit:** `adeefdf` (adeefdfcccb521fa25746faf52bb09e5ac7f72a0)  
+**Generated:** 2026-03-08 15:33 UTC  
+**Commit:** `947fa1f` (947fa1fb544770e506fc70a6653913fc7f38d80f)  
 **Status:** MVP Complete (Phase 6)  
 
 ---
@@ -958,12 +958,12 @@ if __name__ == "__main__":
 
 ### `scanner/schema.py`
 
-**SHA256:** `f2742e78dd9f22d9eca0a1ab90bfd3557d88c60d20ce6f28b6ac5229b6c84405`
+**SHA256:** `c530f7701086c420d2e800bc15d144999c413ddf76975ed070eb9f6d5f5b66a6`
 
 ```python
 """Schema/version constants for scanner outputs."""
 
-REPORT_SCHEMA_VERSION = "v1.10"
+REPORT_SCHEMA_VERSION = "v1.11"
 REPORT_META_VERSION = "1.9"
 
 ```
@@ -4666,7 +4666,7 @@ class ExcelReportGenerator:
 
 ### `scanner/pipeline/__init__.py`
 
-**SHA256:** `54f3ae4d98ec2b4526d6a80d9767832d4314ac1ec8de8b72770cbc2c1e939451`
+**SHA256:** `e05353623a864b0481184f2d069349dcc9087ce2f008ba98cf2349fe1938700b`
 
 ```python
 """
@@ -4698,6 +4698,7 @@ from .snapshot import SnapshotManager
 from .runtime_market_meta import RuntimeMarketMetaExporter
 from .discovery import compute_discovery_fields
 from .regime import compute_btc_regime
+from .decision import apply_decision_layer
 
 logger = logging.getLogger(__name__)
 
@@ -4766,6 +4767,20 @@ def _enrich_scored_entries_with_market_activity(entries, features):
         entry['global_volume_24h_usd'] = feature_row.get('global_volume_24h_usd')
         entry['turnover_24h'] = feature_row.get('turnover_24h')
         entry['mexc_share_24h'] = feature_row.get('mexc_share_24h')
+        if entry.get('spread_pct') is None:
+            entry['spread_pct'] = feature_row.get('spread_pct')
+        if entry.get('depth_bid_1pct_usd') is None:
+            entry['depth_bid_1pct_usd'] = feature_row.get('depth_bid_1pct_usd')
+        if entry.get('depth_ask_1pct_usd') is None:
+            entry['depth_ask_1pct_usd'] = feature_row.get('depth_ask_1pct_usd')
+        if entry.get('slippage_bps_5k') is None:
+            entry['slippage_bps_5k'] = feature_row.get('slippage_bps_5k')
+        if entry.get('slippage_bps_20k') is None:
+            entry['slippage_bps_20k'] = feature_row.get('slippage_bps_20k')
+        if entry.get('tradeability_class') is None:
+            entry['tradeability_class'] = feature_row.get('tradeability_class')
+        if entry.get('execution_mode') is None:
+            entry['execution_mode'] = feature_row.get('execution_mode')
     return entries
 
 
@@ -4985,6 +5000,10 @@ def run_pipeline(config: ScannerConfig) -> None:
             features[symbol]['depth_bid_1pct_usd'] = shortlist_entry.get('depth_bid_1pct_usd')
             features[symbol]['depth_ask_1pct_usd'] = shortlist_entry.get('depth_ask_1pct_usd')
             features[symbol]['orderbook_ok'] = shortlist_entry.get('orderbook_ok')
+            features[symbol]['slippage_bps_5k'] = shortlist_entry.get('slippage_bps_5k')
+            features[symbol]['slippage_bps_20k'] = shortlist_entry.get('slippage_bps_20k')
+            features[symbol]['tradeability_class'] = shortlist_entry.get('tradeability_class')
+            features[symbol]['execution_mode'] = shortlist_entry.get('execution_mode')
             features[symbol]['risk_flags'] = shortlist_entry.get('risk_flags', [])
             features[symbol]['soft_penalties'] = shortlist_entry.get('soft_penalties', {})
         else:
@@ -5004,6 +5023,10 @@ def run_pipeline(config: ScannerConfig) -> None:
             features[symbol]['depth_bid_1pct_usd'] = None
             features[symbol]['depth_ask_1pct_usd'] = None
             features[symbol]['orderbook_ok'] = None
+            features[symbol]['slippage_bps_5k'] = None
+            features[symbol]['slippage_bps_20k'] = None
+            features[symbol]['tradeability_class'] = None
+            features[symbol]['execution_mode'] = None
             features[symbol]['risk_flags'] = []
             features[symbol]['soft_penalties'] = {}
 
@@ -5058,6 +5081,7 @@ def run_pipeline(config: ScannerConfig) -> None:
     breakout_results = _enrich_scored_entries_with_market_activity(breakout_results, features)
     pullback_results = _enrich_scored_entries_with_market_activity(pullback_results, features)
     global_top20 = _enrich_scored_entries_with_market_activity(global_top20, features)
+    global_top20 = apply_decision_layer(global_top20, config.raw, btc_regime=btc_regime)
 
     logger.info(f"  ✓ Global Top20: {len(global_top20)} entries")
 
@@ -6291,7 +6315,7 @@ def _stable_reason_order(reasons: Iterable[str]) -> List[str]:
 
 ### `scanner/pipeline/output.py`
 
-**SHA256:** `a7cf6fe2885eac7b9131f0426f98a4a90e2cfd05f373bd7284f862bc0ecf1ddc`
+**SHA256:** `8dc7436612548f6c9b1762fb756249a96a2d9b7476de46620daf1c04020f4f29`
 
 ```python
 """
@@ -6311,6 +6335,8 @@ import json
 from scanner.schema import REPORT_META_VERSION, REPORT_SCHEMA_VERSION
 
 logger = logging.getLogger(__name__)
+
+_DECISION_PRIORITY = {"ENTER": 0, "WAIT": 1, "NO_TRADE": 2}
 
 
 class ReportGenerator:
@@ -6623,6 +6649,92 @@ class ReportGenerator:
             return None
         return numeric
 
+    @staticmethod
+    def _sanitize_reason_list(value: Any) -> List[str]:
+        if not isinstance(value, list):
+            return []
+        out: List[str] = []
+        for item in value:
+            if isinstance(item, str) and item.strip():
+                out.append(item.strip())
+        return out
+
+    @staticmethod
+    def _sanitize_bool_or_none(value: Any) -> Any:
+        if value is None or isinstance(value, bool):
+            return value
+        return None
+
+    @staticmethod
+    def _sanitize_float_or_none(value: Any) -> Any:
+        if value is None:
+            return None
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError):
+            return None
+        if numeric != numeric:
+            return None
+        return numeric
+
+    @staticmethod
+    def _decision_sort_key(row: Dict[str, Any]) -> Any:
+        decision = str(row.get("decision") or "NO_TRADE").upper()
+        priority = _DECISION_PRIORITY.get(decision, 99)
+        global_score = ReportGenerator._sanitize_float_or_none(row.get("global_score"))
+        score_key = -(global_score if global_score is not None else float("-inf"))
+        return (
+            priority,
+            score_key,
+            str(row.get("symbol") or ""),
+            str(row.get("best_setup_type") or ""),
+        )
+
+    def _build_trade_candidates(self, global_top20: List[Dict[str, Any]], btc_regime: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        regime_state = ((btc_regime or {}).get("state") or "NEUTRAL")
+        candidates: List[Dict[str, Any]] = []
+        for row in global_top20:
+            trade_levels = (row.get("analysis") or {}).get("trade_levels") if isinstance(row.get("analysis"), dict) else {}
+            targets = trade_levels.get("targets") if isinstance(trade_levels, dict) and isinstance(trade_levels.get("targets"), list) else []
+            entry_price = row.get("entry_price_usdt", row.get("price_usdt"))
+            candidate = {
+                "rank": None,
+                "symbol": row.get("symbol"),
+                "coin_name": row.get("coin_name"),
+                "decision": row.get("decision", "NO_TRADE"),
+                "decision_reasons": self._sanitize_reason_list(row.get("decision_reasons")),
+                "entry_price_usdt": self._sanitize_float_or_none(entry_price),
+                "stop_price_initial": self._sanitize_float_or_none(row.get("stop_price_initial")),
+                "risk_pct_to_stop": self._sanitize_float_or_none(row.get("risk_pct_to_stop")),
+                "tp10_price": self._sanitize_float_or_none(row.get("tp10_price", targets[0] if len(targets) >= 1 else None)),
+                "tp20_price": self._sanitize_float_or_none(row.get("tp20_price", targets[1] if len(targets) >= 2 else None)),
+                "rr_to_tp10": self._sanitize_float_or_none(row.get("rr_to_tp10")),
+                "rr_to_tp20": self._sanitize_float_or_none(row.get("rr_to_tp20")),
+                "best_setup_type": row.get("best_setup_type"),
+                "setup_subtype": row.get("setup_subtype"),
+                "setup_score": self._sanitize_float_or_none(row.get("setup_score", row.get("score"))),
+                "global_score": self._sanitize_float_or_none(row.get("global_score", row.get("score"))),
+                "entry_ready": self._sanitize_bool_or_none(row.get("entry_ready")),
+                "entry_readiness_reasons": self._sanitize_reason_list(row.get("entry_readiness_reasons")),
+                "tradeability_class": row.get("tradeability_class"),
+                "execution_mode": row.get("execution_mode", "none"),
+                "spread_pct": self._sanitize_float_or_none(row.get("spread_pct")),
+                "depth_bid_1pct_usd": self._sanitize_float_or_none(row.get("depth_bid_1pct_usd")),
+                "depth_ask_1pct_usd": self._sanitize_float_or_none(row.get("depth_ask_1pct_usd")),
+                "slippage_bps_5k": self._sanitize_float_or_none(row.get("slippage_bps_5k")),
+                "slippage_bps_20k": self._sanitize_float_or_none(row.get("slippage_bps_20k", row.get("slippage_bps"))),
+                "risk_acceptable": self._sanitize_bool_or_none(row.get("risk_acceptable")),
+                "market_cap_usd": self._sanitize_float_or_none(row.get("market_cap_usd", row.get("market_cap"))),
+                "btc_regime": row.get("btc_regime", row.get("btc_regime_state", regime_state)),
+                "flags": row.get("flags", []),
+            }
+            candidates.append(candidate)
+
+        candidates.sort(key=self._decision_sort_key)
+        for idx, row in enumerate(candidates, start=1):
+            row["rank"] = idx
+        return candidates
+
     def generate_json_report(
         self,
         reversal_results: List[Dict[str, Any]],
@@ -6672,6 +6784,7 @@ class ReportGenerator:
                 'pullbacks': self._with_rank(pullback_results[:self.top_n]),
                 'global_top20': self._with_rank(global_top20[:20])
             },
+            'trade_candidates': self._build_trade_candidates(global_top20[:20], btc_regime=btc_regime),
             'btc_regime': btc_regime or {
                 'state': 'RISK_OFF',
                 'multiplier_risk_on': 1.0,
@@ -10983,7 +11096,7 @@ Notes:
 
 ### `docs/canonical/OUTPUT_SCHEMA.md`
 
-**SHA256:** `bab5fc49083010ab40ae6d7c4133146d9cf3fc8f9111481534d58501b0863071`
+**SHA256:** `421cb803d2bdd3ebf4212922f6ca850b9c767d9e15a11fb4b200cb5832205ae9`
 
 ```markdown
 # Output Schema — Trade Candidates Source of Truth (Canonical)
@@ -11021,18 +11134,40 @@ Optional:
 
 ## trade_candidates row contract
 Minimum required fields:
+- `rank`
 - `symbol`
-- `setup_id`
-- `setup_score`
-- `global_score`
+- `coin_name`
 - `decision`
 - `decision_reasons`
-- `tradeability_class`
-- `risk_acceptable`
+- `entry_price_usdt`
+- `stop_price_initial`
+- `risk_pct_to_stop`
+- `tp10_price`
+- `tp20_price`
+- `rr_to_tp10`
+- `rr_to_tp20`
+- `best_setup_type`
+- `setup_subtype`
+- `setup_score`
+- `global_score`
 - `entry_ready`
 - `entry_readiness_reasons`
-- `setup_subtype`
-- `btc_regime_state`
+- `tradeability_class`
+- `execution_mode`
+- `spread_pct`
+- `depth_bid_1pct_usd`
+- `depth_ask_1pct_usd`
+- `slippage_bps_5k`
+- `slippage_bps_20k`
+- `risk_acceptable`
+- `market_cap_usd`
+- `btc_regime`
+- `flags`
+
+Deterministic ordering:
+- Primary: `decision` priority `ENTER` > `WAIT` > `NO_TRADE`
+- Secondary for `ENTER` and `WAIT`: `global_score` descending
+- Stable tie-breakers: `symbol` ascending, then `best_setup_type` ascending
 
 ## Nullable rules (authoritative)
 Whenever a field is semantically not evaluable, value MUST remain `null`.
@@ -11715,4 +11850,4 @@ discovery_source_allowed:
 
 ---
 
-_Generated by GitHub Actions • 2026-03-08 15:20 UTC_
+_Generated by GitHub Actions • 2026-03-08 15:33 UTC_
