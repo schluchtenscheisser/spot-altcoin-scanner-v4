@@ -108,6 +108,12 @@ No implicit bool/number coercion is allowed for nullable fields.
 - Operational metadata (runtime, versions, provider set) lives in manifest.
 - No format-specific output may contradict the JSON `trade_candidates` truth.
 
+## Markdown rendering minimum contract
+- Markdown MUST render candidate rows from `trade_candidates` only.
+- Markdown MUST include sections `ENTER Candidates`, `WAIT Candidates`, and `Summary`.
+- `WAIT Candidates` MUST include full `decision_reasons` from SoT (no renaming, shortening, or heuristic replacement).
+- Missing optional fields in `trade_candidates` MUST be rendered as not-available values rather than causing render crashes.
+- Invalid `trade_candidates` schema (e.g. wrong type for required fields) MUST fail clearly instead of silent correction.
 
 ## Setup scorer V2 structured fields
 Scorer rows may include setup-specific confirmation flags as additive machine-readable fields.

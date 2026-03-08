@@ -47,5 +47,5 @@ def test_pr7_breakout_lists_honor_top_n_per_setup_in_json_and_markdown() -> None
     assert len(report["setups"]["breakout_immediate_1_5d"]) == 1
     assert len(report["setups"]["breakout_retest_1_5d"]) == 1
 
-    # One row per breakout section + one global ranking mention in summary.
-    assert md.count("### 1.") == 2
+    assert "## ENTER Candidates" in md
+    assert "## WAIT Candidates" in md
