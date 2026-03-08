@@ -108,6 +108,7 @@ class ReportGenerator:
         global_top20: List[Dict[str, Any]],
         run_date: str,
         btc_regime: Dict[str, Any] = None,
+        metadata: Dict[str, Any] = None,
     ) -> str:
         """
         Generate Markdown report.
@@ -121,140 +122,141 @@ class ReportGenerator:
         Returns:
             Markdown content as string
         """
-        lines = []
-        
-        # Header
-        lines.append(f"# Spot Altcoin Scanner Report")
-        lines.append(f"**Date:** {run_date}")
-        lines.append(f"**Generated:** {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
-        lines.append("")
-        lines.append("---")
-        lines.append("")
+        report = self.generate_json_report(
+            reversal_results=reversal_results,
+            breakout_results=breakout_results,
+            pullback_results=pullback_results,
+            global_top20=global_top20,
+            run_date=run_date,
+            metadata=metadata,
+            btc_regime=btc_regime,
+        )
+        trade_candidates = report.get("trade_candidates", [])
+        run_manifest = report.get("run_manifest", {})
+        resolved_regime = report.get("btc_regime", {})
 
-        btc_regime = btc_regime or {}
-        btc_checks = btc_regime.get("checks") or {}
-        lines.append("## BTC Regime")
-        lines.append("")
-        lines.append(f"- **State:** {btc_regime.get('state', 'RISK_OFF')}")
-        lines.append(f"- **Multiplier (Risk-On):** {float(btc_regime.get('multiplier_risk_on', 1.0)):.2f}")
-        lines.append(f"- **Multiplier (Risk-Off):** {float(btc_regime.get('multiplier_risk_off', 0.85)):.2f}")
-        lines.append(f"- **Checks:** close>ema50={bool(btc_checks.get('close_gt_ema50', False))}, ema20>ema50={bool(btc_checks.get('ema20_gt_ema50', False))}")
-        lines.append("")
-        lines.append("---")
-        lines.append("")
-        
-        # Summary
-        lines.append("## Summary")
-        lines.append("")
-        lines.append(f"- **Reversal Setups:** {len(reversal_results)} scored")
-        lines.append(f"- **Breakout Setups:** {len(breakout_results)} scored")
-        lines.append(f"- **Pullback Setups:** {len(pullback_results)} scored")
-        lines.append(f"- **Global Top 20:** {len(global_top20)} ranked")
-        lines.append("")
-        lines.append("---")
-        lines.append("")
+        self._validate_trade_candidates_for_markdown(trade_candidates)
 
-        breakout_retest = [row for row in breakout_results if str(row.get("setup_id", "")).endswith("retest_1_5d")]
-        breakout_immediate = [
-            row
-            for row in breakout_results
-            if not str(row.get("setup_id", "")).endswith("retest_1_5d")
+        enter_candidates = [row for row in trade_candidates if row.get("decision") == "ENTER"]
+        wait_candidates = [row for row in trade_candidates if row.get("decision") == "WAIT"]
+
+        lines = [
+            "# Spot Altcoin Scanner Report",
+            f"**Date:** {run_date}",
+            f"**Generated:** {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}",
+            "",
+            "## ENTER Candidates",
+            "",
         ]
 
-        # Global Top 20
-        lines.append("## 🌐 Global Top 20")
-        lines.append("")
-        if global_top20:
-            for i, entry in enumerate(global_top20[:20], 1):
-                lines.extend(self._format_setup_entry(i, entry))
-                lines.append(f"**Best Setup:** {entry.get('best_setup_type', 'n/a')} | **Global Score:** {float(entry.get('global_score', 0.0)):.2f} | **Confluence:** {int(entry.get('confluence', 1))}")
-                lines.append("")
+        if enter_candidates:
+            for row in enter_candidates:
+                lines.extend(self._format_trade_candidate_markdown(row, include_reasons=False))
         else:
-            lines.append("*No global setups found.*")
+            lines.append("*No ENTER candidates.*")
             lines.append("")
 
-        lines.append("---")
-        lines.append("")
-        
-        # Reversal Setups (Priority)
-        lines.append("## 🔄 Top Reversal Setups")
-        lines.append("")
-        lines.append("*Downtrend → Base → Reclaim*")
-        lines.append("")
-        
-        if reversal_results:
-            top_reversals = reversal_results[:self.top_n]
-            for i, entry in enumerate(top_reversals, 1):
-                lines.extend(self._format_setup_entry(i, entry))
+        lines.extend(["## WAIT Candidates", ""])
+        if wait_candidates:
+            for row in wait_candidates:
+                lines.extend(self._format_trade_candidate_markdown(row, include_reasons=True))
         else:
-            lines.append("*No reversal setups found.*")
-            lines.append("")
-        
-        lines.append("---")
-        lines.append("")
-        
-        # Breakout Immediate Setups (1-5D)
-        lines.append("## 📈 Top 20 Immediate (1–5D)")
-        lines.append("")
-        lines.append("*Range break + momentum confirmation*")
-        lines.append("")
-
-        if breakout_immediate:
-            top_breakouts = breakout_immediate[:self.top_n]
-            for i, entry in enumerate(top_breakouts, 1):
-                lines.extend(self._format_setup_entry(i, entry))
-        else:
-            lines.append("*No immediate breakout setups found.*")
+            lines.append("*No WAIT candidates.*")
             lines.append("")
 
-        lines.append("---")
-        lines.append("")
-
-        # Breakout Retest Setups (1-5D)
-        lines.append("## 📈 Top 20 Retest (1–5D)")
-        lines.append("")
-        lines.append("*Break-and-retest within validation window*")
-        lines.append("")
-
-        if breakout_retest:
-            top_breakouts = breakout_retest[:self.top_n]
-            for i, entry in enumerate(top_breakouts, 1):
-                lines.extend(self._format_setup_entry(i, entry))
-        else:
-            lines.append("*No retest breakout setups found.*")
-            lines.append("")
-
-        lines.append("---")
-        lines.append("")
-        
-        # Pullback Setups
-        lines.append("## 📽 Top Pullback Setups")
-        lines.append("")
-        lines.append("*Trend continuation after retracement*")
-        lines.append("")
-        
-        if pullback_results:
-            top_pullbacks = pullback_results[:self.top_n]
-            for i, entry in enumerate(top_pullbacks, 1):
-                lines.extend(self._format_setup_entry(i, entry))
-        else:
-            lines.append("*No pullback setups found.*")
-            lines.append("")
-        
-        lines.append("---")
-        lines.append("")
-        
-        # Footer
-        lines.append("## Notes")
-        lines.append("")
-        lines.append("- Scores range from 0-100")
-        lines.append("- Higher scores indicate stronger setups")
-        lines.append("- ⚠️ flags indicate warnings (overextension, low liquidity, etc.)")
-        lines.append("- This is a research tool, not financial advice")
-        lines.append("")
-        
+        lines.extend(self._format_markdown_summary(trade_candidates, run_manifest, resolved_regime))
         return "\n".join(lines)
     
+
+    @staticmethod
+    def _format_nullable_bool(value: Any) -> str:
+        if value is None:
+            return "n/a"
+        return "true" if value is True else "false"
+
+    @staticmethod
+    def _format_nullable_float(value: Any, digits: int = 4) -> str:
+        numeric = ReportGenerator._sanitize_float_or_none(value)
+        if numeric is None:
+            return "n/a"
+        return f"{numeric:.{digits}f}"
+
+    @staticmethod
+    def _format_reason_list(value: Any) -> str:
+        if value is None:
+            return "n/a"
+        if isinstance(value, list):
+            normalized = [item for item in value if isinstance(item, str)]
+            if not normalized:
+                return "[]"
+            return ", ".join(normalized)
+        raise ValueError("trade_candidates.decision_reasons must be a list or null")
+
+    def _validate_trade_candidates_for_markdown(self, trade_candidates: Any) -> None:
+        if not isinstance(trade_candidates, list):
+            raise ValueError("trade_candidates must be a list")
+        required_fields = {"rank", "symbol", "decision", "decision_reasons"}
+        for idx, row in enumerate(trade_candidates):
+            if not isinstance(row, dict):
+                raise ValueError(f"trade_candidates[{idx}] must be an object")
+            missing = [field for field in required_fields if field not in row]
+            if missing:
+                raise ValueError(f"trade_candidates[{idx}] missing required fields: {', '.join(missing)}")
+            decision = row.get("decision")
+            if decision not in {"ENTER", "WAIT", "NO_TRADE"}:
+                raise ValueError(f"trade_candidates[{idx}].decision invalid: {decision}")
+            reasons = row.get("decision_reasons")
+            if reasons is not None and not isinstance(reasons, list):
+                raise ValueError(f"trade_candidates[{idx}].decision_reasons must be list or null")
+
+    def _format_trade_candidate_markdown(self, row: Dict[str, Any], include_reasons: bool) -> List[str]:
+        rank = row.get("rank", "?")
+        symbol = row.get("symbol") or "UNKNOWN"
+        coin_name = row.get("coin_name") or "Unknown"
+        lines = [f"### {rank}. {symbol} ({coin_name})", ""]
+        lines.append(f"- decision: {row.get('decision')}")
+        if include_reasons:
+            lines.append(f"- decision_reasons: {self._format_reason_list(row.get('decision_reasons'))}")
+        lines.append(f"- risk_acceptable: {self._format_nullable_bool(row.get('risk_acceptable'))}")
+        lines.append(f"- rr_to_tp10: {self._format_nullable_float(row.get('rr_to_tp10'))}")
+        lines.append(f"- slippage_bps_20k: {self._format_nullable_float(row.get('slippage_bps_20k'))}")
+        lines.append(f"- spread_pct: {self._format_nullable_float(row.get('spread_pct'), digits=6)}")
+        lines.append(f"- depth_bid_1pct_usd: {self._format_nullable_float(row.get('depth_bid_1pct_usd'), digits=2)}")
+        lines.append(f"- depth_ask_1pct_usd: {self._format_nullable_float(row.get('depth_ask_1pct_usd'), digits=2)}")
+        lines.append("")
+        return lines
+
+    def _format_markdown_summary(
+        self,
+        trade_candidates: List[Dict[str, Any]],
+        run_manifest: Dict[str, Any],
+        btc_regime: Dict[str, Any],
+    ) -> List[str]:
+        counts = {"ENTER": 0, "WAIT": 0, "NO_TRADE": 0}
+        for row in trade_candidates:
+            decision = row.get("decision")
+            if decision in counts:
+                counts[decision] += 1
+
+        lines = ["## Summary", ""]
+        lines.append(f"- ENTER: {counts['ENTER']}")
+        lines.append(f"- WAIT: {counts['WAIT']}")
+        lines.append(f"- NO_TRADE: {counts['NO_TRADE']}")
+
+        regime_state = (btc_regime or {}).get("state")
+        if regime_state is not None:
+            lines.append(f"- BTC Regime: {regime_state}")
+
+        run_id = (run_manifest or {}).get("run_id")
+        if run_id is not None:
+            lines.append(f"- run_id: {run_id}")
+        canonical_schema_version = (run_manifest or {}).get("canonical_schema_version")
+        if canonical_schema_version is not None:
+            lines.append(f"- canonical_schema_version: {canonical_schema_version}")
+
+        lines.append("")
+        return lines
+
     def _format_setup_entry(self, rank: int, data: dict) -> List[str]:
         """
         Format a single setup entry for markdown output.
@@ -569,7 +571,7 @@ class ReportGenerator:
         
         # Generate Markdown
         md_content = self.generate_markdown_report(
-            reversal_results, breakout_results, pullback_results, global_top20, run_date, btc_regime=btc_regime
+            reversal_results, breakout_results, pullback_results, global_top20, run_date, btc_regime=btc_regime, metadata=metadata
         )
         
         # Generate JSON

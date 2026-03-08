@@ -37,17 +37,14 @@ def test_json_report_contains_market_activity_fields_with_values_and_nulls() -> 
     assert second["mexc_share_24h"] is None
 
 
-def test_format_market_activity_markdown_numbers() -> None:
+def test_markdown_formats_nullable_trade_candidate_fields() -> None:
     generator = ReportGenerator({"output": {"top_n_per_setup": 5}})
 
-    md = generator.generate_markdown_report(
-        [_row("AAAUSDT", global_volume_24h_usd=103_700_000, turnover_24h=0.0378, mexc_share_24h=0.0123)], [], [], [], "2026-02-28"
-    )
+    row = _row("AAAUSDT", decision="WAIT", decision_reasons=["entry_not_confirmed"], global_score=80.0, rr_to_tp10=1.23456, slippage_bps_20k=20.5)
+    md = generator.generate_markdown_report([], [], [], [row], "2026-02-28")
 
-    assert "**Market Activity:**" in md
-    assert "- global_volume_24h_usd: 103,7 M USD" in md
-    assert "- turnover_24h: 3,78 %" in md
-    assert "- mexc_share_24h: 1,23 %" in md
+    assert "rr_to_tp10: 1.2346" in md
+    assert "slippage_bps_20k: 20.5000" in md
 
 
 def test_excel_report_contains_market_activity_columns_and_empty_cells_for_missing(tmp_path: Path) -> None:
@@ -75,14 +72,13 @@ def test_excel_report_contains_market_activity_columns_and_empty_cells_for_missi
     assert global_headers[12] == "MEXC Share 24h"
 
 
-def test_format_market_activity_markdown_none() -> None:
+def test_markdown_keeps_nullables_as_na() -> None:
     generator = ReportGenerator({"output": {"top_n_per_setup": 5}})
 
-    md = generator.generate_markdown_report(
-        [_row("AAAUSDT", global_volume_24h_usd=None, turnover_24h=None, mexc_share_24h=None)], [], [], [], "2026-02-28"
-    )
+    row = _row("AAAUSDT", decision="WAIT", decision_reasons=None, global_score=80.0, rr_to_tp10=None, slippage_bps_20k=None, risk_acceptable=None)
+    md = generator.generate_markdown_report([], [], [], [row], "2026-02-28")
 
-    assert "**Market Activity:**" in md
-    assert "- global_volume_24h_usd: n/a" in md
-    assert "- turnover_24h: n/a" in md
-    assert "- mexc_share_24h: n/a" in md
+    assert "decision_reasons: []" in md
+    assert "risk_acceptable: n/a" in md
+    assert "rr_to_tp10: n/a" in md
+    assert "slippage_bps_20k: n/a" in md

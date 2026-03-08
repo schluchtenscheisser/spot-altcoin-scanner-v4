@@ -1,3 +1,5 @@
+> ARCHIVED (ticket): Implemented in PR for this ticket. Canonical truth is under `docs/canonical/`.
+
 ## Title
 [P0] PR-20 Markdown aus `trade_candidates`-SoT rendern
 

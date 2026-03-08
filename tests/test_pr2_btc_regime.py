@@ -35,7 +35,7 @@ def test_compute_btc_regime_risk_on_when_close_and_ema20_above_ema50() -> None:
     assert regime["checks"]["ema20_gt_ema50"] is True
 
 
-def test_markdown_places_btc_block_before_global_top20() -> None:
+def test_markdown_summary_contains_btc_regime_state() -> None:
     generator = ReportGenerator({"output": {"top_n_per_setup": 1}})
     btc_regime = {
         "state": "RISK_OFF",
@@ -49,7 +49,8 @@ def test_markdown_places_btc_block_before_global_top20() -> None:
 
     md = generator.generate_markdown_report([], [], [], [], "2026-02-21", btc_regime=btc_regime)
 
-    assert md.index("## BTC Regime") < md.index("## 🌐 Global Top 20")
+    assert "## Summary" in md
+    assert "- BTC Regime: RISK_OFF" in md
 
 
 def test_excel_summary_has_btc_regime_header_at_a1(tmp_path: Path) -> None:

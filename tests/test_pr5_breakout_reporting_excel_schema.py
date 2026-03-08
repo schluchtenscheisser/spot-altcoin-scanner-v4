@@ -13,13 +13,13 @@ def _breakout_rows():
     ]
 
 
-def test_pr5_markdown_contains_immediate_and_retest_sections() -> None:
+def test_pr5_markdown_contains_sot_sections() -> None:
     generator = ReportGenerator({"output": {"top_n_per_setup": 10}})
 
-    md = generator.generate_markdown_report([], _breakout_rows(), [], [], "2026-02-22")
+    md = generator.generate_markdown_report([], _breakout_rows(), [], _breakout_rows(), "2026-02-22")
 
-    assert "## 📈 Top 20 Immediate (1–5D)" in md
-    assert "## 📈 Top 20 Retest (1–5D)" in md
+    assert "## ENTER Candidates" in md
+    assert "## WAIT Candidates" in md
 
 
 def test_pr5_json_contains_breakout_setup_lists() -> None:
@@ -42,13 +42,17 @@ def test_pr5_excel_has_legacy_and_new_breakout_sheets(tmp_path: Path) -> None:
     assert "Breakout Retest 1-5D" in wb.sheetnames
 
 
-def test_pr5_markdown_contains_execution_gate_fields() -> None:
+def test_pr5_markdown_renders_wait_reasons_from_trade_candidates() -> None:
     generator = ReportGenerator({"output": {"top_n_per_setup": 10}})
 
-    md = generator.generate_markdown_report([], _breakout_rows(), [], [], "2026-02-22")
+    rows = _breakout_rows()
+    rows[0]["decision"] = "WAIT"
+    rows[0]["decision_reasons"] = ["entry_not_confirmed", "btc_regime_caution"]
+    rows[0]["global_score"] = 80.0
 
-    assert "**Execution Gate:**" in md
-    assert "**Spread %:**" in md
+    md = generator.generate_markdown_report([], rows, [], rows, "2026-02-22")
+
+    assert "decision_reasons: entry_not_confirmed, btc_regime_caution" in md
 
 
 def test_pr5_excel_setup_sheet_contains_execution_columns(tmp_path: Path) -> None:
