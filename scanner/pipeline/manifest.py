@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
+_ALLOWED_SHADOW_MODES = {"legacy_only", "new_only", "parallel"}
+
 
 def _nested_mapping_value(config: Dict[str, Any], path: List[str], default: Any) -> Any:
     cursor: Any = config
@@ -21,6 +23,24 @@ def _nested_bool(config: Dict[str, Any], path: List[str], default: bool) -> bool
     return bool(_nested_mapping_value(config, path, default))
 
 
+def resolve_shadow_mode(config: Dict[str, Any]) -> str:
+    shadow_cfg = config.get("shadow", {}) if isinstance(config, dict) else {}
+    mode = shadow_cfg.get("mode", "parallel") if isinstance(shadow_cfg, dict) else "parallel"
+    mode = str(mode)
+    if mode not in _ALLOWED_SHADOW_MODES:
+        raise ValueError(f"shadow.mode must be one of {sorted(_ALLOWED_SHADOW_MODES)}")
+    return mode
+
+
+def derive_pipeline_paths(config: Dict[str, Any]) -> Dict[str, Any]:
+    mode = resolve_shadow_mode(config)
+    return {
+        "shadow_mode": mode,
+        "legacy_path_enabled": mode in {"legacy_only", "parallel"},
+        "new_path_enabled": mode in {"new_only", "parallel"},
+    }
+
+
 def derive_feature_flags(config: Dict[str, Any]) -> Dict[str, bool]:
     """Return a deterministic map of relevant feature flags and their states."""
     return {
@@ -32,6 +52,7 @@ def derive_feature_flags(config: Dict[str, Any]) -> Dict[str, bool]:
         "pullback_scoring_enabled": _nested_bool(config, ["scoring", "pullback", "enabled"], True),
         "reversal_scoring_enabled": _nested_bool(config, ["scoring", "reversal", "enabled"], True),
         "mexc_enabled": _nested_bool(config, ["data_sources", "mexc", "enabled"], True),
+        "shadow_mode_parallel": derive_pipeline_paths(config)["shadow_mode"] == "parallel",
     }
 
 

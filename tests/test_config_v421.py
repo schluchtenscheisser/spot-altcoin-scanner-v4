@@ -76,6 +76,7 @@ def test_v421_enabled_flags_can_be_false() -> None:
             "risk": {"enabled": False},
             "decision": {"enabled": False},
             "btc_regime": {"enabled": False},
+            "shadow": {"mode": "legacy_only"},
         }
     )
 
@@ -148,3 +149,22 @@ def test_v421_budget_values_reject_bool_and_negative() -> None:
     assert "budget.shortlist_size must be numeric" in errors
     assert "budget.orderbook_top_k must be numeric" in errors
     assert any("budget.pre_shortlist_market_cap_floor_usd" in e and "must be >= 0" in e for e in errors)
+
+
+def test_v421_shadow_mode_defaults_and_validation() -> None:
+    cfg = ScannerConfig(raw=_offline_base())
+    assert cfg.shadow_mode == "parallel"
+
+    invalid = _offline_base()
+    invalid["shadow"] = {"mode": "bad"}
+    errors = validate_config(ScannerConfig(raw=invalid))
+    assert any("shadow.mode" in e for e in errors)
+
+
+def test_v421_shadow_new_path_requires_complete_stage_enablement() -> None:
+    raw = _offline_base()
+    raw["shadow"] = {"mode": "new_only"}
+    raw["decision"] = {"enabled": False}
+
+    errors = validate_config(ScannerConfig(raw=raw))
+    assert "shadow.mode=new_only requires decision.enabled=true" in errors

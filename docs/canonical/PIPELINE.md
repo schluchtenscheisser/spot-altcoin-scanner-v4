@@ -25,6 +25,9 @@ determinism:
   closed_candle_only: true
   no_lookahead: true
   stable_sorting: true
+shadow_mode:
+  default_mode: parallel
+  allowed_modes: [legacy_only, new_only, parallel]
 ```
 
 ## Purpose
@@ -91,6 +94,18 @@ Define the Phase-1 execution order and stop rules so downstream PRs implement on
 - `UNKNOWN` is neither `FAIL` nor `WAIT`; it is a pre-decision stop-path.
 - No implicit coercion from nullability to booleans.
 - No stage may silently reclassify `UNKNOWN` to `FAIL` or `WAIT`.
+
+## Shadow mode / parallel operation (transition contract)
+- Pipeline activation is controlled centrally by `shadow.mode`.
+- Allowed modes are deterministic and mutually exclusive:
+  - `legacy_only`: legacy outputs active, new decision-path outputs inactive
+  - `new_only`: new decision-path outputs active, legacy outputs inactive
+  - `parallel`: both outputs active in one run
+- Missing `shadow.mode` MUST resolve to canonical default `parallel`.
+- Invalid mode values MUST fail config validation clearly; no silent fallback.
+- `new_only` and `parallel` require a semantically complete new path (tradeability + risk + decision all enabled).
+- Run artifacts/manifest MUST expose active path state explicitly (`legacy_path_enabled`, `new_path_enabled`, resolved mode).
+- `trade_candidates` remains the target SoT; shadow mode is transitional control, not a second business truth.
 
 ## Non-goals in Phase 1
 - No portfolio manager.

@@ -4,7 +4,7 @@
 ```yaml
 id: CANON_CHANGELOG
 status: canonical
-canonical_schema_version: 5.3.0
+canonical_schema_version: 5.4.0
 canonical_schema_versioning: semver
 canonical_schema_version_location: docs/canonical/CHANGELOG.md
 ```
@@ -18,6 +18,13 @@ canonical_schema_version_location: docs/canonical/CHANGELOG.md
 
 Rule: Every canonical contract change PR must evaluate version impact and update this value accordingly.
 
+
+
+
+## 5.4.0 — Shadow-mode pipeline path manifest contract
+- Added canonical shadow-mode operation contract (`legacy_only`, `new_only`, `parallel`) with deterministic default `parallel`.
+- Added required run-manifest field `pipeline_paths` with `shadow_mode`, `legacy_path_enabled`, and `new_path_enabled`.
+- Clarified that shadow mode is transition control only and does not introduce a second SoT beside `trade_candidates`.
 
 ## 5.3.0 — Run manifest minimum contract introduced
 - Canonicalized a required standalone run manifest artifact separated from `trade_candidates`.

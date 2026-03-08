@@ -54,6 +54,40 @@ Dieses Dokument protokolliert alle Änderungen an:
 ## Historie
 *(Neue Einträge kommen hier darunter)*
 
+
+### 2026-03-08 — schema_version v1.12 → v1.13 — Run-Manifest `pipeline_paths` für Shadow-Mode (additiv)
+**PR:** (branch-local, ticket/pr-23-shadow-mode-parallelbetrieb)  
+**Typ:** additiv
+
+#### Was hat sich geändert?
+- `run_manifest` enthält jetzt zusätzlich `pipeline_paths`.
+- `pipeline_paths` Felder: `shadow_mode`, `legacy_path_enabled`, `new_path_enabled`.
+- Canonical Shadow-Mode-Vertrag (`legacy_only|new_only|parallel`) wird damit im Laufartefakt transparent gemacht.
+
+#### Warum?
+- Deterministische, maschinenlesbare Transparenz im Parallelbetrieb von Legacy- und New-Path während der Übergangsphase.
+
+#### Kompatibilität
+- **Rückwärtskompatibel?** Ja.
+- Additives Feld; bestehende Consumer können `pipeline_paths` ignorieren.
+
+#### Migration / Vorgehen
+- Consumer können ab `schema_version >= v1.13` aktive Pfade direkt aus `run_manifest.pipeline_paths` lesen.
+
+#### Beispiel (kurz)
+```json
+{
+  "schema_version": "v1.13",
+  "run_manifest": {
+    "pipeline_paths": {
+      "shadow_mode": "parallel",
+      "legacy_path_enabled": true,
+      "new_path_enabled": true
+    }
+  }
+}
+```
+
 ### 2026-03-08 — schema_version v1.11 → v1.12 — Separates Run-Manifest als operatives Artefakt (additiv)
 **PR:** (branch-local, ticket/2026-03-08_P0_PR-19_run-manifest)  
 **Typ:** additiv

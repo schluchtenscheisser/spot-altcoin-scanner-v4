@@ -4,7 +4,7 @@
 ```yaml
 id: CANON_OUTPUT_SCHEMA
 status: canonical
-schema_version: v1.12
+schema_version: v1.13
 canonical_schema_version_ref: docs/canonical/CHANGELOG.md
 outputs:
   - json
@@ -26,6 +26,7 @@ Required fields:
 - `config_hash`
 - `canonical_schema_version`
 - `feature_flags`
+- `pipeline_paths`
 - `counts_per_stage`
 - `shortlist_size_used`
 - `orderbook_top_k_used`
@@ -37,6 +38,12 @@ Notes:
 - `warnings` MUST be a machine-readable list and MAY be empty (`[]`), but MUST NOT be `null`.
 - `canonical_schema_version` MUST be sourced from `docs/canonical/CHANGELOG.md`.
 - Manifest metadata is operational and remains separated from `trade_candidates`.
+
+- `pipeline_paths` MUST include:
+  - `shadow_mode` (`legacy_only|new_only|parallel`)
+  - `legacy_path_enabled` (bool)
+  - `new_path_enabled` (bool)
+- `pipeline_paths` values must be deterministic from config and valid mode semantics.
 
 ## trade_candidates row contract
 Minimum required fields:

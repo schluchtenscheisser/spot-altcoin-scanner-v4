@@ -88,10 +88,15 @@ class _PassThrough:
 
 
 class _DummyReportGenerator:
+    captured_args = None
+    captured_kwargs = None
+
     def __init__(self, raw):
         self.raw = raw
 
     def save_reports(self, *args, **kwargs):
+        _DummyReportGenerator.captured_args = args
+        _DummyReportGenerator.captured_kwargs = kwargs
         return {"markdown": "reports/a.md", "json": "reports/a.json"}
 
 
@@ -128,7 +133,7 @@ def _patch_runtime(monkeypatch, shortlist_after_liquidity):
     monkeypatch.setattr(pipeline, "score_reversals", lambda *args, **kwargs: [])
     monkeypatch.setattr(pipeline, "score_breakout_trend_1_5d", lambda *args, **kwargs: [])
     monkeypatch.setattr(pipeline, "score_pullbacks", lambda *args, **kwargs: [])
-    monkeypatch.setattr(pipeline, "compute_global_top20", lambda *args, **kwargs: [])
+    monkeypatch.setattr(pipeline, "compute_global_top20", lambda *args, **kwargs: [{"symbol": "AAAUSDT", "score": 70}])
     monkeypatch.setattr(pipeline, "ReportGenerator", _DummyReportGenerator)
     monkeypatch.setattr(pipeline, "SnapshotManager", _DummySnapshotManager)
     monkeypatch.setattr(pipeline, "RuntimeMarketMetaExporter", _DummyRuntimeMetaExporter)
@@ -164,3 +169,45 @@ def test_run_pipeline_skips_ohlcv_for_fail_and_unknown(monkeypatch):
     pipeline.run_pipeline(config)
 
     assert _DummyOHLCVFetcher.captured_symbols == ["AAAUSDT", "BBBUSDT", "CCCUSDT"]
+
+
+def test_shadow_mode_legacy_only_disables_new_path_outputs(monkeypatch):
+    shortlist_after_liquidity = [{"symbol": "AAAUSDT", "tradeability_class": "DIRECT_OK"}]
+    _patch_runtime(monkeypatch, shortlist_after_liquidity)
+    monkeypatch.setattr(pipeline, "apply_decision_layer", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("must not be called")))
+
+    config = ScannerConfig(raw={"general": {"run_mode": "fast"}, "shadow": {"mode": "legacy_only"}})
+    pipeline.run_pipeline(config)
+
+    args = _DummyReportGenerator.captured_args
+    kwargs = _DummyReportGenerator.captured_kwargs
+    assert args[0] == []
+    assert args[1] == []
+    assert args[2] == []
+    assert args[3] == []
+    assert kwargs["metadata"]["pipeline_paths"] == {
+        "shadow_mode": "legacy_only",
+        "legacy_path_enabled": True,
+        "new_path_enabled": False,
+    }
+
+
+def test_shadow_mode_new_only_disables_legacy_setup_outputs(monkeypatch):
+    shortlist_after_liquidity = [{"symbol": "AAAUSDT", "tradeability_class": "DIRECT_OK"}]
+    _patch_runtime(monkeypatch, shortlist_after_liquidity)
+    monkeypatch.setattr(pipeline, "apply_decision_layer", lambda rows, *_args, **_kwargs: rows)
+
+    config = ScannerConfig(raw={"general": {"run_mode": "fast"}, "shadow": {"mode": "new_only"}})
+    pipeline.run_pipeline(config)
+
+    args = _DummyReportGenerator.captured_args
+    kwargs = _DummyReportGenerator.captured_kwargs
+    assert args[0] == []
+    assert args[1] == []
+    assert args[2] == []
+    assert args[3] != []
+    assert kwargs["metadata"]["pipeline_paths"] == {
+        "shadow_mode": "new_only",
+        "legacy_path_enabled": False,
+        "new_path_enabled": True,
+    }
