@@ -1,7 +1,7 @@
 # Spot Altcoin Scanner • GPT Snapshot
 
-**Generated:** 2026-03-08 20:03 UTC  
-**Commit:** `1931175` (1931175dc381004743ff50d9b4c40bec27d36233)  
+**Generated:** 2026-03-08 20:14 UTC  
+**Commit:** `d474189` (d47418932d818ebdc8ec8c023f749eb46f322311)  
 **Status:** MVP Complete (Phase 6)  
 
 ---
@@ -963,12 +963,12 @@ if __name__ == "__main__":
 
 ### `scanner/schema.py`
 
-**SHA256:** `ed2c01b8ab2f7414065c44cbe6576ab62d9c8adc4c5fd2c0b3265fa62e12db26`
+**SHA256:** `cd319833be8109845e21f6c6e5f1084249154db815b2c941cb01e8b7271b3756`
 
 ```python
 """Schema/version constants for scanner outputs."""
 
-REPORT_SCHEMA_VERSION = "v1.13"
+REPORT_SCHEMA_VERSION = "v1.15"
 REPORT_META_VERSION = "1.9"
 
 ```
@@ -6367,7 +6367,7 @@ def _stable_reason_order(reasons: Iterable[str]) -> List[str]:
 
 ### `scanner/pipeline/output.py`
 
-**SHA256:** `dbb146654ba4408ba23fe3ad30175aa0370a5cdc161c8b2ce6f7899911f8b6d5`
+**SHA256:** `03b9e020a3fb3f7d8732a08c4395014eca4db691a7a8115be40014f3d34df95b`
 
 ```python
 """
@@ -6841,12 +6841,64 @@ class ReportGenerator:
                 "btc_regime": row.get("btc_regime", row.get("btc_regime_state", regime_state)),
                 "flags": row.get("flags", []),
             }
+            if "directional_volume_preparation" in row:
+                candidate["directional_volume_preparation"] = self._sanitize_directional_volume_preparation(
+                    row.get("directional_volume_preparation")
+                )
             candidates.append(candidate)
 
         candidates.sort(key=self._decision_sort_key)
         for idx, row in enumerate(candidates, start=1):
             row["rank"] = idx
         return candidates
+
+    @staticmethod
+    def _sanitize_directional_volume_preparation(value: Any) -> Any:
+        if value is None:
+            return None
+        if not isinstance(value, dict):
+            raise ValueError("directional_volume_preparation must be object or null when present")
+
+        allowed_keys = {
+            "buy_volume_share",
+            "sell_volume_share",
+            "imbalance_ratio",
+            "lookback_bars",
+        }
+        unknown_keys = sorted(set(value.keys()) - allowed_keys)
+        if unknown_keys:
+            joined = ", ".join(unknown_keys)
+            raise ValueError(f"directional_volume_preparation has unknown keys: {joined}")
+
+        def _finite_number_or_none(raw: Any, field: str) -> float | None:
+            if raw is None:
+                return None
+            try:
+                numeric = float(raw)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"directional_volume_preparation.{field} must be finite number or null") from exc
+            if numeric != numeric or numeric in (float("inf"), float("-inf")):
+                raise ValueError(f"directional_volume_preparation.{field} must be finite number or null")
+            return numeric
+
+        lookback_raw = value.get("lookback_bars")
+        lookback_bars = None
+        if lookback_raw is not None:
+            if isinstance(lookback_raw, bool):
+                raise ValueError("directional_volume_preparation.lookback_bars must be positive integer or null")
+            try:
+                lookback_bars = int(lookback_raw)
+            except (TypeError, ValueError) as exc:
+                raise ValueError("directional_volume_preparation.lookback_bars must be positive integer or null") from exc
+            if lookback_bars <= 0:
+                raise ValueError("directional_volume_preparation.lookback_bars must be positive integer or null")
+
+        return {
+            "buy_volume_share": _finite_number_or_none(value.get("buy_volume_share"), "buy_volume_share"),
+            "sell_volume_share": _finite_number_or_none(value.get("sell_volume_share"), "sell_volume_share"),
+            "imbalance_ratio": _finite_number_or_none(value.get("imbalance_ratio"), "imbalance_ratio"),
+            "lookback_bars": lookback_bars,
+        }
 
     def generate_json_report(
         self,
@@ -11609,7 +11661,7 @@ Notes:
 
 ### `docs/canonical/OUTPUT_SCHEMA.md`
 
-**SHA256:** `e8b58fe63ee45a686a9938e5f39898f8b6ca3b0ef464c834f52f8b66c8573200`
+**SHA256:** `44d84b2390dae8365c8b165ce2840418243e82f8b5d3fb52b77ec3cda4a64a57`
 
 ```markdown
 # Output Schema — Trade Candidates Source of Truth (Canonical)
@@ -11618,7 +11670,7 @@ Notes:
 ```yaml
 id: CANON_OUTPUT_SCHEMA
 status: canonical
-schema_version: v1.14
+schema_version: v1.15
 canonical_schema_version_ref: docs/canonical/CHANGELOG.md
 outputs:
   - json
@@ -11758,11 +11810,24 @@ Allowed examples:
 
 When a confirmation is semantically not evaluable due to missing/invalid/non-finite inputs, the confirmation field MUST remain `null`.
 
+Directional Volume preparation namespace (Phase-1 inactive, optional):
+- Optional field: `directional_volume_preparation: object|null`
+- Allowed nested keys (all optional, nullable):
+  - `buy_volume_share: number|null`
+  - `sell_volume_share: number|null`
+  - `imbalance_ratio: number|null`
+  - `lookback_bars: integer|null`
+- Missing `directional_volume_preparation` is valid and means “not provided”.
+- `null` means “not evaluated / not used” and MUST NOT be coerced to negative/false signals.
+- Invalid nested values are invalid-contract input and must fail clearly, distinct from missing/null.
+- This namespace is preparatory only and MUST NOT change Phase-1 decision/scoring behavior by itself.
+
+
 ```
 
 ### `docs/canonical/VERIFICATION_FOR_AI.md`
 
-**SHA256:** `9259e546b9677667b08a0c0236693d9640d358feb24cabd3b554f792a7d2ee88`
+**SHA256:** `00a49d6efe7e1c2d05a61af3c7fc8a0fedec2e8945c8800ccfd40767adbcc660`
 
 ```markdown
 # Verification for AI — Golden Fixtures, Invariants, Checklist (Canonical)
@@ -11875,6 +11940,15 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - Without sufficient sample basis, `shadow_recommendation.recommended_thresholds.*` and `shadow_recommendation.shadow_probabilities.overall.*` remain `null` (no coercion to live defaults).
 - Non-finite calibration inputs (`NaN`, `+inf`, `-inf`) are reported as invalid and must not propagate into recommendation outputs.
 - Recommendation outputs are analysis-only and MUST NOT change productive decision thresholds.
+
+
+## Directional Volume preparation verification boundaries
+- `trade_candidates.directional_volume_preparation` is optional; missing namespace is valid in Phase 1.
+- `directional_volume_preparation=null` is valid and means not evaluated/not used (must not be coerced).
+- If present as object, allowed keys are exactly `{buy_volume_share, sell_volume_share, imbalance_ratio, lookback_bars}`.
+- `buy_volume_share`, `sell_volume_share`, and `imbalance_ratio` accept finite numbers or `null`; non-finite/invalid types are invalid input.
+- `lookback_bars` accepts positive integer or `null`; zero/negative/non-integer/bool values are invalid input.
+- Presence/absence of preparatory Directional Volume fields must not change Phase-1 score/decision outputs for identical otherwise-valid inputs.
 
 ```
 
@@ -12415,4 +12489,4 @@ discovery_source_allowed:
 
 ---
 
-_Generated by GitHub Actions • 2026-03-08 20:03 UTC_
+_Generated by GitHub Actions • 2026-03-08 20:14 UTC_
