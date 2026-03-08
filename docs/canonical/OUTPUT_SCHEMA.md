@@ -4,7 +4,7 @@
 ```yaml
 id: CANON_OUTPUT_SCHEMA
 status: canonical
-schema_version: v1.11
+schema_version: v1.12
 canonical_schema_version_ref: docs/canonical/CHANGELOG.md
 outputs:
   - json
@@ -21,15 +21,22 @@ source_of_truth_entity: trade_candidates
 
 ## Run manifest (required)
 Required fields:
-- `commit_hash`
-- `schema_version`
-- `providers_used`
+- `run_id`
+- `timestamp_utc`
 - `config_hash`
-- `asof_ts_ms`
+- `canonical_schema_version`
+- `feature_flags`
+- `counts_per_stage`
+- `shortlist_size_used`
+- `orderbook_top_k_used`
+- `data_freshness`
+- `warnings`
+- `duration_seconds`
 
-Optional:
-- `config_version`
-- `asof_iso_utc`
+Notes:
+- `warnings` MUST be a machine-readable list and MAY be empty (`[]`), but MUST NOT be `null`.
+- `canonical_schema_version` MUST be sourced from `docs/canonical/CHANGELOG.md`.
+- Manifest metadata is operational and remains separated from `trade_candidates`.
 
 ## trade_candidates row contract
 Minimum required fields:

@@ -4,7 +4,7 @@
 ```yaml
 id: CANON_CHANGELOG
 status: canonical
-canonical_schema_version: 5.2.0
+canonical_schema_version: 5.3.0
 canonical_schema_versioning: semver
 canonical_schema_version_location: docs/canonical/CHANGELOG.md
 ```
@@ -17,6 +17,12 @@ canonical_schema_version_location: docs/canonical/CHANGELOG.md
 - **PATCH**: non-semantic fixes/wording corrections with no contract behavior change.
 
 Rule: Every canonical contract change PR must evaluate version impact and update this value accordingly.
+
+
+## 5.3.0 — Run manifest minimum contract introduced
+- Canonicalized a required standalone run manifest artifact separated from `trade_candidates`.
+- Added required manifest minimum fields: `run_id`, `timestamp_utc`, `config_hash`, `canonical_schema_version`, `feature_flags`, `counts_per_stage`, `shortlist_size_used`, `orderbook_top_k_used`, `data_freshness`, `warnings`, `duration_seconds`.
+- Clarified `warnings` as machine-readable list with empty-list (`[]`) default instead of `null`.
 
 
 ## 5.2.0 — trade_candidates canonical JSON SoT
