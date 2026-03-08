@@ -4,7 +4,7 @@
 ```yaml
 id: CANON_CHANGELOG
 status: canonical
-canonical_schema_version: 5.5.0
+canonical_schema_version: 5.6.0
 canonical_schema_versioning: semver
 canonical_schema_version_location: docs/canonical/CHANGELOG.md
 ```
@@ -20,6 +20,12 @@ Rule: Every canonical contract change PR must evaluate version impact and update
 
 
 
+
+
+## 5.6.0 — Shadow calibration prep artifact contract
+- Added canonical output contract `OUTPUTS/SHADOW_CALIBRATION_PREP.md` for analysis-only shadow calibration preparation.
+- Defined deterministic readiness and row-status semantics (`labeled` vs `not_evaluable`) without live threshold changes.
+- Canonicalized explicit handling for non-finite numeric rows via `excluded_invalid_rows` accounting.
 
 
 ## 5.5.0 — Shadow-mode primary-path contract hardened

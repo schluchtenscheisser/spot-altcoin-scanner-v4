@@ -1,3 +1,5 @@
+> ARCHIVED (ticket): Implemented in PR for this ticket. Canonical truth is under `docs/canonical/`.
+
 ## Title
 [P0] PR-27 Shadow Calibration vorbereiten (ohne aktive Kalibrierung)
 
