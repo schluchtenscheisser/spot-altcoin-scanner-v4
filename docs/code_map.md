@@ -1,7 +1,7 @@
 # 📘 Code Map — Automatically Generated
 
 **Repository:** schluchtenscheisser/spot-altcoin-scanner  
-**Last Updated:** 2026-03-08 16:15 UTC  
+**Last Updated:** 2026-03-08 16:39 UTC  
 **Generator:** scripts/update_codemap.py
 
 ---
@@ -20,7 +20,7 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 - **Total Modules:** 45
 - **Total Classes:** 19
-- **Total Functions:** 372
+- **Total Functions:** 375
 
 ---
 
@@ -96,9 +96,9 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 **Classes:** `ScannerConfig`
 
-**Functions:** `_budget_mapping, _expect_integer_number, _expect_number, _parse_integer_budget_value, btc_regime_enabled, btc_regime_mode, btc_regime_risk_off_enter_boost, budget_orderbook_top_k, budget_shortlist_size, cmc_api_key, config_version, decision_enabled, decision_min_score_for_enter, decision_min_score_for_wait, decision_require_risk_acceptable_for_enter, decision_require_tradeability_for_enter, exclude_leveraged, exclude_stablecoins, exclude_wrapped, load_config, log_file, log_level, log_to_file, lookback_days_1d, lookback_days_4h, market_cap_max, market_cap_min, mexc_enabled, min_history_days_1d, min_mexc_quote_volume_24h_usdt, min_mexc_share_24h, min_quote_volume_24h, min_turnover_24h, pre_shortlist_market_cap_floor_usd, risk_atr_multiple, risk_atr_period, risk_atr_timeframe, risk_enabled, risk_max_stop_distance_pct, risk_min_rr_to_tp10, risk_min_stop_distance_pct, risk_stop_method, run_mode, scoring_volume_source, shortlist_size, spec_version, timezone, tradeability_band_pct, tradeability_class_thresholds, tradeability_enabled, tradeability_max_spread_pct, tradeability_max_tranches, tradeability_min_depth_1pct_usd, tradeability_notional_chunk_usdt, tradeability_notional_total_usdt, validate_config`
+**Functions:** `_budget_mapping, _expect_integer_number, _expect_number, _parse_integer_budget_value, btc_regime_enabled, btc_regime_mode, btc_regime_risk_off_enter_boost, budget_orderbook_top_k, budget_shortlist_size, cmc_api_key, config_version, decision_enabled, decision_min_score_for_enter, decision_min_score_for_wait, decision_require_risk_acceptable_for_enter, decision_require_tradeability_for_enter, exclude_leveraged, exclude_stablecoins, exclude_wrapped, load_config, log_file, log_level, log_to_file, lookback_days_1d, lookback_days_4h, market_cap_max, market_cap_min, mexc_enabled, min_history_days_1d, min_mexc_quote_volume_24h_usdt, min_mexc_share_24h, min_quote_volume_24h, min_turnover_24h, pre_shortlist_market_cap_floor_usd, risk_atr_multiple, risk_atr_period, risk_atr_timeframe, risk_enabled, risk_max_stop_distance_pct, risk_min_rr_to_tp10, risk_min_stop_distance_pct, risk_stop_method, run_mode, scoring_volume_source, shadow_mode, shortlist_size, spec_version, timezone, tradeability_band_pct, tradeability_class_thresholds, tradeability_enabled, tradeability_max_spread_pct, tradeability_max_tranches, tradeability_min_depth_1pct_usd, tradeability_notional_chunk_usdt, tradeability_notional_total_usdt, validate_config`
 
-**Module Variables:** `CONFIG_PATH, btc_cfg, budget_cfg, cfg_path, class_thresholds, d, decision_cfg, env_var, errors, m` _(+15 more)_
+**Module Variables:** `CONFIG_PATH, allowed_shadow_modes, btc_cfg, budget_cfg, cfg_path, class_thresholds, d, decision_cfg, env_var, errors` _(+18 more)_
 
 **Imports:** `dataclasses, os, pathlib, typing, yaml`
 
@@ -118,7 +118,7 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 **Functions:** `_apply_tradeability_gate, _build_scoring_volume_maps, _compute_mexc_share_24h, _compute_turnover_24h, _enrich_scored_entries_with_market_activity, _extract_cmc_global_volume_24h, _to_optional_float, run_pipeline`
 
-**Module Variables:** `allowed, allowed_classes, asof_dt, asof_iso, asof_ts_ms, breakout_results, btc_regime, cmc, cmc_data, cmc_listings` _(+65 more)_
+**Module Variables:** `allowed, allowed_classes, asof_dt, asof_iso, asof_ts_ms, breakout_results, btc_regime, cmc, cmc_data, cmc_listings` _(+72 more)_
 
 **Imports:** `__future__, clients.mapping, clients.marketcap_client, clients.mexc_client, config, decision, discovery, features` _(+15 more)_
 
@@ -222,9 +222,9 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 ### 📄 `scanner/pipeline/manifest.py`
 
-**Functions:** `_nested_bool, _nested_mapping_value, build_config_hash, derive_feature_flags, read_canonical_schema_version, write_manifest_atomic`
+**Functions:** `_nested_bool, _nested_mapping_value, build_config_hash, derive_feature_flags, derive_pipeline_paths, read_canonical_schema_version, resolve_shadow_mode, write_manifest_atomic`
 
-**Module Variables:** `canonical_json, cursor, tmp_path, version`
+**Module Variables:** `canonical_json, cursor, mode, shadow_cfg, tmp_path, version`
 
 **Imports:** `__future__, hashlib, json, pathlib, typing`
 
@@ -594,6 +594,7 @@ _This section shows which functions call which other functions, helping identify
 | `risk_stop_method` | — | `get` |
 | `run_mode` | — | `get` |
 | `scoring_volume_source` | — | `get` |
+| `shadow_mode` | — | `get` |
 | `shortlist_size` | — | `get` |
 | `spec_version` | — | `get` |
 | `timezone` | — | `get` |
@@ -762,8 +763,10 @@ _This section shows which functions call which other functions, helping identify
 |------------------|----------------|----------------|
 | `_nested_bool` | `_nested_mapping_value` | — |
 | `build_config_hash` | — | `dumps`, `encode`, `hexdigest`, `sha256` |
-| `derive_feature_flags` | `_nested_bool` | — |
+| `derive_feature_flags` | `_nested_bool`, `derive_pipeline_paths` | — |
+| `derive_pipeline_paths` | `resolve_shadow_mode` | — |
 | `read_canonical_schema_version` | — | `ValueError`, `read_text`, `split`, `splitlines`, `startswith`, `strip` |
+| `resolve_shadow_mode` | — | `ValueError`, `get` |
 | `write_manifest_atomic` | — | `dumps`, `mkdir`, `replace`, `with_suffix`, `write_text` |
 
 ### 📄 scanner/pipeline/ohlcv.py
@@ -780,7 +783,7 @@ _This section shows which functions call which other functions, helping identify
 | Calling Function | Internal Calls | External Calls |
 |------------------|----------------|----------------|
 | `__init__` | — | `Path`, `get`, `info`, `mkdir` |
-| `_build_run_manifest` | — | `Path`, `build_config_hash`, `derive_feature_flags`, `get`, `read_canonical_schema_version`, `setdefault`, `strftime`, `utcnow` |
+| `_build_run_manifest` | — | `Path`, `build_config_hash`, `derive_feature_flags`, `derive_pipeline_paths`, `get`, `read_canonical_schema_version`, `setdefault`, `strftime`, `utcnow` |
 | `_build_trade_candidates` | `_sanitize_bool_or_none`, `_sanitize_float_or_none`, `_sanitize_reason_list` | `append`, `get`, `sort` |
 | `_decision_sort_key` | `_sanitize_float_or_none` | `get`, `upper` |
 | `_format_m_usd` | — | `replace` |
@@ -1042,10 +1045,10 @@ _Modules with high external call counts may benefit from refactoring._
 
 | Module | Internal Calls | External Calls | Total | Coupling |
 |--------|----------------|----------------|-------|----------|
-| `scanner/pipeline/output.py` | 21 | 59 | 80 | 🔴 High |
+| `scanner/pipeline/output.py` | 21 | 60 | 81 | 🔴 High |
 | `scanner/tools/backfill_snapshots.py` | 18 | 60 | 78 | 🔴 High |
 | `scanner/pipeline/features.py` | 29 | 47 | 76 | 🔴 High |
-| `scanner/config.py` | 9 | 63 | 72 | 🔴 High |
+| `scanner/config.py` | 9 | 64 | 73 | 🔴 High |
 | `scanner/pipeline/__init__.py` | 9 | 48 | 57 | 🔴 High |
 | `scanner/pipeline/liquidity.py` | 30 | 24 | 54 | ⚠️ Medium |
 | `scanner/pipeline/filters.py` | 17 | 31 | 48 | 🔴 High |
@@ -1065,7 +1068,7 @@ _Modules with high external call counts may benefit from refactoring._
 | `scanner/pipeline/snapshot.py` | 2 | 22 | 24 | 🔴 High |
 | `scanner/backtest/e2_model.py` | 10 | 13 | 23 | ⚠️ Medium |
 | `scanner/pipeline/scoring/trade_levels.py` | 14 | 9 | 23 | ⚠️ Medium |
-| `scanner/pipeline/manifest.py` | 2 | 15 | 17 | 🔴 High |
+| `scanner/pipeline/manifest.py` | 4 | 17 | 21 | 🔴 High |
 | `scanner/pipeline/ohlcv.py` | 1 | 15 | 16 | 🔴 High |
 | `scanner/utils/io_utils.py` | 5 | 10 | 15 | 🔴 High |
 | `scanner/utils/logging_utils.py` | 1 | 14 | 15 | 🔴 High |
@@ -1099,4 +1102,4 @@ _Modules with high external call counts may benefit from refactoring._
 
 ---
 
-_Generated by GitHub Actions • 2026-03-08 16:15 UTC_
+_Generated by GitHub Actions • 2026-03-08 16:39 UTC_
