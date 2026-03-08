@@ -7,6 +7,7 @@ Orchestrates the full daily scanning pipeline.
 
 from __future__ import annotations
 import logging
+import time
 from ..utils.time_utils import utc_now, timestamp_to_ms
 
 from ..config import ScannerConfig
@@ -159,6 +160,7 @@ def run_pipeline(config: ScannerConfig) -> None:
     12. Write snapshot for backtests
     """
     run_mode = config.run_mode
+    pipeline_start_time = time.perf_counter()
 
     # As-Of Timestamp (einmal pro Run)
     asof_dt = utc_now()
@@ -417,6 +419,27 @@ def run_pipeline(config: ScannerConfig) -> None:
     # Step 11: Write reports (Markdown + JSON + Excel)
     logger.info("\n[11/12] Generating reports...")
     report_gen = ReportGenerator(config.raw)
+    stage_counts = {
+        'universe': len(universe),
+        'filtered': len(filtered),
+        'shortlist': len(shortlist),
+        'orderbook_requested': len(selected_symbols),
+        'orderbook_selected': len(selected_symbols),
+        'tradeability_passed': len(shortlist),
+        'tradeability_stopped': len(tradeability_stopped),
+        'ohlcv_symbols': len(ohlcv_data),
+        'features': len(features),
+        'reversal_scored': len(reversal_results),
+        'breakout_scored': len(breakout_results),
+        'pullback_scored': len(pullback_results),
+        'global_top20': len(global_top20),
+    }
+    warnings = []
+    if tradeability_stopped:
+        warnings.append('tradeability_gate_stopped_symbols')
+    if len(orderbooks) < len(selected_symbols):
+        warnings.append('orderbook_partial_fetch')
+
     report_paths = report_gen.save_reports(
         reversal_results,
         breakout_results,
@@ -425,8 +448,22 @@ def run_pipeline(config: ScannerConfig) -> None:
         run_date,
         metadata={
             'mode': run_mode,
+            'run_id': f"{run_date}_{asof_ts_ms}",
+            'timestamp_utc': asof_iso,
             'asof_ts_ms': asof_ts_ms,
             'asof_iso': asof_iso,
+            'stage_counts': stage_counts,
+            'warnings': warnings,
+            'duration_seconds': time.perf_counter() - pipeline_start_time,
+            'shortlist_size_used': config.budget_shortlist_size,
+            'orderbook_top_k_used': config.budget_orderbook_top_k,
+            'data_freshness': {
+                'exchange_info_ts_utc': exchange_info_ts_utc,
+                'tickers_24h_ts_utc': tickers_24h_ts_utc,
+                'market_cap_listings_ts_utc': cmc_listings_ts_utc,
+                'asof_iso_utc': asof_iso,
+                'asof_ts_ms': asof_ts_ms,
+            },
         },
         btc_regime=btc_regime,
     )

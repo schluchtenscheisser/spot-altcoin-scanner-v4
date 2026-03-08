@@ -54,6 +54,38 @@ Dieses Dokument protokolliert alle Änderungen an:
 ## Historie
 *(Neue Einträge kommen hier darunter)*
 
+### 2026-03-08 — schema_version v1.11 → v1.12 — Separates Run-Manifest als operatives Artefakt (additiv)
+**PR:** (branch-local, ticket/2026-03-08_P0_PR-19_run-manifest)  
+**Typ:** additiv
+
+#### Was hat sich geändert?
+- Report-JSON enthält zusätzlich ein separates Objekt `run_manifest`.
+- Zusätzlich wird pro Run eine eigene Datei `<run_date>_<run_id>.manifest.json` geschrieben.
+- Mindestfelder im Manifest: `run_id`, `timestamp_utc`, `config_hash`, `canonical_schema_version`, `feature_flags`, `counts_per_stage`, `shortlist_size_used`, `orderbook_top_k_used`, `data_freshness`, `warnings`, `duration_seconds`.
+- `warnings` bleibt deterministisch als Liste und fällt ohne Warnungen auf `[]` (nicht `null`) zurück.
+
+#### Warum?
+- Bessere Operabilität/Nachvollziehbarkeit pro Lauf, ohne die Trading-SoT `trade_candidates` zu vermischen.
+
+#### Kompatibilität
+- **Rückwärtskompatibel?** Ja.
+- Änderung ist additiv; bestehende Consumer können `run_manifest` ignorieren.
+
+#### Migration / Vorgehen
+- Consumer können ab `schema_version >= v1.12` das Manifest direkt aus dem JSON lesen oder aus der separaten Manifest-Datei.
+- `trade_candidates` bleibt unverändert Source of Truth für Kandidatenentscheidungen.
+
+#### Beispiel (kurz)
+```json
+{
+  "schema_version": "v1.12",
+  "run_manifest": {
+    "run_id": "2026-03-08_1772946835000",
+    "warnings": []
+  }
+}
+```
+
 ### 2026-03-08 — schema_version v1.9 → v1.10 — Setup-Invalidation-Anchor Kontexfelder (additiv)
 **PR:** (branch-local, ticket/2026-03-07_P0_PR-10_setup-invalidation-anchors-v4.2.1)  
 **Typ:** additiv

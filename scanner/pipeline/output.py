@@ -7,12 +7,18 @@ from scored results.
 """
 
 import logging
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 from pathlib import Path
 import json
 
 from scanner.schema import REPORT_META_VERSION, REPORT_SCHEMA_VERSION
+from .manifest import (
+    build_config_hash,
+    derive_feature_flags,
+    read_canonical_schema_version,
+    write_manifest_atomic,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +37,10 @@ class ReportGenerator:
         """
         # Handle both dict and ScannerConfig object
         if hasattr(config, 'raw'):
+            self.root_config = config.raw
             output_config = config.raw.get('output', {})
         else:
+            self.root_config = config
             output_config = config.get('output', {})
         
         self.reports_dir = Path(output_config.get('reports_dir', 'reports'))
@@ -42,6 +50,55 @@ class ReportGenerator:
         self.reports_dir.mkdir(parents=True, exist_ok=True)
         
         logger.info(f"Report Generator initialized: reports_dir={self.reports_dir}")
+
+    def _build_run_manifest(
+        self,
+        run_date: str,
+        metadata: Optional[Dict[str, Any]],
+        trade_candidates: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        metadata = metadata or {}
+        asof_ts_ms = metadata.get("asof_ts_ms")
+        asof_iso = metadata.get("asof_iso")
+        run_id = str(metadata.get("run_id") or asof_ts_ms or run_date)
+
+        default_stage_counts = {
+            "trade_candidates": len(trade_candidates),
+        }
+        stage_counts = metadata.get("stage_counts")
+        if not isinstance(stage_counts, dict):
+            stage_counts = default_stage_counts
+        else:
+            stage_counts = {**stage_counts}
+            stage_counts.setdefault("trade_candidates", len(trade_candidates))
+
+        warnings_list = metadata.get("warnings", [])
+        if isinstance(warnings_list, list):
+            warnings_payload = [str(item) for item in warnings_list]
+        else:
+            warnings_payload = [str(warnings_list)]
+
+        data_freshness = metadata.get("data_freshness")
+        if not isinstance(data_freshness, dict):
+            data_freshness = {
+                "asof_iso_utc": asof_iso,
+                "asof_ts_ms": asof_ts_ms,
+            }
+
+        manifest = {
+            "run_id": run_id,
+            "timestamp_utc": metadata.get("timestamp_utc") or datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "config_hash": build_config_hash(self.root_config),
+            "canonical_schema_version": read_canonical_schema_version(Path("docs/canonical/CHANGELOG.md")),
+            "feature_flags": derive_feature_flags(self.root_config),
+            "counts_per_stage": stage_counts,
+            "shortlist_size_used": metadata.get("shortlist_size_used", self.root_config.get("budget", {}).get("shortlist_size", 200)),
+            "orderbook_top_k_used": metadata.get("orderbook_top_k_used", self.root_config.get("budget", {}).get("orderbook_top_k", 200)),
+            "data_freshness": data_freshness,
+            "warnings": warnings_payload,
+            "duration_seconds": float(metadata.get("duration_seconds", 0.0)),
+        }
+        return manifest
     
     def generate_markdown_report(
         self,
@@ -438,6 +495,9 @@ class ReportGenerator:
         Returns:
             Report dict (JSON-serializable)
         """
+        trade_candidates = self._build_trade_candidates(global_top20[:20], btc_regime=btc_regime)
+        run_manifest = self._build_run_manifest(run_date=run_date, metadata=metadata, trade_candidates=trade_candidates)
+
         report = {
             'schema_version': REPORT_SCHEMA_VERSION,
             'meta': {
@@ -464,7 +524,8 @@ class ReportGenerator:
                 'pullbacks': self._with_rank(pullback_results[:self.top_n]),
                 'global_top20': self._with_rank(global_top20[:20])
             },
-            'trade_candidates': self._build_trade_candidates(global_top20[:20], btc_regime=btc_regime),
+            'trade_candidates': trade_candidates,
+            'run_manifest': run_manifest,
             'btc_regime': btc_regime or {
                 'state': 'RISK_OFF',
                 'multiplier_risk_on': 1.0,
@@ -527,6 +588,12 @@ class ReportGenerator:
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(json_content, f, indent=2, ensure_ascii=False)
         logger.info(f"JSON report saved: {json_path}")
+
+        manifest = json_content.get("run_manifest", {})
+        run_id = manifest.get("run_id", run_date)
+        manifest_path = self.reports_dir / f"{run_date}_{run_id}.manifest.json"
+        write_manifest_atomic(manifest_path, manifest)
+        logger.info(f"Run manifest saved: {manifest_path}")
         
         # Generate Excel
         try:
@@ -552,7 +619,8 @@ class ReportGenerator:
         
         result = {
             'markdown': md_path,
-            'json': json_path
+            'json': json_path,
+            'manifest': manifest_path,
         }
         
         if excel_path:
