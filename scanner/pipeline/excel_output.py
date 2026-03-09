@@ -40,6 +40,8 @@ class ExcelReportGenerator:
         ("risk_acceptable", "Risk Acceptable"),
         ("entry_price_usdt", "Entry Price (USDT)"),
         ("current_price_usdt", "Current Price (USDT)"),
+        ("distance_to_entry_pct", "Distance to Entry (%)"),
+        ("entry_state", "Entry State"),
         ("stop_price_initial", "Stop Price Initial"),
         ("risk_pct_to_stop", "Risk % to Stop"),
         ("tp10_price", "TP10 Price"),

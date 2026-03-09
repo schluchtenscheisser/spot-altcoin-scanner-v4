@@ -4,7 +4,7 @@
 ```yaml
 id: CANON_OUTPUT_SCHEMA
 status: canonical
-schema_version: v1.15
+schema_version: v1.16
 canonical_schema_version_ref: docs/canonical/CHANGELOG.md
 outputs:
   - json
@@ -58,6 +58,8 @@ Minimum required fields:
 - `decision_reasons`
 - `entry_price_usdt`
 - `current_price_usdt`
+- `distance_to_entry_pct`
+- `entry_state`
 - `stop_price_initial`
 - `risk_pct_to_stop`
 - `tp10_price`
@@ -93,6 +95,13 @@ Price semantics (authoritative):
   - breakout/reversal: `entry_trigger`
 - `current_price_usdt` MUST represent the current spot price (`price_usdt`) as a separate field.
 - Both fields are nullable and MUST be `null` when missing, non-finite, non-positive, or otherwise not evaluable.
+- `distance_to_entry_pct` MUST be computed as `((current_price_usdt / entry_price_usdt) - 1.0) * 100` when both prices are valid positive finite numbers; otherwise `null`.
+- `entry_state` is a deterministic timing-state enum derived from `distance_to_entry_pct` and MUST be `null` when distance is `null`.
+- Entry-state thresholds (V1):
+  - `early`: `distance_to_entry_pct < -0.25`
+  - `at_trigger`: `-0.25 <= distance_to_entry_pct <= +0.25`
+  - `late`: `+0.25 < distance_to_entry_pct <= +3.00`
+  - `chased`: `distance_to_entry_pct > +3.00`
 
 ## Nullable rules (authoritative)
 Whenever a field is semantically not evaluable, value MUST remain `null`.
@@ -107,6 +116,8 @@ Typical nullable fields include (non-exhaustive):
 - `rr_to_tp20`
 - `entry_price_usdt`
 - `current_price_usdt`
+- `distance_to_entry_pct`
+- `entry_state`
 - `spread_bps`
 - `slippage_bps`
 - `global_volume_24h_usd`

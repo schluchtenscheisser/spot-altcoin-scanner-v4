@@ -1,3 +1,4 @@
+import pytest
 import json
 from pathlib import Path
 
@@ -240,7 +241,7 @@ def test_trade_candidates_contains_required_fields_and_deterministic_sorting() -
 
     required_fields = {
         "rank", "symbol", "coin_name", "decision", "decision_reasons", "entry_price_usdt", "current_price_usdt", "stop_price_initial",
-        "risk_pct_to_stop", "tp10_price", "tp20_price", "rr_to_tp10", "rr_to_tp20", "best_setup_type", "setup_subtype",
+        "risk_pct_to_stop", "tp10_price", "tp20_price", "rr_to_tp10", "rr_to_tp20", "distance_to_entry_pct", "entry_state", "best_setup_type", "setup_subtype",
         "setup_score", "global_score", "entry_ready", "entry_readiness_reasons", "tradeability_class", "execution_mode",
         "spread_pct", "depth_bid_1pct_usd", "depth_ask_1pct_usd", "slippage_bps_5k", "slippage_bps_20k", "risk_acceptable",
         "market_cap_usd", "btc_regime", "flags",
@@ -251,10 +252,16 @@ def test_trade_candidates_contains_required_fields_and_deterministic_sorting() -
     assert trade_candidates[0]["btc_regime"] == "RISK_OFF"
     assert trade_candidates[0]["entry_price_usdt"] == 0.95
     assert trade_candidates[0]["current_price_usdt"] == 1.0
+    assert trade_candidates[0]["distance_to_entry_pct"] == 5.263157894736836
+    assert trade_candidates[0]["entry_state"] == "chased"
     assert trade_candidates[1]["entry_price_usdt"] == 2.1
     assert trade_candidates[1]["current_price_usdt"] == 2.0
+    assert trade_candidates[1]["distance_to_entry_pct"] == -4.761904761904767
+    assert trade_candidates[1]["entry_state"] == "early"
     assert trade_candidates[2]["entry_price_usdt"] == 9.5
     assert trade_candidates[2]["current_price_usdt"] == 10.0
+    assert trade_candidates[2]["distance_to_entry_pct"] == 5.263157894736836
+    assert trade_candidates[2]["entry_state"] == "chased"
 
 
 def test_trade_candidates_keeps_nullable_fields_as_null_without_coercion() -> None:
@@ -449,3 +456,61 @@ def test_trade_candidates_directional_volume_preparation_sanitizes_finite_fields
         "imbalance_ratio": 1.5,
         "lookback_bars": 48,
     }
+
+
+def test_trade_candidate_entry_timing_fields_follow_thresholds_and_nullability() -> None:
+    generator = ReportGenerator({"output": {"top_n_per_setup": 5}})
+
+    global_top20 = [
+        {
+            "symbol": "ATUSDT",
+            "coin_name": "At",
+            "decision": "WAIT",
+            "decision_reasons": ["entry_not_confirmed"],
+            "best_setup_type": "breakout",
+            "analysis": {"trade_levels": {"entry_trigger": 100.0}},
+            "price_usdt": 100.0,
+        },
+        {
+            "symbol": "LTUSDT",
+            "coin_name": "Late",
+            "decision": "WAIT",
+            "decision_reasons": ["entry_not_confirmed"],
+            "best_setup_type": "breakout",
+            "analysis": {"trade_levels": {"entry_trigger": 100.0}},
+            "price_usdt": 101.0,
+        },
+        {
+            "symbol": "ERUSDT",
+            "coin_name": "Early",
+            "decision": "WAIT",
+            "decision_reasons": ["entry_not_confirmed"],
+            "best_setup_type": "breakout",
+            "analysis": {"trade_levels": {"entry_trigger": 100.0}},
+            "price_usdt": 97.0,
+        },
+        {
+            "symbol": "NULUSDT",
+            "coin_name": "Null",
+            "decision": "WAIT",
+            "decision_reasons": ["entry_not_confirmed"],
+            "best_setup_type": "breakout",
+            "analysis": {"trade_levels": {"entry_trigger": None}},
+            "price_usdt": None,
+        },
+    ]
+
+    trade_candidates = generator.generate_json_report([], [], [], global_top20, "2026-03-09")["trade_candidates"]
+    by_symbol = {row["symbol"]: row for row in trade_candidates}
+
+    assert by_symbol["ATUSDT"]["distance_to_entry_pct"] == 0.0
+    assert by_symbol["ATUSDT"]["entry_state"] == "at_trigger"
+
+    assert by_symbol["ERUSDT"]["distance_to_entry_pct"] == pytest.approx(-3.0)
+    assert by_symbol["ERUSDT"]["entry_state"] == "early"
+
+    assert by_symbol["LTUSDT"]["distance_to_entry_pct"] == pytest.approx(1.0)
+    assert by_symbol["LTUSDT"]["entry_state"] == "late"
+
+    assert by_symbol["NULUSDT"]["distance_to_entry_pct"] is None
+    assert by_symbol["NULUSDT"]["entry_state"] is None

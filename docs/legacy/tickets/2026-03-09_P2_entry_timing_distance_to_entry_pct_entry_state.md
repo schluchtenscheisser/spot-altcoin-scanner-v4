@@ -1,3 +1,5 @@
+> ARCHIVED (ticket): Implemented in PR for this ticket. Canonical truth is under `docs/canonical/`.
+
 # Ticket: Entry-Timing sichtbar machen (`distance_to_entry_pct` + `entry_state`)
 
 ## Kontext

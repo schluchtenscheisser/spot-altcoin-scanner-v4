@@ -74,11 +74,12 @@ def test_excel_report_contains_trade_candidates_columns_and_null_semantics(tmp_p
     wb = load_workbook(excel_path)
 
     ws_trade = wb["Trade Candidates"]
-    headers = [ws_trade.cell(row=1, column=i).value for i in range(1, 8)]
+    headers = [ws_trade.cell(row=1, column=i).value for i in range(1, ws_trade.max_column + 1)]
     assert headers[:5] == ["Rank", "Symbol", "Name", "Decision", "Decision Reasons"]
+    market_cap_col = headers.index("Market Cap USD") + 1
     assert ws_trade.cell(row=2, column=2).value == "AAAUSDT"
     assert ws_trade.cell(row=3, column=5).value == "entry_not_confirmed | btc_regime_caution"
-    assert ws_trade.cell(row=3, column=27).value is None
+    assert ws_trade.cell(row=3, column=market_cap_col).value is None
 
 
 def test_markdown_keeps_nullables_as_na() -> None:

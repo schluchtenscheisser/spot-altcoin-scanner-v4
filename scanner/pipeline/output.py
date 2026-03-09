@@ -24,6 +24,8 @@ from .manifest import (
 logger = logging.getLogger(__name__)
 
 _DECISION_PRIORITY = {"ENTER": 0, "WAIT": 1, "NO_TRADE": 2}
+_ENTRY_AT_TRIGGER_TOLERANCE_PCT = 0.25
+_ENTRY_CHASED_THRESHOLD_PCT = 3.0
 
 
 class ReportGenerator:
@@ -222,6 +224,8 @@ class ReportGenerator:
         lines.append(f"- risk_acceptable: {self._format_nullable_bool(row.get('risk_acceptable'))}")
         lines.append(f"- rr_to_tp10: {self._format_nullable_float(row.get('rr_to_tp10'))}")
         lines.append(f"- slippage_bps_20k: {self._format_nullable_float(row.get('slippage_bps_20k'))}")
+        lines.append(f"- distance_to_entry_pct: {self._format_nullable_float(row.get('distance_to_entry_pct'))}")
+        lines.append(f"- entry_state: {row.get('entry_state') or 'n/a'}")
         lines.append(f"- spread_pct: {self._format_nullable_float(row.get('spread_pct'), digits=6)}")
         lines.append(f"- depth_bid_1pct_usd: {self._format_nullable_float(row.get('depth_bid_1pct_usd'), digits=2)}")
         lines.append(f"- depth_ask_1pct_usd: {self._format_nullable_float(row.get('depth_ask_1pct_usd'), digits=2)}")
@@ -460,6 +464,28 @@ class ReportGenerator:
             str(row.get("best_setup_type") or ""),
         )
 
+
+    @classmethod
+    def _compute_distance_to_entry_pct(cls, entry_price: Any, current_price: Any) -> float | None:
+        entry_numeric = cls._sanitize_positive_float_or_none(entry_price)
+        current_numeric = cls._sanitize_positive_float_or_none(current_price)
+        if entry_numeric is None or current_numeric is None:
+            return None
+        return ((current_numeric / entry_numeric) - 1.0) * 100.0
+
+    @classmethod
+    def _classify_entry_state(cls, distance_to_entry_pct: Any) -> str | None:
+        distance_numeric = cls._sanitize_float_or_none(distance_to_entry_pct)
+        if distance_numeric is None:
+            return None
+        if distance_numeric < -_ENTRY_AT_TRIGGER_TOLERANCE_PCT:
+            return "early"
+        if abs(distance_numeric) <= _ENTRY_AT_TRIGGER_TOLERANCE_PCT:
+            return "at_trigger"
+        if distance_numeric <= _ENTRY_CHASED_THRESHOLD_PCT:
+            return "late"
+        return "chased"
+
     def _build_trade_candidates(self, global_top20: List[Dict[str, Any]], btc_regime: Dict[str, Any] = None) -> List[Dict[str, Any]]:
         regime_state = ((btc_regime or {}).get("state") or "NEUTRAL")
         candidates: List[Dict[str, Any]] = []
@@ -467,6 +493,8 @@ class ReportGenerator:
             trade_levels = (row.get("analysis") or {}).get("trade_levels") if isinstance(row.get("analysis"), dict) else {}
             targets = trade_levels.get("targets") if isinstance(trade_levels, dict) and isinstance(trade_levels.get("targets"), list) else []
             entry_price = self._resolve_planned_entry_price(row)
+            current_price = self._sanitize_positive_float_or_none(row.get("price_usdt"))
+            distance_to_entry_pct = self._compute_distance_to_entry_pct(entry_price, current_price)
             candidate = {
                 "rank": None,
                 "symbol": row.get("symbol"),
@@ -474,7 +502,9 @@ class ReportGenerator:
                 "decision": row.get("decision", "NO_TRADE"),
                 "decision_reasons": self._sanitize_reason_list(row.get("decision_reasons")),
                 "entry_price_usdt": entry_price,
-                "current_price_usdt": self._sanitize_positive_float_or_none(row.get("price_usdt")),
+                "current_price_usdt": current_price,
+                "distance_to_entry_pct": self._sanitize_float_or_none(distance_to_entry_pct),
+                "entry_state": self._classify_entry_state(distance_to_entry_pct),
                 "stop_price_initial": self._sanitize_float_or_none(row.get("stop_price_initial")),
                 "risk_pct_to_stop": self._sanitize_float_or_none(row.get("risk_pct_to_stop")),
                 "tp10_price": self._sanitize_float_or_none(row.get("tp10_price", targets[0] if len(targets) >= 1 else None)),
