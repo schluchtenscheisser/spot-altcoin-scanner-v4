@@ -55,6 +55,38 @@ Dieses Dokument protokolliert alle Änderungen an:
 *(Neue Einträge kommen hier darunter)*
 
 
+### 2026-03-09 — schema_version v1.15 → v1.16 — Entry-Timing Felder `distance_to_entry_pct` + `entry_state` (additiv)
+**PR:** (branch-local, ticket/2026-03-09_P2_entry_timing_distance_to_entry_pct_entry_state)
+
+**Änderung**
+- `trade_candidates` erweitert um:
+  - `distance_to_entry_pct` (`float|null`) mit Formel `((current_price_usdt / entry_price_usdt) - 1.0) * 100`
+  - `entry_state` (`string|null`) mit V1-Domain `{early, at_trigger, late, chased}`
+- Fehlende/ungültige Preisinputs führen deterministisch zu `distance_to_entry_pct=null` und `entry_state=null`.
+- Markdown/Excel-Renderings spiegeln die neuen Felder als reine SoT-Views.
+
+**Backwards compatibility**
+- Additiv, nicht-breaking.
+- Consumer, die starre Spalten-/Feldlisten nutzen, müssen um die neuen Keys erweitert werden.
+
+**Migrationshinweis**
+- Für Contract-Gating auf `schema_version >= v1.16` prüfen.
+
+**Beispiel (gekürzt)**
+```json
+{
+  "schema_version": "v1.16",
+  "trade_candidates": [
+    {
+      "entry_price_usdt": 100.0,
+      "current_price_usdt": 101.0,
+      "distance_to_entry_pct": 1.0,
+      "entry_state": "late"
+    }
+  ]
+}
+```
+
 ### 2026-03-08 — schema_version v1.14 → v1.15 — Optional `directional_volume_preparation` Namespace in `trade_candidates` (additiv)
 **PR:** (branch-local, ticket/2026-03-08_p1_followup_directional-volume-architecture-prep)  
 **Typ:** additiv

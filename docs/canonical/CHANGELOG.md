@@ -4,7 +4,7 @@
 ```yaml
 id: CANON_CHANGELOG
 status: canonical
-canonical_schema_version: 5.6.0
+canonical_schema_version: 5.7.0
 canonical_schema_versioning: semver
 canonical_schema_version_location: docs/canonical/CHANGELOG.md
 ```
@@ -19,9 +19,10 @@ canonical_schema_version_location: docs/canonical/CHANGELOG.md
 Rule: Every canonical contract change PR must evaluate version impact and update this value accordingly.
 
 
-
-
-
+## 5.7.0 — Entry timing output semantics
+- Added optional `trade_candidates.distance_to_entry_pct` as deterministic percentage distance between `current_price_usdt` and `entry_price_usdt`.
+- Added optional `trade_candidates.entry_state` enum (`early|at_trigger|late|chased`) with fixed V1 thresholds and nullability rules.
+- Clarified these fields as interpretability-only output semantics that MUST NOT change decision/scoring/ranking behavior.
 
 ## 5.6.0 — Directional-volume preparation namespace (non-active)
 - Added optional `trade_candidates.directional_volume_preparation` namespace for forward-compatible Directional Volume integration.

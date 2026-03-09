@@ -69,6 +69,12 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - Missing tradeability config keys use canonical defaults; invalid threshold ordering raises a clear validation error (no silent coercion).
 
 
+## Entry timing verification boundaries
+- `distance_to_entry_pct` uses `((current_price_usdt / entry_price_usdt) - 1.0) * 100` with no UI-rounding dependence.
+- Missing/invalid/non-positive `entry_price_usdt` or `current_price_usdt` yields `distance_to_entry_pct=null` and `entry_state=null`.
+- Entry-state thresholds are deterministic: `early (<-0.25)`, `at_trigger ([-0.25,+0.25])`, `late ((+0.25,+3.00])`, `chased (>+3.00)`.
+- Entry-timing fields are output-only semantics and MUST NOT alter decision, risk, scoring, or ranking behavior.
+
 ## Phase-1 risk computation verification boundaries
 - Risk fields `stop_price_initial`, `risk_pct_to_stop`, `rr_to_tp10`, `rr_to_tp20`, `risk_acceptable` are computed only when planned entry and ATR are valid positive numbers.
 - Long-spot invariant is strict: if `stop_price_initial >= entry_price`, all risk fields remain nullable (`null`).
