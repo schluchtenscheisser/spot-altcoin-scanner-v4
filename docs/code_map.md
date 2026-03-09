@@ -1,7 +1,7 @@
 # 📘 Code Map — Automatically Generated
 
 **Repository:** schluchtenscheisser/spot-altcoin-scanner  
-**Last Updated:** 2026-03-09 17:28 UTC  
+**Last Updated:** 2026-03-09 17:36 UTC  
 **Generator:** scripts/update_codemap.py
 
 ---
@@ -20,7 +20,7 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 - **Total Modules:** 46
 - **Total Classes:** 19
-- **Total Functions:** 396
+- **Total Functions:** 400
 
 ---
 
@@ -170,7 +170,7 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 **Functions:** `__init__, _create_summary_sheet, _create_trade_candidates_sheet, _sanitize_float_if_needed, _sanitize_float_or_none, _to_excel_cell_value, _validate_trade_candidates, generate_excel_report`
 
-**Module Variables:** `ALLOWED_DECISIONS, CANDIDATE_COLUMNS, REQUIRED_FIELDS, btc_regime, cell, checks, col, counts, decision, enter_candidates` _(+12 more)_
+**Module Variables:** `ALLOWED_DECISIONS, CANDIDATE_COLUMNS, REQUIRED_FIELDS, btc_regime, cell, checks, col, counts, decision, enter_candidates` _(+16 more)_
 
 **Imports:** `datetime, logging, math, openpyxl, openpyxl.styles, openpyxl.utils, pathlib, typing`
 
@@ -246,9 +246,9 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 **Classes:** `ReportGenerator`
 
-**Functions:** `__init__, _build_run_manifest, _build_trade_candidates, _classify_entry_state, _compute_distance_to_entry_pct, _decision_sort_key, _finite_number_or_none, _format_m_usd, _format_markdown_summary, _format_nullable_bool, _format_nullable_float, _format_pct, _format_reason_list, _format_setup_entry, _format_trade_candidate_markdown, _resolve_planned_entry_price, _sanitize_bool_or_none, _sanitize_directional_volume_preparation, _sanitize_float_or_none, _sanitize_optional_metric, _sanitize_positive_float_or_none, _sanitize_reason_list, _validate_trade_candidates_for_markdown, _with_rank, generate_json_report, generate_markdown_report, save_reports`
+**Functions:** `__init__, _append_timing_reason, _build_entry_state_counts, _build_entry_state_counts_by_decision, _build_run_manifest, _build_trade_candidates, _classify_entry_state, _compute_distance_to_entry_pct, _decision_sort_key, _entry_state_key, _finite_number_or_none, _format_m_usd, _format_markdown_summary, _format_nullable_bool, _format_nullable_float, _format_pct, _format_reason_list, _format_setup_entry, _format_trade_candidate_markdown, _resolve_planned_entry_price, _sanitize_bool_or_none, _sanitize_directional_volume_preparation, _sanitize_float_or_none, _sanitize_optional_metric, _sanitize_positive_float_or_none, _sanitize_reason_list, _validate_trade_candidates_for_markdown, _with_rank, generate_json_report, generate_markdown_report, save_reports`
 
-**Module Variables:** `allowed_keys, analysis, asof_iso, asof_ts_ms, candidate, canonical_schema_version, coin_name, components, counts, current_numeric` _(+66 more)_
+**Module Variables:** `allowed_keys, analysis, asof_iso, asof_ts_ms, candidate, canonical_schema_version, coin_name, components, counts, current_numeric` _(+71 more)_
 
 **Imports:** `datetime, excel_output, json, logging, manifest, pathlib, scanner.schema, typing`
 
@@ -795,14 +795,17 @@ _This section shows which functions call which other functions, helping identify
 | Calling Function | Internal Calls | External Calls |
 |------------------|----------------|----------------|
 | `__init__` | — | `Path`, `get`, `info`, `mkdir` |
+| `_append_timing_reason` | — | `get` |
+| `_build_entry_state_counts` | `_entry_state_key` | `get` |
+| `_build_entry_state_counts_by_decision` | `_entry_state_key` | `get` |
 | `_build_run_manifest` | — | `Path`, `build_config_hash`, `derive_feature_flags`, `derive_pipeline_paths`, `get`, `read_canonical_schema_version`, `setdefault`, `strftime`, `utcnow` |
-| `_build_trade_candidates` | `_classify_entry_state`, `_compute_distance_to_entry_pct`, `_resolve_planned_entry_price`, `_sanitize_bool_or_none`, `_sanitize_directional_volume_preparation`, `_sanitize_float_or_none`, `_sanitize_positive_float_or_none`, `_sanitize_reason_list` | `append`, `get`, `sort` |
+| `_build_trade_candidates` | `_append_timing_reason`, `_classify_entry_state`, `_compute_distance_to_entry_pct`, `_resolve_planned_entry_price`, `_sanitize_bool_or_none`, `_sanitize_directional_volume_preparation`, `_sanitize_float_or_none`, `_sanitize_positive_float_or_none`, `_sanitize_reason_list` | `append`, `get`, `sort` |
 | `_classify_entry_state` | `_sanitize_float_or_none` | — |
 | `_compute_distance_to_entry_pct` | `_sanitize_positive_float_or_none` | — |
 | `_decision_sort_key` | `_sanitize_float_or_none` | `get`, `upper` |
 | `_finite_number_or_none` | — | `ValueError` |
 | `_format_m_usd` | — | `replace` |
-| `_format_markdown_summary` | — | `append`, `get` |
+| `_format_markdown_summary` | `_build_entry_state_counts` | `append`, `get` |
 | `_format_nullable_float` | `_sanitize_float_or_none` | — |
 | `_format_pct` | — | `replace` |
 | `_format_reason_list` | — | `ValueError`, `join` |
@@ -814,7 +817,7 @@ _This section shows which functions call which other functions, helping identify
 | `_sanitize_reason_list` | — | `append`, `strip` |
 | `_validate_trade_candidates_for_markdown` | — | `ValueError`, `get`, `join` |
 | `_with_rank` | `_sanitize_optional_metric` | `append`, `get` |
-| `generate_json_report` | `_build_run_manifest`, `_build_trade_candidates`, `_with_rank` | `endswith`, `get`, `isoformat`, `update`, `utcnow` |
+| `generate_json_report` | `_build_entry_state_counts`, `_build_entry_state_counts_by_decision`, `_build_run_manifest`, `_build_trade_candidates`, `_with_rank` | `endswith`, `get`, `isoformat`, `update`, `utcnow` |
 | `generate_markdown_report` | `_format_markdown_summary`, `_format_trade_candidate_markdown`, `_validate_trade_candidates_for_markdown`, `generate_json_report` | `append`, `extend`, `get`, `join`, `strftime`, `utcnow` |
 | `save_reports` | `generate_json_report`, `generate_markdown_report` | `ExcelReportGenerator`, `dump`, `error`, `generate_excel_report`, `get`, `info`, `warning`, `write`, `write_manifest_atomic` |
 
@@ -1080,7 +1083,7 @@ _Modules with high external call counts may benefit from refactoring._
 
 | Module | Internal Calls | External Calls | Total | Coupling |
 |--------|----------------|----------------|-------|----------|
-| `scanner/pipeline/output.py` | 31 | 67 | 98 | 🔴 High |
+| `scanner/pipeline/output.py` | 37 | 70 | 107 | 🔴 High |
 | `scanner/tools/backfill_snapshots.py` | 18 | 60 | 78 | 🔴 High |
 | `scanner/pipeline/features.py` | 29 | 47 | 76 | 🔴 High |
 | `scanner/config.py` | 9 | 64 | 73 | 🔴 High |
@@ -1138,4 +1141,4 @@ _Modules with high external call counts may benefit from refactoring._
 
 ---
 
-_Generated by GitHub Actions • 2026-03-09 17:28 UTC_
+_Generated by GitHub Actions • 2026-03-09 17:36 UTC_
