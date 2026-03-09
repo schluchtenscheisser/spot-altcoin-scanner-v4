@@ -1,0 +1,199 @@
+# Title
+[P1] Trade-candidates: geplanten Entry strikt vom aktuellen Spot trennen
+
+## Kontext / Source
+Im aktuellen Output werden in `trade_candidates` semantisch unterschiedliche Preisbegriffe vermischt.
+
+Beobachteter Ist-Zustand im Repo:
+
+- Die Risk-/RR-Berechnung in `scanner/pipeline/scoring/trade_levels.py` arbeitet mit dem **geplanten Entry**:
+  - Reversal / Breakout: `analysis.trade_levels.entry_trigger`
+  - Pullback: `analysis.trade_levels.entry_zone.center`
+- Die Output-Schicht in `scanner/pipeline/output.py` setzt `trade_candidates.entry_price_usdt` derzeit aus `row.get("entry_price_usdt", row.get("price_usdt"))` und fällt damit typischerweise auf den **aktuellen Spotpreis** zurück.
+- Dadurch können `trade_candidates.entry_price_usdt`, `stop_price_initial`, `rr_to_tp10`, `rr_to_tp20`, `tp10_price`, `tp20_price` semantisch auf unterschiedlichen Preisankern beruhen.
+
+Das erzeugt fachlich irreführende Reports.
+
+Dieses Ticket ist bewusst **nur** der Prio-1-Datenmodell-/Output-Fix. Änderungen an Risk-, Scoring- oder Decision-Logik sind **nicht** Teil dieses Tickets.
+
+## Goal
+`trade_candidates` sollen nach diesem Fix einen fachlich konsistenten Preisanker verwenden:
+
+- `entry_price_usdt` repräsentiert den **geplanten Entry des Setups**, nicht den aktuellen Spotpreis.
+- Der **aktuelle Spotpreis** wird separat als eigenes Feld ausgegeben.
+- Die bereits vorhandenen Risk-/Target-Felder bleiben auf denselben geplanten Entry bezogen.
+- Ein Leser des Reports kann klar unterscheiden zwischen:
+  - geplantem Entry
+  - aktuellem Spot
+  - daraus resultierender Timing-Distanz
+
+## Scope
+Erlaubte Änderungen in diesem Ticket:
+
+- `scanner/pipeline/output.py`
+- zugehörige Output-/Schema-Validierung in denselben Output-Pfaden
+- Excel-/Markdown-Rendering, soweit nötig, um das neue Feld sauber zu zeigen
+- Canonical-Doku, falls sich der Output-Vertrag ändert
+- Tests für JSON-/Markdown-/Excel-Output oder output-nahe Helpers
+
+Betroffene reale Repo-Pfade, auf die sich dieses Ticket stützt:
+
+- `scanner/pipeline/output.py`
+- `scanner/pipeline/scoring/trade_levels.py`
+- `docs/canonical/OUTPUT_SCHEMA.md`
+- ggf. `scanner/pipeline/excel_output.py`, falls dort `trade_candidates`-Felder explizit gerendert werden
+- output-nahe Tests unter `tests/`
+
+## Out of Scope
+Explizit **nicht** Teil dieses Tickets:
+
+- keine Änderung von `risk_acceptable`
+- keine Änderung von ATR-Multiples, Stop-Distanzen, RR-Schwellen
+- keine Änderung von `decision.py`
+- keine Änderung von `tradeability`-Gates
+- keine neuen Decision-Reasons
+- keine Änderung der Setup-Scorer
+- keine Änderung von BTC-Regime-Logik
+- keine Änderung von Ranking/Selektion außer rein deterministischer Beibehaltung bestehender Reihenfolge
+
+## Canonical References (important)
+- `docs/canonical/OUTPUT_SCHEMA.md`
+- `docs/canonical/DECISION_LAYER.md`
+- `docs/canonical/PIPELINE.md`
+- `docs/canonical/INDEX.md`
+
+## Proposed change (high-level)
+Beschreibe gewünschtes Verhalten, nicht freie Neuinterpretation:
+
+- **Before:**
+  - `trade_candidates.entry_price_usdt` kann den aktuellen Spotpreis repräsentieren, obwohl `stop_price_initial`, `rr_to_tp10`, `rr_to_tp20`, `tp10_price`, `tp20_price` aus dem geplanten Setup-Entry abgeleitet wurden.
+  - Dadurch ist `entry_price_usdt` kein verlässlicher Preisanker für die übrigen Risk-/Target-Felder.
+- **After:**
+  - `trade_candidates.entry_price_usdt` ist immer der **geplante Entry**.
+    - Pullback: `analysis.trade_levels.entry_zone.center`
+    - Breakout / Reversal: `analysis.trade_levels.entry_trigger`
+  - `trade_candidates.current_price_usdt` wird als **separates** Feld eingeführt und repräsentiert den aktuellen Spotpreis aus `price_usdt`.
+  - Falls der geplante Entry fachlich **nicht evaluierbar** ist, bleibt `trade_candidates.entry_price_usdt = null`.
+  - Falls der aktuelle Spotpreis fachlich **nicht vorhanden / nicht evaluierbar** ist, bleibt `trade_candidates.current_price_usdt = null`.
+  - Bereits vorhandene Risk-/Target-Felder bleiben unverändert an den geplanten Entry gekoppelt.
+- **Edge cases:**
+  - `analysis` fehlt komplett
+  - `analysis.trade_levels` fehlt
+  - `entry_zone` fehlt oder hat keine `center`
+  - `entry_trigger` fehlt
+  - `price_usdt` fehlt
+  - numerisch ungültige Werte (`NaN`, `inf`, `-inf`, nicht konvertierbar)
+- **Backward compatibility impact:**
+  - JSON-Output-Vertrag ändert sich: neues Feld `current_price_usdt`; semantische Präzisierung von `entry_price_usdt`
+  - Markdown-/Excel-Renderings müssen das neue Feld nicht zwingend prominent verwenden, dürfen aber `entry_price_usdt` nicht weiter als Spot missdeuten
+  - bestehende Konsumenten, die `entry_price_usdt` als Spot interpretiert haben, müssen angepasst werden
+
+## Codex Implementation Guardrails (No-Guesswork, Pflicht bei Code-Tickets)
+
+> Diese Sektion ist eine **Ausführungsanweisung** für Codex. Wenn hier etwas nicht eindeutig ist, muss das Ticket angepasst werden. Kein Raten.
+
+- **Config/Defaults:** Dieses Ticket führt **keine neue Konfigurationslogik** ein. Keine ad-hoc Config-Defaults ergänzen. Bestehende zentrale Defaults unverändert lassen.
+- **Nullability:** `entry_price_usdt` und das neue Feld `current_price_usdt` sind **nullable**. `null` bedeutet „fachlich nicht evaluierbar / nicht vorhanden“ und darf nicht implizit zu `false`, `0` oder leerem String koerziert werden.
+- **Strict/Preflight:** Falls Output-Validierung existiert, muss sie den neuen Vertrag vor dem Schreiben prüfen. Keine stillen Korrekturen außerhalb der explizit beschriebenen Sanitization-Regeln.
+- **Not-evaluated vs failed:**
+  - Fehlender geplanter Entry ist **nicht evaluierbar** → `entry_price_usdt = null`
+  - Fehlender Spot ist **nicht evaluierbar** → `current_price_usdt = null`
+  - Numerisch ungültige Inputs (`NaN`, `inf`, `-inf`, nicht parsebar) sind **invalid inputs** und dürfen nicht als numerischer Output durchgereicht werden; sie resultieren in `null` für das jeweilige Output-Feld
+- **Determinismus:** Reihenfolge, Sortierung, Tie-Breaker und Ranking der `trade_candidates` bleiben exakt unverändert. Dieses Ticket ändert nur Preissemantik/Feldausgabe, nicht Selektionslogik.
+- **Repo-Reality:** Vorhandene Helper zur Sanitization/Wertkonvertierung wiederverwenden. Keine zweite parallele Wahrheitsquelle für Entry-Ableitung einführen. Der geplante Entry muss aus den bereits vorhandenen `analysis.trade_levels` stammen.
+- **Raw vs normalized field semantics:**
+  - `entry_price_usdt` ist nach diesem Ticket das **kanonische normalisierte Feld für geplanten Entry**
+  - `current_price_usdt` ist das **kanonische normalisierte Feld für aktuellen Spot**
+  - `price_usdt` bleibt ein input-/setup-nahes Rohfeld im internen Flow und darf im finalen `trade_candidates`-Vertrag nicht stillschweigend die Semantik von `entry_price_usdt` übernehmen
+
+## Implementation Notes (optional but useful)
+- Dataflow:
+  - `trade_levels.py` ist die fachliche Quelle für den geplanten Entry.
+  - `output.py` darf diesen Preisanker nicht durch `price_usdt` überschreiben.
+- Output/Schema:
+  - `trade_candidates.entry_price_usdt` = geplanter Entry
+  - `trade_candidates.current_price_usdt` = aktueller Spot
+- Wichtig:
+  - Dieses Ticket ändert **nicht** die Berechnung von `stop_price_initial`, `rr_to_tp10`, `rr_to_tp20`, `tp10_price`, `tp20_price`.
+  - Diese Felder bleiben so, wie sie heute berechnet werden.
+  - Der Fix ist erfolgreich, wenn der Report dieselbe fachliche Basis für Entry/Risk/Targets sichtbar macht.
+
+## Acceptance Criteria (deterministic)
+1) Für jeden `trade_candidate`, dessen `analysis.trade_levels` einen fachlich auswertbaren geplanten Entry liefert, ist `entry_price_usdt` im finalen JSON genau dieser geplante Entry und **nicht** `price_usdt`.
+
+2) Für Pullback-Setups wird `entry_price_usdt` aus `analysis.trade_levels.entry_zone.center` übernommen, wenn `center` numerisch endlich und > 0 ist; andernfalls ist `entry_price_usdt = null`.
+
+3) Für Breakout- und Reversal-Setups wird `entry_price_usdt` aus `analysis.trade_levels.entry_trigger` übernommen, wenn `entry_trigger` numerisch endlich und > 0 ist; andernfalls ist `entry_price_usdt = null`.
+
+4) Das neue Feld `current_price_usdt` existiert in jedem `trade_candidate` und repräsentiert den aktuellen Spotpreis aus `price_usdt`, falls dieser numerisch endlich und > 0 ist; andernfalls ist `current_price_usdt = null`.
+
+5) `stop_price_initial`, `risk_pct_to_stop`, `rr_to_tp10`, `rr_to_tp20`, `tp10_price`, `tp20_price`, `decision`, `decision_reasons`, `setup_score`, `global_score` und die Sortierreihenfolge der `trade_candidates` bleiben gegenüber derselben Eingabe unverändert, außer dort, wo Snapshot-/Golden-Tests das neue Feld ergänzen.
+
+6) Der Output-Vertrag in `docs/canonical/OUTPUT_SCHEMA.md` beschreibt `entry_price_usdt` nach diesem Ticket explizit als **geplanten Entry** und dokumentiert `current_price_usdt` als separates Feld für den aktuellen Spot.
+
+7) Markdown- und Excel-Renderer dürfen `entry_price_usdt` nicht mehr implizit als Spot behandeln. Wenn sie Preise anzeigen, müssen sie entweder:
+   - `entry_price_usdt` als geplanten Entry zeigen, oder
+   - zusätzlich `current_price_usdt` klar getrennt anzeigen.
+
+8) Nicht-finite numerische Inputs (`NaN`, `inf`, `-inf`) für geplanten Entry oder Spot werden nicht als numerische Outputs serialisiert, sondern führen für das jeweilige Feld zu `null`.
+
+9) Bei identischem Input und identischer Config bleiben Auswahl, Reihenfolge, Rank, Decision und Decision-Reasons der `trade_candidates` deterministisch identisch; nur die korrigierte Preissemantik und das neue Feld kommen hinzu.
+
+## Default-/Edgecase-Abdeckung (Pflicht bei Code-Tickets)
+
+> Markiere explizit, was dieses Ticket abdeckt. Jeder ✅ braucht einen Verweis auf Acceptance Criteria und Test(s).
+> Nicht relevante Punkte werden explizit als N/A markiert.
+
+- **Config Defaults (Missing key → Default):** ✅ N/A – Ticket liest keine neue Config
+- **Config Invalid Value Handling:** ✅ N/A – Ticket führt keine neue Config ein
+- **Nullability / kein bool()-Coercion:** ✅ (AC: #2, #3, #4, #8; Tests: fehlender Entry, fehlender Spot, `null` bleibt `null`)
+- **Not-evaluated vs failed getrennt:** ✅ (AC: #2, #3, #4, #8; Tests: fehlende `trade_levels` vs invalid numerics)
+- **Strict/Preflight Atomizität (0 Partial Writes):** ✅ N/A – Ticket führt kein neues Write-/Preflight-Verhalten ein
+- **ID/Dateiname Namespace-Kollisionen (falls relevant):** ✅ N/A – Ticket ändert keine Benennung/Dateinamen
+- **Deterministische Sortierung/Tie-Breaker:** ✅ (AC: #5, #9; Tests: deterministischer Reproduktions-Test)
+
+## Tests (required if logic changes)
+- **Unit:**
+  - Test: Pullback-Kandidat mit `analysis.trade_levels.entry_zone.center` und `price_usdt` ungleich `center` → `entry_price_usdt == center`, `current_price_usdt == price_usdt`
+  - Test: Breakout- oder Reversal-Kandidat mit `analysis.trade_levels.entry_trigger` und `price_usdt` ungleich Trigger → `entry_price_usdt == entry_trigger`, `current_price_usdt == price_usdt`
+  - Test: `analysis.trade_levels` fehlt → `entry_price_usdt is null`, `current_price_usdt` bleibt numerisch, falls vorhanden
+  - Test: `price_usdt` fehlt → `current_price_usdt is null`, `entry_price_usdt` bleibt aus `trade_levels` ableitbar
+  - Test: `entry_trigger`/`center` ist `NaN` / `inf` / `-inf` / nicht parsebar → `entry_price_usdt is null`
+  - Test: `price_usdt` ist `NaN` / `inf` / `-inf` / nicht parsebar → `current_price_usdt is null`
+  - Test: bestehende Sortierung/Ränge/Decisions bleiben unverändert, wenn nur das neue Feld ergänzt und `entry_price_usdt` semantisch korrigiert wird
+- **Integration:**
+  - JSON-Report-Test mit mindestens einem Pullback- und einem Breakout-/Reversal-Beispiel
+  - Markdown-/Excel-nahe Tests, falls Renderer Feldlisten oder Header explizit prüfen
+- **Golden fixture / verification:**
+  - Golden-/Snapshot-Test für einen repräsentativen Report mit:
+    - `entry_price_usdt` = geplanter Entry
+    - `current_price_usdt` = Spot
+    - unveränderten Decision-/Ranking-Feldern
+
+## Constraints / Invariants (must not change)
+- Keine Änderung an Closed-candle-only-Annahmen
+- Kein Lookahead
+- Deterministic ordering with stable tie-breakers bleibt erhalten
+- Score-Ranges / Scoring-Verhalten bleiben unverändert
+- Timestamp-Units bleiben unverändert
+- Keine Änderung an Risk-/Decision-/Tradeability-Logik
+- Keine Änderung an BTC-Regime-Verhalten
+- Keine Änderung an Setup-Scorern
+- Keine Änderung an bestehenden Stage-Gates oder Budget-Pfaden
+
+## Definition of Done (Codex must satisfy)
+(Reference: `docs/canonical/WORKFLOW_CODEX.md`)
+
+- [ ] Implemented code changes per Acceptance Criteria
+- [ ] Updated canonical docs under `docs/canonical/` (Output-Vertrag präzisiert)
+- [ ] Updated `docs/canonical/VERIFICATION_FOR_AI.md` if required by output-contract verification rules
+- [ ] PR created: exactly **1 ticket → 1 PR**
+- [ ] Ticket moved to `docs/legacy/tickets/` after PR is created
+
+## Metadata (optional)
+```yaml
+created_utc: "2026-03-09T00:00:00Z"
+priority: P1
+type: bugfix
+owner: codex
+related_issues: []
