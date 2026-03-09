@@ -103,6 +103,18 @@ Price semantics (authoritative):
   - `late`: `+0.25 < distance_to_entry_pct <= +3.00`
   - `chased`: `distance_to_entry_pct > +3.00`
 
+TP / RR orientation semantics (authoritative):
+- `tp10_price` and `tp20_price` are canonical reward/risk orientation targets derived only from planned entry:
+  - `tp10_price = entry_price_usdt * 1.10`
+  - `tp20_price = entry_price_usdt * 1.20`
+- `tp10_price` / `tp20_price` MUST be `null` when `entry_price_usdt` is missing, non-finite, or non-positive.
+- `rr_to_tp10` / `rr_to_tp20` MUST be computed against the canonical TP orientation targets:
+  - `rr_to_tp10 = (tp10_price - entry_price_usdt) / (entry_price_usdt - stop_price_initial)`
+  - `rr_to_tp20 = (tp20_price - entry_price_usdt) / (entry_price_usdt - stop_price_initial)`
+- If `stop_price_initial` is missing/invalid/non-positive or `stop_price_initial >= entry_price_usdt`, `rr_to_tp10` and `rr_to_tp20` MUST be `null`.
+- `tp10_price` / `tp20_price` are orientation levels for RR evaluation only; they MUST NOT imply mandatory exits or automated take-profit behavior.
+- Analysis-/scorer-internal targets (for example `analysis.trade_levels.targets`) are allowed as raw analysis context, but MUST NOT overwrite canonical `trade_candidates.tp10_price` / `trade_candidates.tp20_price`.
+
 ## Summary contract
 - `summary` MUST include setup counters (`reversal_count`, `breakout_count`, `pullback_count`, `total_scored`, `global_top20_count`).
 - `summary` MUST include deterministic entry-state diagnostics over `trade_candidates`:

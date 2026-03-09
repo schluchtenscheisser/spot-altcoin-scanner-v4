@@ -1,3 +1,5 @@
+> ARCHIVED (ticket): Implemented in PR for this ticket. Canonical truth is under `docs/canonical/`.
+
 # Title
 [P1] Canonical TP10/TP20: RR-Orientierungsziele auf Entry×1.10 / Entry×1.20 umstellen
 

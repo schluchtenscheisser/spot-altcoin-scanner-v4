@@ -484,6 +484,25 @@ class ReportGenerator:
         return ((current_numeric / entry_numeric) - 1.0) * 100.0
 
     @classmethod
+    def _compute_canonical_tp_prices(cls, entry_price: Any) -> tuple[float | None, float | None]:
+        entry_numeric = cls._sanitize_positive_float_or_none(entry_price)
+        if entry_numeric is None:
+            return None, None
+        return entry_numeric * 1.10, entry_numeric * 1.20
+
+    @classmethod
+    def _compute_rr_to_target(cls, entry_price: Any, stop_price: Any, target_price: Any) -> float | None:
+        entry_numeric = cls._sanitize_positive_float_or_none(entry_price)
+        stop_numeric = cls._sanitize_positive_float_or_none(stop_price)
+        target_numeric = cls._sanitize_positive_float_or_none(target_price)
+        if entry_numeric is None or stop_numeric is None or target_numeric is None:
+            return None
+        if stop_numeric >= entry_numeric:
+            return None
+        risk_abs = entry_numeric - stop_numeric
+        return (target_numeric - entry_numeric) / risk_abs
+
+    @classmethod
     def _classify_entry_state(cls, distance_to_entry_pct: Any) -> str | None:
         distance_numeric = cls._sanitize_float_or_none(distance_to_entry_pct)
         if distance_numeric is None:
@@ -533,12 +552,14 @@ class ReportGenerator:
         regime_state = ((btc_regime or {}).get("state") or "NEUTRAL")
         candidates: List[Dict[str, Any]] = []
         for row in global_top20:
-            trade_levels = (row.get("analysis") or {}).get("trade_levels") if isinstance(row.get("analysis"), dict) else {}
-            targets = trade_levels.get("targets") if isinstance(trade_levels, dict) and isinstance(trade_levels.get("targets"), list) else []
             entry_price = self._resolve_planned_entry_price(row)
             current_price = self._sanitize_positive_float_or_none(row.get("price_usdt"))
             distance_to_entry_pct = self._compute_distance_to_entry_pct(entry_price, current_price)
             entry_state = self._classify_entry_state(distance_to_entry_pct)
+            tp10_price, tp20_price = self._compute_canonical_tp_prices(entry_price)
+            stop_price_initial = self._sanitize_positive_float_or_none(row.get("stop_price_initial"))
+            rr_to_tp10 = self._compute_rr_to_target(entry_price, stop_price_initial, tp10_price)
+            rr_to_tp20 = self._compute_rr_to_target(entry_price, stop_price_initial, tp20_price)
             decision_reasons = self._append_timing_reason(
                 self._sanitize_reason_list(row.get("decision_reasons")),
                 entry_state,
@@ -553,12 +574,12 @@ class ReportGenerator:
                 "current_price_usdt": current_price,
                 "distance_to_entry_pct": self._sanitize_float_or_none(distance_to_entry_pct),
                 "entry_state": entry_state,
-                "stop_price_initial": self._sanitize_float_or_none(row.get("stop_price_initial")),
+                "stop_price_initial": stop_price_initial,
                 "risk_pct_to_stop": self._sanitize_float_or_none(row.get("risk_pct_to_stop")),
-                "tp10_price": self._sanitize_float_or_none(row.get("tp10_price", targets[0] if len(targets) >= 1 else None)),
-                "tp20_price": self._sanitize_float_or_none(row.get("tp20_price", targets[1] if len(targets) >= 2 else None)),
-                "rr_to_tp10": self._sanitize_float_or_none(row.get("rr_to_tp10")),
-                "rr_to_tp20": self._sanitize_float_or_none(row.get("rr_to_tp20")),
+                "tp10_price": self._sanitize_float_or_none(tp10_price),
+                "tp20_price": self._sanitize_float_or_none(tp20_price),
+                "rr_to_tp10": self._sanitize_float_or_none(rr_to_tp10),
+                "rr_to_tp20": self._sanitize_float_or_none(rr_to_tp20),
                 "best_setup_type": row.get("best_setup_type"),
                 "setup_subtype": row.get("setup_subtype"),
                 "setup_score": self._sanitize_float_or_none(row.get("setup_score", row.get("score"))),

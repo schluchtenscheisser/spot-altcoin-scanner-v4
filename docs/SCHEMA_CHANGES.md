@@ -54,6 +54,39 @@ Dieses Dokument protokolliert alle Änderungen an:
 ## Historie
 *(Neue Einträge kommen hier darunter)*
 
+### 2026-03-09 — schema_version v1.16 → v1.17 — Canonical TP10/TP20 als Entry-orientierte RR-Ziele (semantisch)
+**PR:** (branch-local, ticket/2026-03-09__P1__canonical_tp10_tp20_rr_orientation_fix)
+
+**Änderung**
+- `trade_candidates.tp10_price` und `trade_candidates.tp20_price` werden kanonisch aus `entry_price_usdt` abgeleitet (`entry*1.10` / `entry*1.20`).
+- `trade_candidates.rr_to_tp10` und `trade_candidates.rr_to_tp20` werden gegen diese kanonischen Orientierungspreise berechnet.
+- Analysis-/Scorer-Targets (z. B. `analysis.trade_levels.targets`) bleiben als Rohkontext möglich, speisen aber die kanonischen TP-Felder nicht mehr.
+
+**Backwards compatibility**
+- Semantische Änderung bei bestehenden Feldern (`tp10_price`, `tp20_price`, `rr_to_tp10`, `rr_to_tp20`).
+- Consumer mit Erwartung scorer-interner TP-Werte müssen auf den kanonischen Entry-Bezug umstellen.
+
+**Migrationshinweis**
+- Für Contracts mit TP-/RR-Assertions auf `schema_version >= v1.17` prüfen.
+- Bei Vergleich alter/new Runs die geänderte TP-/RR-Semantik berücksichtigen.
+
+**Beispiel (gekürzt)**
+```json
+{
+  "schema_version": "v1.17",
+  "trade_candidates": [
+    {
+      "entry_price_usdt": 100.0,
+      "stop_price_initial": 95.0,
+      "tp10_price": 110.0,
+      "tp20_price": 120.0,
+      "rr_to_tp10": 2.0,
+      "rr_to_tp20": 4.0
+    }
+  ]
+}
+```
+
 
 ### 2026-03-09 — schema_version v1.15 → v1.16 — Entry-Timing Felder `distance_to_entry_pct` + `entry_state` (additiv)
 **PR:** (branch-local, ticket/2026-03-09_P2_entry_timing_distance_to_entry_pct_entry_state)

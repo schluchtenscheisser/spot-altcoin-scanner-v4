@@ -82,6 +82,14 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - `risk_acceptable` is threshold-driven and evaluated only when risk distance and `rr_to_tp10` are evaluable.
 
 
+## Trade-candidates TP/RR orientation verification boundaries
+- Canonical `trade_candidates.tp10_price` / `trade_candidates.tp20_price` must be derived only from planned entry as `entry*1.10` and `entry*1.20`.
+- Canonical `trade_candidates.rr_to_tp10` / `trade_candidates.rr_to_tp20` must be derived against those canonical TP orientation targets.
+- Missing/invalid/non-positive/non-finite `entry_price_usdt` yields `tp10_price=null`, `tp20_price=null`, `rr_to_tp10=null`, `rr_to_tp20=null`.
+- Missing/invalid/non-positive `stop_price_initial` or `stop_price_initial >= entry_price_usdt` yields `rr_to_tp10=null`, `rr_to_tp20=null` while TP orientation prices remain evaluable from valid entry.
+- Analysis/scorer raw target fields (e.g. `analysis.trade_levels.targets`) may exist for analysis, but must not override canonical TP/RR output fields.
+
+
 ## Scorer V2 readiness verification boundaries
 - All affected setup scorers emit `entry_ready`, `entry_readiness_reasons`, and deterministic `setup_subtype`.
 - Breakout emits `breakout_confirmed`; pullback emits `rebound_confirmed` and `retest_reclaimed`; reversal emits `reclaim_confirmed` and `retest_reclaimed`.
