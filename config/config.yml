@@ -36,8 +36,8 @@ risk:
   atr_timeframe: "1d"
   atr_multiple: 2.0
   min_stop_distance_pct: 4.0
-  max_stop_distance_pct: 12.0
-  min_rr_to_tp10: 1.3
+  max_stop_distance_pct: 15.0
+  min_rr_to_tp10: 1.0
 
 decision:
   enabled: true
