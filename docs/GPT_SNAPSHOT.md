@@ -1,7 +1,7 @@
 # Spot Altcoin Scanner • GPT Snapshot
 
-**Generated:** 2026-03-12 21:47 UTC  
-**Commit:** `249156b` (249156bbaf72c8a55f347db1938cd1c7280c7c82)  
+**Generated:** 2026-03-12 22:59 UTC  
+**Commit:** `c4b1ef1` (c4b1ef182171bc92f75426394ff5126075bbee6b)  
 **Status:** MVP Complete (Phase 6)  
 
 ---
@@ -964,12 +964,12 @@ if __name__ == "__main__":
 
 ### `scanner/schema.py`
 
-**SHA256:** `8e9867910d8818065d946723a4c421a1306cd4628acc6b9288043ed47510ad11`
+**SHA256:** `0e17fa56d2a058ac9b3c3b05630e381fc3120ac1ee70050c94e3b4fbdd2409f3`
 
 ```python
 """Schema/version constants for scanner outputs."""
 
-REPORT_SCHEMA_VERSION = "v1.17"
+REPORT_SCHEMA_VERSION = "v1.18"
 REPORT_META_VERSION = "1.9"
 
 ```
@@ -4355,7 +4355,7 @@ def apply_liquidity_metrics_to_shortlist(
 
 ### `scanner/pipeline/excel_output.py`
 
-**SHA256:** `bb4ca28bb4b6abe06cf98e390cd2af2a7dea74e4cb3efeb9116233b73de7754d`
+**SHA256:** `b9c6fd516d0f898e322c2eae67197d6678552130c2656b23064a1d2abbf39a3b`
 
 ```python
 """
@@ -4404,10 +4404,11 @@ class ExcelReportGenerator:
         ("entry_state", "Entry State"),
         ("stop_price_initial", "Stop Price Initial"),
         ("risk_pct_to_stop", "Risk % to Stop"),
-        ("tp10_price", "TP10 Price"),
-        ("tp20_price", "TP20 Price"),
-        ("rr_to_tp10", "RR to TP10"),
-        ("rr_to_tp20", "RR to TP20"),
+        ("target_1_price", "Target 1 Price"),
+        ("target_2_price", "Target 2 Price"),
+        ("target_3_price", "Target 3 Price"),
+        ("rr_to_target_1", "RR to Target 1"),
+        ("rr_to_target_2", "RR to Target 2"),
         ("spread_pct", "Spread %"),
         ("depth_bid_1pct_usd", "Depth Bid 1.0% USD"),
         ("depth_ask_1pct_usd", "Depth Ask 1.0% USD"),
@@ -6442,7 +6443,7 @@ def _stable_reason_order(reasons: Iterable[str]) -> List[str]:
 
 ### `scanner/pipeline/output.py`
 
-**SHA256:** `7d0aee9f63cdd87deffee2c21f929f107430d26d19c02c888e1fe2283d7d06b4`
+**SHA256:** `0d24dc87b7b7d1ffbbc1a8ce80e3aac58be6e2a9bca0e0f339b54628e1d8a80d`
 
 ```python
 """
@@ -6675,7 +6676,7 @@ class ReportGenerator:
         if include_reasons:
             lines.append(f"- decision_reasons: {self._format_reason_list(row.get('decision_reasons'))}")
         lines.append(f"- risk_acceptable: {self._format_nullable_bool(row.get('risk_acceptable'))}")
-        lines.append(f"- rr_to_tp10: {self._format_nullable_float(row.get('rr_to_tp10'))}")
+        lines.append(f"- rr_to_target_1: {self._format_nullable_float(row.get('rr_to_target_1'))}")
         lines.append(f"- slippage_bps_20k: {self._format_nullable_float(row.get('slippage_bps_20k'))}")
         lines.append(f"- distance_to_entry_pct: {self._format_nullable_float(row.get('distance_to_entry_pct'))}")
         lines.append(f"- entry_state: {row.get('entry_state') or 'n/a'}")
@@ -6934,11 +6935,18 @@ class ReportGenerator:
         return ((current_numeric / entry_numeric) - 1.0) * 100.0
 
     @classmethod
-    def _compute_canonical_tp_prices(cls, entry_price: Any) -> tuple[float | None, float | None]:
-        entry_numeric = cls._sanitize_positive_float_or_none(entry_price)
-        if entry_numeric is None:
-            return None, None
-        return entry_numeric * 1.10, entry_numeric * 1.20
+    def _resolve_target_price(cls, row: Dict[str, Any], index: int) -> float | None:
+        direct_key = f"target_{index}_price"
+        direct_value = cls._sanitize_positive_float_or_none(row.get(direct_key))
+        if direct_value is not None:
+            return direct_value
+
+        analysis = row.get("analysis") if isinstance(row.get("analysis"), dict) else {}
+        trade_levels = analysis.get("trade_levels") if isinstance(analysis.get("trade_levels"), dict) else {}
+        targets = trade_levels.get("targets") if isinstance(trade_levels.get("targets"), list) else []
+        if len(targets) < index:
+            return None
+        return cls._sanitize_positive_float_or_none(targets[index - 1])
 
     @classmethod
     def _compute_rr_to_target(cls, entry_price: Any, stop_price: Any, target_price: Any) -> float | None:
@@ -6948,6 +6956,8 @@ class ReportGenerator:
         if entry_numeric is None or stop_numeric is None or target_numeric is None:
             return None
         if stop_numeric >= entry_numeric:
+            return None
+        if target_numeric <= entry_numeric:
             return None
         risk_abs = entry_numeric - stop_numeric
         return (target_numeric - entry_numeric) / risk_abs
@@ -7006,10 +7016,12 @@ class ReportGenerator:
             current_price = self._sanitize_positive_float_or_none(row.get("price_usdt"))
             distance_to_entry_pct = self._compute_distance_to_entry_pct(entry_price, current_price)
             entry_state = self._classify_entry_state(distance_to_entry_pct)
-            tp10_price, tp20_price = self._compute_canonical_tp_prices(entry_price)
             stop_price_initial = self._sanitize_positive_float_or_none(row.get("stop_price_initial"))
-            rr_to_tp10 = self._compute_rr_to_target(entry_price, stop_price_initial, tp10_price)
-            rr_to_tp20 = self._compute_rr_to_target(entry_price, stop_price_initial, tp20_price)
+            target_1_price = self._resolve_target_price(row, index=1)
+            target_2_price = self._resolve_target_price(row, index=2)
+            target_3_price = self._resolve_target_price(row, index=3)
+            rr_to_target_1 = self._compute_rr_to_target(entry_price, stop_price_initial, target_1_price)
+            rr_to_target_2 = self._compute_rr_to_target(entry_price, stop_price_initial, target_2_price)
             decision_reasons = self._append_timing_reason(
                 self._sanitize_reason_list(row.get("decision_reasons")),
                 entry_state,
@@ -7026,10 +7038,11 @@ class ReportGenerator:
                 "entry_state": entry_state,
                 "stop_price_initial": stop_price_initial,
                 "risk_pct_to_stop": self._sanitize_float_or_none(row.get("risk_pct_to_stop")),
-                "tp10_price": self._sanitize_float_or_none(tp10_price),
-                "tp20_price": self._sanitize_float_or_none(tp20_price),
-                "rr_to_tp10": self._sanitize_float_or_none(rr_to_tp10),
-                "rr_to_tp20": self._sanitize_float_or_none(rr_to_tp20),
+                "target_1_price": self._sanitize_float_or_none(target_1_price),
+                "target_2_price": self._sanitize_float_or_none(target_2_price),
+                "target_3_price": self._sanitize_float_or_none(target_3_price),
+                "rr_to_target_1": self._sanitize_float_or_none(rr_to_target_1),
+                "rr_to_target_2": self._sanitize_float_or_none(rr_to_target_2),
                 "best_setup_type": row.get("best_setup_type"),
                 "setup_subtype": row.get("setup_subtype"),
                 "setup_score": self._sanitize_float_or_none(row.get("setup_score", row.get("score"))),
@@ -10045,7 +10058,7 @@ def score_breakouts(features_data: Dict[str, Dict[str, Any]], volumes: Dict[str,
 
 ### `scanner/pipeline/scoring/trade_levels.py`
 
-**SHA256:** `92531a41bd0033cc50ff18772ff119b31081db06292807c4202d39c851eb3403`
+**SHA256:** `f24698445b7c8492580a83204b3ac50d130ca6f07d51d2ed83773624446d29b5`
 
 ```python
 """Deterministic trade-level helpers (output-only, no scoring impact)."""
@@ -10164,8 +10177,8 @@ def compute_phase1_risk_fields(setup_type: str, trade_levels: Dict[str, Any], ro
     result: Dict[str, Any] = {
         "stop_price_initial": None,
         "risk_pct_to_stop": None,
-        "rr_to_tp10": None,
-        "rr_to_tp20": None,
+        "rr_to_target_1": None,
+        "rr_to_target_2": None,
         "risk_acceptable": None,
     }
 
@@ -10192,21 +10205,21 @@ def compute_phase1_risk_fields(setup_type: str, trade_levels: Dict[str, Any], ro
     if tp10 <= entry_price or tp20 <= entry_price:
         return result
 
-    rr_to_tp10 = (tp10 - entry_price) / risk_abs
-    rr_to_tp20 = (tp20 - entry_price) / risk_abs
+    rr_to_target_1 = (tp10 - entry_price) / risk_abs
+    rr_to_target_2 = (tp20 - entry_price) / risk_abs
 
     risk_acceptable = (
         cfg["min_stop_distance_pct"] <= risk_pct_to_stop <= cfg["max_stop_distance_pct"]
-        and rr_to_tp10 is not None
-        and rr_to_tp10 >= cfg["min_rr_to_tp10"]
+        and rr_to_target_1 is not None
+        and rr_to_target_1 >= cfg["min_rr_to_tp10"]
     )
 
     result.update(
         {
             "stop_price_initial": stop_price_initial,
             "risk_pct_to_stop": risk_pct_to_stop,
-            "rr_to_tp10": rr_to_tp10,
-            "rr_to_tp20": rr_to_tp20,
+            "rr_to_target_1": rr_to_target_1,
+            "rr_to_target_2": rr_to_target_2,
             "risk_acceptable": risk_acceptable,
         }
     )
@@ -11873,7 +11886,7 @@ Notes:
 
 ### `docs/canonical/OUTPUT_SCHEMA.md`
 
-**SHA256:** `1d15debd7984728da70eb947dc5fefdd005cf31cf69aa240f0334432da086cf1`
+**SHA256:** `c50349a71422791ff9286ea79c340b9bbe69b426a44ce0f6d2b633b0ff770a9f`
 
 ```markdown
 # Output Schema — Trade Candidates Source of Truth (Canonical)
@@ -11882,7 +11895,7 @@ Notes:
 ```yaml
 id: CANON_OUTPUT_SCHEMA
 status: canonical
-schema_version: v1.17
+schema_version: v1.18
 canonical_schema_version_ref: docs/canonical/CHANGELOG.md
 outputs:
   - json
@@ -11940,10 +11953,11 @@ Minimum required fields:
 - `entry_state`
 - `stop_price_initial`
 - `risk_pct_to_stop`
-- `tp10_price`
-- `tp20_price`
-- `rr_to_tp10`
-- `rr_to_tp20`
+- `target_1_price`
+- `target_2_price`
+- `target_3_price`
+- `rr_to_target_1`
+- `rr_to_target_2`
 - `best_setup_type`
 - `setup_subtype`
 - `setup_score`
@@ -11981,17 +11995,15 @@ Price semantics (authoritative):
   - `late`: `+0.25 < distance_to_entry_pct <= +3.00`
   - `chased`: `distance_to_entry_pct > +3.00`
 
-TP / RR orientation semantics (authoritative):
-- `tp10_price` and `tp20_price` are canonical reward/risk orientation targets derived only from planned entry:
-  - `tp10_price = entry_price_usdt * 1.10`
-  - `tp20_price = entry_price_usdt * 1.20`
-- `tp10_price` / `tp20_price` MUST be `null` when `entry_price_usdt` is missing, non-finite, or non-positive.
-- `rr_to_tp10` / `rr_to_tp20` MUST be computed against the canonical TP orientation targets:
-  - `rr_to_tp10 = (tp10_price - entry_price_usdt) / (entry_price_usdt - stop_price_initial)`
-  - `rr_to_tp20 = (tp20_price - entry_price_usdt) / (entry_price_usdt - stop_price_initial)`
-- If `stop_price_initial` is missing/invalid/non-positive or `stop_price_initial >= entry_price_usdt`, `rr_to_tp10` and `rr_to_tp20` MUST be `null`.
-- `tp10_price` / `tp20_price` are orientation levels for RR evaluation only; they MUST NOT imply mandatory exits or automated take-profit behavior.
-- Analysis-/scorer-internal targets (for example `analysis.trade_levels.targets`) are allowed as raw analysis context, but MUST NOT overwrite canonical `trade_candidates.tp10_price` / `trade_candidates.tp20_price`.
+Target / RR semantics (authoritative):
+- `target_1_price`/`target_2_price`/`target_3_price` MUST be derived exclusively from setup target levels (for example `analysis.trade_levels.targets` or equivalent canonicalized target fields), not from fixed percentage projections.
+- `rr_to_target_1` / `rr_to_target_2` MUST be computed from setup targets and absolute risk:
+  - `rr_to_target_1 = (target_1_price - entry_price_usdt) / (entry_price_usdt - stop_price_initial)`
+  - `rr_to_target_2 = (target_2_price - entry_price_usdt) / (entry_price_usdt - stop_price_initial)`
+- `target_2_price`, `target_3_price`, and `rr_to_target_2` are nullable and MUST remain `null` when fewer targets are available or values are missing/invalid/non-finite/non-positive.
+- If `stop_price_initial` is missing/invalid/non-positive or `stop_price_initial >= entry_price_usdt`, RR fields MUST be `null`.
+- If target prices are missing/invalid/non-positive or `target_n_price <= entry_price_usdt`, the corresponding RR field MUST be `null`.
+- Target fields are orientation levels for RR evaluation only; they MUST NOT imply mandatory exits or automated take-profit behavior.
 
 ## Summary contract
 - `summary` MUST include setup counters (`reversal_count`, `breakout_count`, `pullback_count`, `total_scored`, `global_top20_count`).
@@ -12012,8 +12024,8 @@ Typical nullable fields include (non-exhaustive):
 - `invalidation_derivable`
 - `stop_price_initial`
 - `risk_pct_to_stop`
-- `rr_to_tp10`
-- `rr_to_tp20`
+- `rr_to_target_1`
+- `rr_to_target_2`
 - `entry_price_usdt`
 - `current_price_usdt`
 - `distance_to_entry_pct`
@@ -12087,7 +12099,7 @@ Directional Volume preparation namespace (Phase-1 inactive, optional):
 
 ### `docs/canonical/VERIFICATION_FOR_AI.md`
 
-**SHA256:** `d24a22fc14a1e35a87764aab5e232948e9d0f3fefeb54252af5481c3d9c3c305`
+**SHA256:** `1a07fb2538a5715b2630e797a2d12e12fd4af5eb99236b00072de3f20a71e9ea`
 
 ```markdown
 # Verification for AI — Golden Fixtures, Invariants, Checklist (Canonical)
@@ -12168,19 +12180,19 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - Entry-timing fields are output-only semantics and MUST NOT alter decision, risk, scoring, or ranking behavior.
 
 ## Phase-1 risk computation verification boundaries
-- Risk fields `stop_price_initial`, `risk_pct_to_stop`, `rr_to_tp10`, `rr_to_tp20`, `risk_acceptable` are computed only when planned entry and ATR are valid positive numbers.
+- Risk fields `stop_price_initial`, `risk_pct_to_stop`, `rr_to_target_1`, `rr_to_target_2`, `risk_acceptable` are computed only when planned entry and ATR are valid positive numbers.
 - Long-spot invariant is strict: if `stop_price_initial >= entry_price`, all risk fields remain nullable (`null`).
 - Missing required risk inputs and invalid required risk inputs are both non-evaluable paths and must keep risk fields nullable (`null`) without coercion.
-- `risk_acceptable` is threshold-driven and evaluated only when risk distance and `rr_to_tp10` are evaluable.
+- `risk_acceptable` is threshold-driven and evaluated only when risk distance and `rr_to_target_1` are evaluable.
 
 
 ## Trade-candidates TP/RR orientation verification boundaries
-- Canonical `trade_candidates.tp10_price` / `trade_candidates.tp20_price` must be derived only from planned entry as `entry*1.10` and `entry*1.20`.
-- Canonical `trade_candidates.rr_to_tp10` / `trade_candidates.rr_to_tp20` must be derived against those canonical TP orientation targets.
-- Missing/invalid/non-positive/non-finite `entry_price_usdt` yields `tp10_price=null`, `tp20_price=null`, `rr_to_tp10=null`, `rr_to_tp20=null`.
-- Missing/invalid/non-positive `stop_price_initial` or `stop_price_initial >= entry_price_usdt` yields `rr_to_tp10=null`, `rr_to_tp20=null` while TP orientation prices remain evaluable from valid entry.
+- Canonical `trade_candidates.target_1_price` / `trade_candidates.target_2_price` must be derived from setup-target levels only (no fixed +10%/+20% projection fallback).
+- Canonical `trade_candidates.rr_to_target_1` / `trade_candidates.rr_to_target_2` must be derived against those canonical TP orientation targets.
+- Missing/invalid/non-positive/non-finite `entry_price_usdt` yields `target_1_price=null`, `target_2_price=null`, `rr_to_target_1=null`, `rr_to_target_2=null`.
+- Missing/invalid/non-positive `stop_price_initial` or `stop_price_initial >= entry_price_usdt` yields `rr_to_target_1=null`, `rr_to_target_2=null` and target prices remain nullable based on setup target availability/validity.
 - Analysis/scorer raw target fields (e.g. `analysis.trade_levels.targets`) may exist for analysis, but must not override canonical TP/RR output fields.
-- Drift guard: reports that keep `tp10_price`/`tp20_price` fields but show RR values numerically matching legacy scorer-target behavior (typical `rr_to_tp10≈0.5`, `rr_to_tp20≈1.0` despite different entry/stop-implied canonical RR) must fail verification.
+- Drift guard: reports that keep `target_1_price`/`target_2_price` fields but show RR values numerically matching legacy scorer-target behavior (typical `rr_to_target_1≈0.5`, `rr_to_target_2≈1.0` despite different entry/stop-implied canonical RR) must fail verification.
 
 
 ## Scorer V2 readiness verification boundaries
@@ -12764,4 +12776,4 @@ discovery_source_allowed:
 
 ---
 
-_Generated by GitHub Actions • 2026-03-12 21:47 UTC_
+_Generated by GitHub Actions • 2026-03-12 22:59 UTC_
