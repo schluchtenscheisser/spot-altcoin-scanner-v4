@@ -49,7 +49,7 @@ decision:
 btc_regime:
   enabled: true
   mode: "threshold_modifier"
-  risk_off_enter_boost: 15
+  risk_off_enter_boost: 5
 
 shadow:
   mode: "parallel"   # legacy_only | new_only | parallel
