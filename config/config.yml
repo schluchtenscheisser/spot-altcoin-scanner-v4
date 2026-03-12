@@ -53,7 +53,8 @@ btc_regime:
 
 shadow:
   mode: "parallel"   # legacy_only | new_only | parallel
-
+  primary_path: "new"
+  
 data_sources:
   mexc:
     enabled: true
