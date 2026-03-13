@@ -5,6 +5,8 @@
 > 
 > Naming convention (recommended): `YYYY-MM-DD__<priority>__<short_slug>.md`
 > - priority: P0 | P1 | P2 | P3
+>
+> Verfasse Tickets ausschließlich in englischer Sprache, auch wenn Template und Checkliste teilweise in deutscher Sprache sind.
 
 ## Implementation Notes
 ### Ticket-Autor Checkliste (No-Guesswork, Pflicht bei Code-Tickets)
