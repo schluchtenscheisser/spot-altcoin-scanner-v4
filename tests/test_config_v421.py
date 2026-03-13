@@ -33,6 +33,7 @@ def test_v421_defaults_are_applied_when_new_blocks_missing() -> None:
     assert cfg.risk_atr_multiple == 2.0
     assert cfg.risk_min_stop_distance_pct == 4.0
     assert cfg.risk_max_stop_distance_pct == 12.0
+    assert cfg.risk_min_rr_to_target_1 == 1.3
     assert cfg.risk_min_rr_to_tp10 == 1.3
 
     assert cfg.decision_enabled is True

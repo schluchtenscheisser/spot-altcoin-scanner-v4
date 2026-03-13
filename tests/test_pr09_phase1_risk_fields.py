@@ -15,7 +15,7 @@ def test_compute_phase1_risk_fields_valid_breakout_path() -> None:
             "atr_multiple": 2.0,
             "min_stop_distance_pct": 3.0,
             "max_stop_distance_pct": 6.0,
-            "min_rr_to_tp10": 0.4,
+            "min_rr_to_target_1": 0.4,
         }
     }
 
@@ -70,7 +70,7 @@ def test_breakout_scoring_emits_phase1_risk_fields() -> None:
                 "atr_multiple": 2.0,
                 "min_stop_distance_pct": 1.0,
                 "max_stop_distance_pct": 10.0,
-                "min_rr_to_tp10": 0.2,
+                "min_rr_to_target_1": 0.2,
             },
         },
     )

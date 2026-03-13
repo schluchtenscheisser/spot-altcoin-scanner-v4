@@ -85,6 +85,8 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - Missing required stop inputs and invalid stop inputs are non-evaluable paths and must keep stop/risk fields nullable (`null`) without coercion.
 - If stop/risk distance is evaluable but targets are not evaluable, RR fields and `risk_acceptable` remain `null` while `stop_price_initial`/`stop_source`/`risk_pct_to_stop` remain populated.
 - `risk_acceptable` is threshold-driven and evaluated only when risk distance and `rr_to_target_1` are evaluable.
+- RR threshold config key precedence is deterministic: `risk.min_rr_to_target_1` (canonical) wins when present; legacy alias `risk.min_rr_to_tp10` is only used when canonical key is absent; missing both uses default `1.3`.
+- If canonical key is present but invalid, validation fails even if legacy alias is valid; non-finite RR threshold values are invalid for both keys.
 
 
 ## Trade-candidates TP/RR orientation verification boundaries

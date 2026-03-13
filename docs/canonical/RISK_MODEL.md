@@ -53,7 +53,7 @@ For Long-Spot candidates, compute risk fields in this fixed order:
 5. Compute `rr_to_target_1` and `rr_to_target_2` from configured orientation targets and absolute risk when targets are evaluable.
 6. Compute `risk_acceptable` from configured bounds:
    - `min_stop_distance_pct <= risk_pct_to_stop <= max_stop_distance_pct`
-   - `rr_to_target_1 >= min_rr_to_tp10`
+   - `rr_to_target_1 >= min_rr_to_target_1`
 
 Missing vs invalid semantics:
 - Missing required stop inputs (entry, valid invalidation, valid ATR fallback) => all required risk metrics remain `null`.

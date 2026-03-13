@@ -1,9 +1,11 @@
-"""Deterministic trade-level helpers (output-only, no scoring impact)."""
+"""Deterministic trade-level derivation and Phase-1 risk-field preparation for downstream consumers."""
 
 from __future__ import annotations
 
 import math
 from typing import Any, Dict, List, Optional
+
+from scanner.config import resolve_risk_min_rr_to_target_1
 
 
 def _to_float(value: Any) -> Optional[float]:
@@ -95,7 +97,7 @@ def _risk_cfg(root_config: Dict[str, Any]) -> Dict[str, float]:
         "atr_multiple": float(risk_cfg.get("atr_multiple", 2.0)),
         "min_stop_distance_pct": float(risk_cfg.get("min_stop_distance_pct", 4.0)),
         "max_stop_distance_pct": float(risk_cfg.get("max_stop_distance_pct", 12.0)),
-        "min_rr_to_tp10": float(risk_cfg.get("min_rr_to_tp10", 1.3)),
+        "min_rr_to_target_1": resolve_risk_min_rr_to_target_1(risk_cfg),
     }
 
 
@@ -169,7 +171,7 @@ def compute_phase1_risk_fields(setup_type: str, trade_levels: Dict[str, Any], ro
     risk_acceptable = (
         cfg["min_stop_distance_pct"] <= risk_pct_to_stop <= cfg["max_stop_distance_pct"]
         and rr_to_target_1 is not None
-        and rr_to_target_1 >= cfg["min_rr_to_tp10"]
+        and rr_to_target_1 >= cfg["min_rr_to_target_1"]
     )
 
     result.update(

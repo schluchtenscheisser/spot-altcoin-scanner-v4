@@ -1,3 +1,5 @@
+> ARCHIVED (ticket): Implemented in PR for this ticket. Canonical truth is under `docs/canonical/`.
+
 # Title
 [P1] Canonicalize risk config naming to `min_rr_to_target_1` and remove misleading `trade_levels` responsibility wording
 

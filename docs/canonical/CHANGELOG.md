@@ -4,7 +4,7 @@
 ```yaml
 id: CANON_CHANGELOG
 status: canonical
-canonical_schema_version: 6.1.0
+canonical_schema_version: 6.1.1
 canonical_schema_versioning: semver
 canonical_schema_version_location: docs/canonical/CHANGELOG.md
 ```
@@ -18,6 +18,12 @@ canonical_schema_version_location: docs/canonical/CHANGELOG.md
 
 Rule: Every canonical contract change PR must evaluate version impact and update this value accordingly.
 
+
+
+## 6.1.1 — Risk config key canonicalization (`min_rr_to_target_1`)
+- Canonicalized the Phase-1 RR threshold config key to `risk.min_rr_to_target_1` with deterministic precedence over legacy alias `risk.min_rr_to_tp10`.
+- Clarified compatibility behavior: legacy alias remains readable for one migration phase, but canonical docs/config examples now use target-index naming.
+- Clarified trade-level module responsibility wording to reflect downstream risk/decision preparation usage.
 
 
 ## 6.1.0 — Invalidation-first stop derivation with ATR fallback
