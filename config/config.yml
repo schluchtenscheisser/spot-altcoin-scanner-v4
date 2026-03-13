@@ -37,7 +37,7 @@ risk:
   atr_multiple: 2.0
   min_stop_distance_pct: 4.0
   max_stop_distance_pct: 15.0
-  min_rr_to_tp10: 1.0
+  min_rr_to_target_1: 1.0
 
 decision:
   enabled: true

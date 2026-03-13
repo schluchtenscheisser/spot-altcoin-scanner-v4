@@ -12,7 +12,7 @@ def _risk_cfg(**overrides):
         "atr_multiple": 2.0,
         "min_stop_distance_pct": 4.0,
         "max_stop_distance_pct": 12.0,
-        "min_rr_to_tp10": 1.3,
+        "min_rr_to_target_1": 1.3,
     }
     risk.update(overrides)
     return {"risk": risk}
@@ -67,12 +67,12 @@ def test_risk_rr_threshold_true_and_false() -> None:
     acceptable = compute_phase1_risk_fields(
         "breakout",
         _trade_levels(tp10=106.0, tp20=112.0),
-        _risk_cfg(min_rr_to_tp10=1.3),
+        _risk_cfg(min_rr_to_target_1=1.3),
     )
     unattractive = compute_phase1_risk_fields(
         "breakout",
         _trade_levels(tp10=104.0, tp20=108.0),
-        _risk_cfg(min_rr_to_tp10=1.3),
+        _risk_cfg(min_rr_to_target_1=1.3),
     )
 
     assert acceptable["rr_to_target_1"] == pytest.approx(1.5)
@@ -207,11 +207,11 @@ def test_validate_config_risk_missing_vs_invalid() -> None:
 
     missing_errors = validate_config(ScannerConfig(raw=base))
     invalid_raw = dict(base)
-    invalid_raw["risk"] = {"min_rr_to_tp10": "bad"}
+    invalid_raw["risk"] = {"min_rr_to_target_1": "bad"}
     invalid_errors = validate_config(ScannerConfig(raw=invalid_raw))
 
     assert missing_errors == []
-    assert any("risk.min_rr_to_tp10" in err for err in invalid_errors)
+    assert any("risk.min_rr_to_target_1" in err for err in invalid_errors)
 
 
 def test_breakout_result_preserves_invalidation_anchor_with_risk_fields() -> None:
@@ -242,7 +242,7 @@ def test_breakout_result_preserves_invalidation_anchor_with_risk_fields() -> Non
                 "atr_multiple": 2.0,
                 "min_stop_distance_pct": 4.0,
                 "max_stop_distance_pct": 12.0,
-                "min_rr_to_tp10": 1.3,
+                "min_rr_to_target_1": 1.3,
             },
         },
     )
@@ -254,3 +254,53 @@ def test_breakout_result_preserves_invalidation_anchor_with_risk_fields() -> Non
     assert row["invalidation_derivable"] is True
     assert row["risk_pct_to_stop"] == pytest.approx(4.2)
     assert row["risk_acceptable"] is False
+
+
+def test_risk_rr_threshold_legacy_alias_still_works() -> None:
+    acceptable = compute_phase1_risk_fields(
+        "breakout",
+        _trade_levels(tp10=106.0, tp20=112.0),
+        _risk_cfg(min_rr_to_tp10=1.3),
+    )
+
+    assert acceptable["rr_to_target_1"] == pytest.approx(1.5)
+    assert acceptable["risk_acceptable"] is True
+
+
+def test_validate_config_risk_canonical_precedence_and_invalid_rules() -> None:
+    base = {
+        "general": {"run_mode": "offline"},
+        "universe_filters": {"market_cap": {"min_usd": 1, "max_usd": 2}},
+    }
+
+    both_valid = dict(base)
+    both_valid["risk"] = {"min_rr_to_target_1": 2.0, "min_rr_to_tp10": 1.1}
+    assert validate_config(ScannerConfig(raw=both_valid)) == []
+
+    canonical_invalid = dict(base)
+    canonical_invalid["risk"] = {"min_rr_to_target_1": "bad", "min_rr_to_tp10": 1.1}
+    errs = validate_config(ScannerConfig(raw=canonical_invalid))
+    assert any("risk.min_rr_to_target_1" in err for err in errs)
+
+    legacy_invalid = dict(base)
+    legacy_invalid["risk"] = {"min_rr_to_tp10": "bad"}
+    errs = validate_config(ScannerConfig(raw=legacy_invalid))
+    assert any("risk.min_rr_to_tp10" in err for err in errs)
+
+
+@pytest.mark.parametrize("bad_value", [math.nan, math.inf, -math.inf])
+def test_validate_config_rejects_non_finite_rr_threshold_for_canonical_and_legacy(bad_value: float) -> None:
+    base = {
+        "general": {"run_mode": "offline"},
+        "universe_filters": {"market_cap": {"min_usd": 1, "max_usd": 2}},
+    }
+
+    canonical_raw = dict(base)
+    canonical_raw["risk"] = {"min_rr_to_target_1": bad_value}
+    canonical_errors = validate_config(ScannerConfig(raw=canonical_raw))
+    assert any("risk.min_rr_to_target_1 must be finite" in err for err in canonical_errors)
+
+    legacy_raw = dict(base)
+    legacy_raw["risk"] = {"min_rr_to_tp10": bad_value}
+    legacy_errors = validate_config(ScannerConfig(raw=legacy_raw))
+    assert any("risk.min_rr_to_tp10 must be finite" in err for err in legacy_errors)

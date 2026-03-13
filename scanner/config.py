@@ -3,10 +3,11 @@ Configuration loading and validation.
 Loads config.yml and applies environment variable overrides.
 """
 
+import math
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Mapping
 import yaml
 
 
@@ -17,6 +18,35 @@ _BUDGET_DEFAULTS = {
     "orderbook_top_k": 200,
     "pre_shortlist_market_cap_floor_usd": 25_000_000,
 }
+
+
+def resolve_risk_min_rr_to_target_1(risk_cfg: Mapping[str, Any] | None) -> float:
+    """Resolve RR threshold with canonical-key precedence and legacy alias fallback."""
+    cfg = risk_cfg if isinstance(risk_cfg, Mapping) else {}
+
+    if "min_rr_to_target_1" in cfg:
+        value = cfg.get("min_rr_to_target_1")
+        source = "risk.min_rr_to_target_1"
+    elif "min_rr_to_tp10" in cfg:
+        value = cfg.get("min_rr_to_tp10")
+        source = "risk.min_rr_to_tp10"
+    else:
+        return 1.3
+
+    if isinstance(value, bool) or value is None:
+        raise ValueError(f"{source} must be numeric")
+
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{source} must be numeric") from exc
+
+    if not math.isfinite(parsed):
+        raise ValueError(f"{source} must be finite")
+    if parsed < 0:
+        raise ValueError(f"{source} ({parsed}) must be >= 0")
+
+    return parsed
 
 
 @dataclass
@@ -212,8 +242,14 @@ class ScannerConfig:
         return float(self.raw.get("risk", {}).get("max_stop_distance_pct", 12.0))
 
     @property
+    def risk_min_rr_to_target_1(self) -> float:
+        risk_cfg = self.raw.get("risk", {})
+        return resolve_risk_min_rr_to_target_1(risk_cfg if isinstance(risk_cfg, Mapping) else {})
+
+    @property
     def risk_min_rr_to_tp10(self) -> float:
-        return float(self.raw.get("risk", {}).get("min_rr_to_tp10", 1.3))
+        """Backward-compatible alias for the canonical risk_min_rr_to_target_1 accessor."""
+        return self.risk_min_rr_to_target_1
 
     # Decision
     @property
@@ -317,6 +353,10 @@ def _expect_number(errors: List[str], value: Any, field_name: str, *, minimum: f
         number = float(value)
     except (TypeError, ValueError):
         errors.append(f"{field_name} must be numeric")
+        return None
+
+    if not math.isfinite(number):
+        errors.append(f"{field_name} must be finite")
         return None
 
     if minimum is not None and number < minimum:
@@ -477,7 +517,10 @@ def validate_config(config: ScannerConfig) -> List[str]:
     max_stop = _expect_number(errors, risk_cfg.get("max_stop_distance_pct", 12.0), "risk.max_stop_distance_pct", minimum=0)
     if min_stop is not None and max_stop is not None and min_stop > max_stop:
         errors.append("risk.min_stop_distance_pct must be <= risk.max_stop_distance_pct")
-    _expect_number(errors, risk_cfg.get("min_rr_to_tp10", 1.3), "risk.min_rr_to_tp10", minimum=0)
+    if "min_rr_to_target_1" in risk_cfg:
+        _expect_number(errors, risk_cfg.get("min_rr_to_target_1"), "risk.min_rr_to_target_1", minimum=0)
+    elif "min_rr_to_tp10" in risk_cfg:
+        _expect_number(errors, risk_cfg.get("min_rr_to_tp10"), "risk.min_rr_to_tp10", minimum=0)
 
     # Decision block
     decision_cfg = config.raw.get("decision", {})
