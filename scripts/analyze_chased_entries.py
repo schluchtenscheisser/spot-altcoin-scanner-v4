@@ -569,3 +569,50 @@ def render_markdown(summary: dict[str, Any], source_files: list[Path]) -> str:
         lines.extend(render_subset_markdown(summary["setup_bucket_summaries"][bucket]))
 
     return "\n".join(lines)
+    
+def main() -> int:
+    args = parse_args()
+
+    reports_dir = Path(args.reports_dir)
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    report_files = select_report_files(
+        reports_dir=reports_dir,
+        runs=args.runs,
+        start_date=args.start_date,
+        end_date=args.end_date,
+    )
+    if not report_files:
+        raise SystemExit("No matching daily report JSON files found.")
+
+    all_rows: list[CandidateRow] = []
+    for report_file in report_files:
+        report_data = load_json(report_file)
+        report_date = parse_report_date(report_file)
+        all_rows.extend(extract_candidates(report_data, report_date))
+
+    if not all_rows:
+        raise SystemExit("No candidate rows found in selected reports.")
+
+    summary = build_summary(all_rows)
+
+    latest_date = parse_report_date(report_files[-1])
+    stem = f"chased_entry_analysis_{latest_date}"
+
+    json_path = output_dir / f"{stem}.json"
+    md_path = output_dir / f"{stem}.md"
+
+    with json_path.open("w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2, ensure_ascii=False)
+
+    with md_path.open("w", encoding="utf-8") as f:
+        f.write(render_markdown(summary, report_files) + "\n")
+
+    print(f"Wrote {json_path}")
+    print(f"Wrote {md_path}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
