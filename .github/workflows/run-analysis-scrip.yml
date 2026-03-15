@@ -35,10 +35,37 @@ jobs:
         run: |
           python "${ANALYSIS_SCRIPT}"
 
+      - name: Show generated files
+        run: |
+          echo "PWD=$(pwd)"
+          echo "Top-level:"
+          ls -la
+          echo ""
+          echo "reports:"
+          ls -la reports || true
+          echo ""
+          echo "reports/analysis:"
+          ls -la reports/analysis || true
+          echo ""
+          echo "git status:"
+          git status --short
+
+      - name: Upload analysis artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-output
+          path: reports/analysis/**
+          if-no-files-found: error
+
       - name: Commit generated analysis artifacts
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add reports/
-          git diff --quiet && git diff --staged --quiet || git commit -m "Run analysis script: ${ANALYSIS_SCRIPT}"
+
+          git add -A reports/analysis/
+
+          echo "git status after add:"
+          git status --short
+
+          git diff --cached --quiet || git commit -m "Run analysis script: ${ANALYSIS_SCRIPT}"
           git push
