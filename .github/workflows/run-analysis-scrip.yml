@@ -1,0 +1,44 @@
+name: Run Analysis Script
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  ANALYSIS_SCRIPT: scripts/analyze_chased_entries.py
+
+jobs:
+  run-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify analysis script exists
+        run: |
+          test -f "${ANALYSIS_SCRIPT}"
+
+      - name: Run analysis script
+        run: |
+          python "${ANALYSIS_SCRIPT}"
+
+      - name: Commit generated analysis artifacts
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add reports/
+          git diff --quiet && git diff --staged --quiet || git commit -m "Run analysis script: ${ANALYSIS_SCRIPT}"
+          git push
