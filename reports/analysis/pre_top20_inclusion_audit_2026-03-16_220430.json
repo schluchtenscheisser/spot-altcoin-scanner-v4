@@ -1,0 +1,601 @@
+{
+  "analysis_name": "pre_top20_inclusion_audit",
+  "generated_at_utc": "2026-03-16T22:04:30Z",
+  "run": {
+    "run_id": "2026-03-16_1773675009352",
+    "timestamp_utc": "2026-03-16T15:30:09Z",
+    "canonical_schema_version": "6.3.0",
+    "source_file": "reports/2026-03-16.json"
+  },
+  "published_top20_summary": {
+    "top20_size": 20,
+    "decision_distribution": {
+      "WAIT": 13,
+      "NO_TRADE": 7
+    },
+    "setup_type_distribution": {
+      "reversal": 16,
+      "pullback": 4
+    },
+    "tradeability_distribution": {
+      "MARGINAL": 13,
+      "DIRECT_OK": 7
+    },
+    "entry_state_distribution": {
+      "chased": 20
+    },
+    "risk_ok_count": 14,
+    "entry_eligible_count": 7,
+    "global_score_summary": {
+      "count": 20,
+      "min": 56.584,
+      "median": 59.868,
+      "max": 75.904,
+      "mean": 62.82
+    }
+  },
+  "published_top20_rows": [
+    {
+      "symbol": "CAKEUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "WAIT",
+      "tradeability_class": "DIRECT_OK",
+      "risk_acceptable": true,
+      "entry_ready": true,
+      "entry_state": "chased",
+      "global_score": 75.904,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 94.88,
+      "decision_reasons": [
+        "effective_rr_insufficient",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "NEOUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "WAIT",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": true,
+      "entry_ready": true,
+      "entry_state": "chased",
+      "global_score": 75.288,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 94.11,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "BBUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "WAIT",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": true,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 67.592,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 84.49,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "SUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "WAIT",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": true,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 65.488,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 81.86,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "EIGENUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "WAIT",
+      "tradeability_class": "DIRECT_OK",
+      "risk_acceptable": true,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 65.472,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 81.84,
+      "decision_reasons": [
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "BONKUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "WAIT",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": true,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 61.016,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 76.27,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "ETCUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "WAIT",
+      "tradeability_class": "DIRECT_OK",
+      "risk_acceptable": true,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 59.976,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 74.97,
+      "decision_reasons": [
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "KASUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "WAIT",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": true,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 59.392,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 74.24,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "ZENUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "WAIT",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": true,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 59.168,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 73.96,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "QUBICUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "pullback",
+      "decision": "WAIT",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": true,
+      "entry_ready": true,
+      "entry_state": "chased",
+      "global_score": 58.32,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 64.8,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "TAOUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "pullback",
+      "decision": "WAIT",
+      "tradeability_class": "DIRECT_OK",
+      "risk_acceptable": true,
+      "entry_ready": true,
+      "entry_state": "chased",
+      "global_score": 58.32,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 64.8,
+      "decision_reasons": [
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "FARTCOINUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "WAIT",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": true,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 58.032,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 72.54,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "ORDIUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "WAIT",
+      "tradeability_class": "DIRECT_OK",
+      "risk_acceptable": true,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 57.648,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 72.06,
+      "decision_reasons": [
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "CFXUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "NO_TRADE",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": false,
+      "entry_ready": true,
+      "entry_state": "chased",
+      "global_score": 72.688,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 90.86,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "risk_reward_unattractive",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "FETUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "NO_TRADE",
+      "tradeability_class": "DIRECT_OK",
+      "risk_acceptable": true,
+      "entry_ready": true,
+      "entry_state": "chased",
+      "global_score": 68.992,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 86.24,
+      "decision_reasons": [
+        "price_past_target_1",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "RIVERUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "pullback",
+      "decision": "NO_TRADE",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": false,
+      "entry_ready": true,
+      "entry_state": "chased",
+      "global_score": 61.2,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 68.0,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "risk_reward_unattractive",
+        "btc_regime_caution",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "pullback",
+      "decision": "NO_TRADE",
+      "tradeability_class": "DIRECT_OK",
+      "risk_acceptable": false,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 59.76,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 66.4,
+      "decision_reasons": [
+        "risk_reward_unattractive",
+        "btc_regime_caution",
+        "entry_not_confirmed",
+        "rebound_not_confirmed",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "BERAUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "NO_TRADE",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": false,
+      "entry_ready": true,
+      "entry_state": "chased",
+      "global_score": 58.488,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 73.11,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "risk_reward_unattractive",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "NO_TRADE",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": false,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 57.072,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 71.34,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "risk_reward_unattractive",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_chased"
+      ]
+    },
+    {
+      "symbol": "MOODENGUSDT",
+      "setup_id": "UNKNOWN",
+      "best_setup_type": "reversal",
+      "decision": "NO_TRADE",
+      "tradeability_class": "MARGINAL",
+      "risk_acceptable": false,
+      "entry_ready": false,
+      "entry_state": "chased",
+      "global_score": 56.584,
+      "weighted_score": null,
+      "final_score": null,
+      "setup_score": 70.73,
+      "decision_reasons": [
+        "tradeability_marginal",
+        "risk_reward_unattractive",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_chased"
+      ]
+    }
+  ],
+  "upstream_candidate_source": {
+    "source_file": "/home/runner/work/spot-altcoin-scanner/spot-altcoin-scanner/tests/fixtures/snapshots/history/2026-02-01.json",
+    "source_bucket": "other",
+    "search_priority_order": [
+      "snapshots/runtime",
+      "snapshots/history",
+      "snapshots/raw",
+      "other"
+    ],
+    "array_path": "scoring.breakouts",
+    "array_length": 21,
+    "sample_keys": [
+      "score",
+      "setup_id",
+      "symbol",
+      "trade_levels"
+    ]
+  },
+  "comparison_summary": {
+    "upstream_rows_total": 21,
+    "dedup_symbols_total": 0,
+    "overlap_count": 0,
+    "jaccard_overlap": 0.0,
+    "published_not_in_reconstructed_top20_count": 20,
+    "reconstructed_not_in_published_top20_count": 0,
+    "published_not_in_reconstructed_top20": [
+      "AVAXUSDT",
+      "BBUSDT",
+      "BERAUSDT",
+      "BONKUSDT",
+      "CAKEUSDT",
+      "CFXUSDT",
+      "EIGENUSDT",
+      "ETCUSDT",
+      "FARTCOINUSDT",
+      "FETUSDT",
+      "KASUSDT",
+      "MOODENGUSDT",
+      "NEOUSDT",
+      "ORDIUSDT",
+      "PENGUUSDT",
+      "QUBICUSDT",
+      "RIVERUSDT",
+      "SUSDT",
+      "TAOUSDT",
+      "ZENUSDT"
+    ],
+    "reconstructed_not_in_published_top20": [],
+    "cutoff_score_proxy": null,
+    "published_risk_ok_count": 14,
+    "reconstructed_risk_ok_count": 0,
+    "near_misses_risk_ok_count": 0,
+    "published_entry_eligible_count": 7,
+    "reconstructed_entry_eligible_count": 0,
+    "near_misses_entry_eligible_count": 0
+  },
+  "comparison": {
+    "upstream_rows_total": 21,
+    "dedup_symbols_total": 0,
+    "published_top20_symbols_ordered": [
+      "CAKEUSDT",
+      "NEOUSDT",
+      "BBUSDT",
+      "SUSDT",
+      "EIGENUSDT",
+      "BONKUSDT",
+      "ETCUSDT",
+      "KASUSDT",
+      "ZENUSDT",
+      "QUBICUSDT",
+      "TAOUSDT",
+      "FARTCOINUSDT",
+      "ORDIUSDT",
+      "CFXUSDT",
+      "FETUSDT",
+      "RIVERUSDT",
+      "AVAXUSDT",
+      "BERAUSDT",
+      "PENGUUSDT",
+      "MOODENGUSDT"
+    ],
+    "reconstructed_top20_symbols_ordered": [],
+    "overlap_count": 0,
+    "jaccard_overlap": 0.0,
+    "published_not_in_reconstructed_top20": [
+      "AVAXUSDT",
+      "BBUSDT",
+      "BERAUSDT",
+      "BONKUSDT",
+      "CAKEUSDT",
+      "CFXUSDT",
+      "EIGENUSDT",
+      "ETCUSDT",
+      "FARTCOINUSDT",
+      "FETUSDT",
+      "KASUSDT",
+      "MOODENGUSDT",
+      "NEOUSDT",
+      "ORDIUSDT",
+      "PENGUUSDT",
+      "QUBICUSDT",
+      "RIVERUSDT",
+      "SUSDT",
+      "TAOUSDT",
+      "ZENUSDT"
+    ],
+    "reconstructed_not_in_published_top20": [],
+    "cutoff_score_proxy": null,
+    "published_top20_score_proxy_summary": {
+      "count": 20,
+      "min": 56.584,
+      "median": 59.868,
+      "max": 75.904,
+      "mean": 62.82
+    },
+    "reconstructed_top20_score_proxy_summary": {
+      "global_score": {
+        "count": 0,
+        "min": null,
+        "median": null,
+        "max": null,
+        "mean": null
+      },
+      "weighted_score": {
+        "count": 0,
+        "min": null,
+        "median": null,
+        "max": null,
+        "mean": null
+      },
+      "final_score": {
+        "count": 0,
+        "min": null,
+        "median": null,
+        "max": null,
+        "mean": null
+      },
+      "setup_score": {
+        "count": 0,
+        "min": null,
+        "median": null,
+        "max": null,
+        "mean": null
+      }
+    },
+    "setup_type_distribution": {
+      "published_top20": {
+        "reversal": 16,
+        "pullback": 4
+      },
+      "reconstructed_top20": {},
+      "dedup_universe": {}
+    },
+    "tradeability_distribution": {
+      "published_top20": {
+        "MARGINAL": 13,
+        "DIRECT_OK": 7
+      },
+      "reconstructed_top20": {},
+      "near_misses_21_40": {}
+    },
+    "risk_ok_counts": {
+      "published_top20": 14,
+      "reconstructed_top20": 0,
+      "near_misses_21_40": 0
+    },
+    "entry_eligible_counts": {
+      "published_top20": 7,
+      "reconstructed_top20": 0,
+      "near_misses_21_40": 0
+    },
+    "near_misses_21_40": [],
+    "reconstructed_top20_rows": []
+  },
+  "missing_snapshot_guidance": null
+}
