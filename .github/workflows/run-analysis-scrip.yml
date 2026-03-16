@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 env:
-  ANALYSIS_SCRIPT: scripts/counterfactual_chased_thresholds_v2.py
+  ANALYSIS_SCRIPT: scripts/counterfactual_chased_thresholds_v3.py
   
 jobs:
   run-analysis:
