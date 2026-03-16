@@ -7,8 +7,8 @@ permissions:
   contents: write
 
 env:
-  ANALYSIS_SCRIPT: scripts/analyze_chased_entries.py
-
+  ANALYSIS_SCRIPT: scripts/analyze_chased_entries_v2.py
+  
 jobs:
   run-analysis:
     runs-on: ubuntu-latest
