@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-03-16T12:32:22Z",
+  "generated_at_utc": "2026-03-16T14:00:30.775672+00:00",
   "reports_used": [
     "2026-03-14_2026-03-14_1773465317951.manifest.json",
     "2026-03-14_2026-03-14_1773470654209.manifest.json",
@@ -9,26 +9,21 @@
     "2026-03-16.json",
     "2026-03-16_2026-03-16_1773640527164.manifest.json"
   ],
-  "current_risk_config": {
+  "config": {
     "min_stop_distance_pct": 4.0,
     "max_stop_distance_pct": 12.0,
     "min_rr_to_target_2": 1.3,
     "atr_multiple": 2.0
   },
-  "hypothetical_max_stop": {
-    "reversal": 25.0,
-    "pullback": 12.0,
-    "breakout": 12.0,
-    "default": 12.0
-  },
-  "hypothetical_min_rr": {
-    "reversal": 1.0,
-    "pullback": 1.3,
-    "breakout": 1.3,
-    "default": 1.3
-  },
+  "reversal_ladder": [
+    15.0,
+    18.0,
+    20.0,
+    22.0,
+    25.0,
+    30.0
+  ],
   "summary": {
-    "source_filter": "trade_candidates",
     "total_candidates": 40,
     "risk_acceptable_counts": {
       "true": 16,
@@ -39,12 +34,6 @@
       "STOP_TOO_WIDE": 20,
       "PASS": 16,
       "STOP_TOO_TIGHT": 4
-    },
-    "current_risk_config": {
-      "min_stop_distance_pct": 4.0,
-      "max_stop_distance_pct": 12.0,
-      "min_rr_to_target_2": 1.3,
-      "atr_multiple": 2.0
     },
     "setup_stats": {
       "reversal": {
@@ -64,6 +53,7 @@
           "p25": 14.1,
           "median": 17.56,
           "p75": 22.43,
+          "p90": 29.47,
           "max": 43.85
         },
         "rr_to_target_2": {
@@ -71,15 +61,10 @@
           "median": 2.0,
           "max": 2.0
         },
-        "counterfactual_setup_specific_max_stop": {
-          "threshold": 25.0,
-          "would_pass": 22,
-          "would_fail": 4,
-          "delta_vs_current": 15
-        },
-        "counterfactual_atr_fallback": {
-          "viable": 0,
-          "would_pass": 0
+        "cf_atr_fallback": {
+          "viable_count": 0,
+          "would_pass_count": 0,
+          "viable_symbols": []
         }
       },
       "pullback": {
@@ -100,6 +85,7 @@
           "p25": 3.04,
           "median": 7.67,
           "p75": 9.13,
+          "p90": 12.54,
           "max": 17.37
         },
         "rr_to_target_2": {
@@ -107,13 +93,427 @@
           "median": 2.0,
           "max": 2.0
         },
-        "counterfactual_setup_specific_max_stop": {
-          "threshold": 12.0,
-          "would_pass": 8,
-          "would_fail": 6,
-          "delta_vs_current": -1
-        },
-        "counterfactual_atr_fallback": null
+        "cf_atr_fallback": null
+      }
+    },
+    "reversal_sensitivity_ladder": {
+      "15.0": {
+        "threshold_pct": 15.0,
+        "would_pass": 7,
+        "delta_vs_current": 0,
+        "delta_vs_previous_step": 0,
+        "newly_unlocked_symbols": [],
+        "newly_unlocked_details": []
+      },
+      "18.0": {
+        "threshold_pct": 18.0,
+        "would_pass": 14,
+        "delta_vs_current": 7,
+        "delta_vs_previous_step": 7,
+        "newly_unlocked_symbols": [
+          "1INCHUSDT",
+          "ADAUSDT",
+          "CAKEUSDT",
+          "QNTUSDT",
+          "QTUMUSDT",
+          "RSRUSDT",
+          "XVSUSDT"
+        ],
+        "newly_unlocked_details": [
+          {
+            "symbol": "CAKEUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 15.14
+          },
+          {
+            "symbol": "QTUMUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 15.5
+          },
+          {
+            "symbol": "1INCHUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 16.55
+          },
+          {
+            "symbol": "XVSUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.05
+          },
+          {
+            "symbol": "RSRUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 17.09
+          },
+          {
+            "symbol": "ADAUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.55
+          },
+          {
+            "symbol": "QNTUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.58
+          }
+        ]
+      },
+      "20.0": {
+        "threshold_pct": 20.0,
+        "would_pass": 17,
+        "delta_vs_current": 10,
+        "delta_vs_previous_step": 3,
+        "newly_unlocked_symbols": [
+          "1INCHUSDT",
+          "ADAUSDT",
+          "AVAXUSDT",
+          "CAKEUSDT",
+          "FETUSDT",
+          "QNTUSDT",
+          "QTUMUSDT",
+          "RSRUSDT",
+          "SPKUSDT",
+          "XVSUSDT"
+        ],
+        "newly_unlocked_details": [
+          {
+            "symbol": "CAKEUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 15.14
+          },
+          {
+            "symbol": "QTUMUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 15.5
+          },
+          {
+            "symbol": "1INCHUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 16.55
+          },
+          {
+            "symbol": "XVSUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.05
+          },
+          {
+            "symbol": "RSRUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 17.09
+          },
+          {
+            "symbol": "ADAUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.55
+          },
+          {
+            "symbol": "QNTUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.58
+          },
+          {
+            "symbol": "FETUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 18.72
+          },
+          {
+            "symbol": "SPKUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 19.16
+          },
+          {
+            "symbol": "AVAXUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 19.81
+          }
+        ]
+      },
+      "22.0": {
+        "threshold_pct": 22.0,
+        "would_pass": 19,
+        "delta_vs_current": 12,
+        "delta_vs_previous_step": 2,
+        "newly_unlocked_symbols": [
+          "1INCHUSDT",
+          "ADAUSDT",
+          "ATHUSDT",
+          "AVAXUSDT",
+          "CAKEUSDT",
+          "FETUSDT",
+          "LINKUSDT",
+          "QNTUSDT",
+          "QTUMUSDT",
+          "RSRUSDT",
+          "SPKUSDT",
+          "XVSUSDT"
+        ],
+        "newly_unlocked_details": [
+          {
+            "symbol": "CAKEUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 15.14
+          },
+          {
+            "symbol": "QTUMUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 15.5
+          },
+          {
+            "symbol": "1INCHUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 16.55
+          },
+          {
+            "symbol": "XVSUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.05
+          },
+          {
+            "symbol": "RSRUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 17.09
+          },
+          {
+            "symbol": "ADAUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.55
+          },
+          {
+            "symbol": "QNTUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.58
+          },
+          {
+            "symbol": "FETUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 18.72
+          },
+          {
+            "symbol": "SPKUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 19.16
+          },
+          {
+            "symbol": "AVAXUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 19.81
+          },
+          {
+            "symbol": "ATHUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 20.48
+          },
+          {
+            "symbol": "LINKUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 20.61
+          }
+        ]
+      },
+      "25.0": {
+        "threshold_pct": 25.0,
+        "would_pass": 22,
+        "delta_vs_current": 15,
+        "delta_vs_previous_step": 3,
+        "newly_unlocked_symbols": [
+          "1INCHUSDT",
+          "ADAUSDT",
+          "ATHUSDT",
+          "AVAXUSDT",
+          "BSVUSDT",
+          "CAKEUSDT",
+          "CFXUSDT",
+          "FETUSDT",
+          "LINKUSDT",
+          "MNTUSDT",
+          "QNTUSDT",
+          "QTUMUSDT",
+          "RSRUSDT",
+          "SPKUSDT",
+          "XVSUSDT"
+        ],
+        "newly_unlocked_details": [
+          {
+            "symbol": "CAKEUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 15.14
+          },
+          {
+            "symbol": "QTUMUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 15.5
+          },
+          {
+            "symbol": "1INCHUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 16.55
+          },
+          {
+            "symbol": "XVSUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.05
+          },
+          {
+            "symbol": "RSRUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 17.09
+          },
+          {
+            "symbol": "ADAUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.55
+          },
+          {
+            "symbol": "QNTUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.58
+          },
+          {
+            "symbol": "FETUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 18.72
+          },
+          {
+            "symbol": "SPKUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 19.16
+          },
+          {
+            "symbol": "AVAXUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 19.81
+          },
+          {
+            "symbol": "ATHUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 20.48
+          },
+          {
+            "symbol": "LINKUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 20.61
+          },
+          {
+            "symbol": "CFXUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 23.03
+          },
+          {
+            "symbol": "MNTUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 23.87
+          },
+          {
+            "symbol": "BSVUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 24.17
+          }
+        ]
+      },
+      "30.0": {
+        "threshold_pct": 30.0,
+        "would_pass": 23,
+        "delta_vs_current": 16,
+        "delta_vs_previous_step": 1,
+        "newly_unlocked_symbols": [
+          "1INCHUSDT",
+          "ADAUSDT",
+          "ATHUSDT",
+          "AVAXUSDT",
+          "BSVUSDT",
+          "CAKEUSDT",
+          "CFXUSDT",
+          "FETUSDT",
+          "LINKUSDT",
+          "MNTUSDT",
+          "QNTUSDT",
+          "QTUMUSDT",
+          "RSRUSDT",
+          "SPKUSDT",
+          "UNIUSDT",
+          "XVSUSDT"
+        ],
+        "newly_unlocked_details": [
+          {
+            "symbol": "CAKEUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 15.14
+          },
+          {
+            "symbol": "QTUMUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 15.5
+          },
+          {
+            "symbol": "1INCHUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 16.55
+          },
+          {
+            "symbol": "XVSUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.05
+          },
+          {
+            "symbol": "RSRUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 17.09
+          },
+          {
+            "symbol": "ADAUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.55
+          },
+          {
+            "symbol": "QNTUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 17.58
+          },
+          {
+            "symbol": "FETUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 18.72
+          },
+          {
+            "symbol": "SPKUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 19.16
+          },
+          {
+            "symbol": "AVAXUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 19.81
+          },
+          {
+            "symbol": "ATHUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 20.48
+          },
+          {
+            "symbol": "LINKUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 20.61
+          },
+          {
+            "symbol": "CFXUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 23.03
+          },
+          {
+            "symbol": "MNTUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 23.87
+          },
+          {
+            "symbol": "BSVUSDT",
+            "date": "2026-03-15",
+            "stop_pct": 24.17
+          },
+          {
+            "symbol": "UNIUSDT",
+            "date": "2026-03-16",
+            "stop_pct": 26.19
+          }
+        ]
       }
     },
     "setup_list_stats": {
@@ -124,9 +524,6 @@
         "failure_modes": {
           "STOP_TOO_WIDE": 33,
           "PASS": 13
-        },
-        "stop_source_counts": {
-          "invalidation": 46
         },
         "risk_pct_to_stop": {
           "median": 17.56,
@@ -144,9 +541,6 @@
           "STOP_TOO_TIGHT": 13,
           "STOP_TOO_WIDE": 1
         },
-        "stop_source_counts": {
-          "invalidation": 34
-        },
         "risk_pct_to_stop": {
           "median": 5.58,
           "p75": 7.89,
@@ -162,9 +556,6 @@
           "PASS": 14,
           "STOP_TOO_TIGHT": 4
         },
-        "stop_source_counts": {
-          "invalidation": 18
-        },
         "risk_pct_to_stop": {
           "median": 9.38,
           "p75": 9.71,
@@ -179,20 +570,16 @@
         "candidates": 20,
         "risk_acceptable_true": 9,
         "risk_acceptable_false": 11,
-        "risk_acceptable_null": 0,
         "failure_stop_too_wide": 7,
-        "failure_stop_too_tight": 4,
-        "failure_rr_too_low": 0
+        "failure_stop_too_tight": 4
       },
       {
         "date": "2026-03-16",
         "candidates": 20,
         "risk_acceptable_true": 7,
         "risk_acceptable_false": 13,
-        "risk_acceptable_null": 0,
         "failure_stop_too_wide": 13,
-        "failure_stop_too_tight": 0,
-        "failure_rr_too_low": 0
+        "failure_stop_too_tight": 0
       }
     ]
   },
@@ -215,11 +602,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -240,11 +623,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -265,11 +644,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -290,10 +665,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": true,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -315,11 +693,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -340,11 +714,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -365,11 +735,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -390,10 +756,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -415,11 +784,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -440,10 +805,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -465,10 +833,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -490,11 +861,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -515,10 +882,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -540,11 +910,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -565,10 +931,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": false
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": false,
+        "30.0": false
       },
       "cf_atr_fallback": null
     },
@@ -590,11 +959,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -615,11 +980,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -640,10 +1001,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": true,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -665,10 +1029,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": false
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": false,
+        "30.0": false
       },
       "cf_atr_fallback": null
     },
@@ -690,11 +1057,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -715,10 +1078,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": true,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -740,10 +1106,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": true,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -765,10 +1134,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": true,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -790,10 +1162,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": true,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -815,11 +1190,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -840,10 +1211,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": true,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -865,11 +1239,7 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -890,10 +1260,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -915,10 +1288,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -940,10 +1316,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -965,10 +1344,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -990,10 +1372,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -1015,10 +1400,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -1040,10 +1428,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -1065,10 +1456,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -1090,10 +1484,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": false
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": false,
+        "30.0": false
       },
       "cf_atr_fallback": null
     },
@@ -1115,10 +1512,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": false
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": false,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -1140,10 +1540,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -1165,10 +1568,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     },
@@ -1190,10 +1596,13 @@
       "atr_value": null,
       "invalidation": null,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": null
     }
@@ -1217,10 +1626,13 @@
       "atr_value": 0.001868,
       "invalidation": 0.01723,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -1249,10 +1661,13 @@
       "atr_value": 0.037611,
       "invalidation": 0.5234,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -1281,10 +1696,13 @@
       "atr_value": 0.000127,
       "invalidation": 0.001341,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -1313,10 +1731,13 @@
       "atr_value": 1.229425,
       "invalidation": 11.38,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -1345,10 +1766,13 @@
       "atr_value": 0.003059,
       "invalidation": 0.03667,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": true,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -1377,10 +1801,13 @@
       "atr_value": 0.065022,
       "invalidation": 0.3345,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": false
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": false,
+        "30.0": false
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -1409,10 +1836,13 @@
       "atr_value": 0.012469,
       "invalidation": 0.1339,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -1441,10 +1871,13 @@
       "atr_value": 0.339167,
       "invalidation": 3.035,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": true,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -1473,10 +1906,13 @@
       "atr_value": 0.031453,
       "invalidation": 0.15362,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": false
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": false,
+        "30.0": false
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -1505,10 +1941,13 @@
       "atr_value": 0.199677,
       "invalidation": 2.002,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -1537,11 +1976,7 @@
       "atr_value": 0.002379,
       "invalidation": 0.026783,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1562,11 +1997,7 @@
       "atr_value": 0.002354,
       "invalidation": 0.049261,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1587,11 +2018,7 @@
       "atr_value": 0.002354,
       "invalidation": 0.049261,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1612,11 +2039,7 @@
       "atr_value": 0.005024,
       "invalidation": 0.287596,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1637,11 +2060,7 @@
       "atr_value": 0.005024,
       "invalidation": 0.287596,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1662,11 +2081,7 @@
       "atr_value": 0.002379,
       "invalidation": 0.026783,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1687,11 +2102,7 @@
       "atr_value": 0.002354,
       "invalidation": 0.049261,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1712,11 +2123,7 @@
       "atr_value": 0.005024,
       "invalidation": 0.287596,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1737,11 +2144,7 @@
       "atr_value": 0.002354,
       "invalidation": 0.049261,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1762,11 +2165,7 @@
       "atr_value": 0.005024,
       "invalidation": 0.287596,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1787,11 +2186,7 @@
       "atr_value": 0.00662,
       "invalidation": 0.164223,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1812,11 +2207,7 @@
       "atr_value": 0.016233,
       "invalidation": 0.221277,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1837,11 +2228,7 @@
       "atr_value": 10.659179,
       "invalidation": 212.84806,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1862,11 +2249,7 @@
       "atr_value": 0.005352,
       "invalidation": 0.054677,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1887,11 +2270,7 @@
       "atr_value": 0.071975,
       "invalidation": 1.603844,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1912,11 +2291,7 @@
       "atr_value": 0.001157,
       "invalidation": 0.080336,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1937,11 +2312,7 @@
       "atr_value": 0.24074,
       "invalidation": 4.413873,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1962,11 +2333,7 @@
       "atr_value": 0.005154,
       "invalidation": 0.123434,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -1987,11 +2354,7 @@
       "atr_value": 0.001001,
       "invalidation": 0.02899,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2012,11 +2375,7 @@
       "atr_value": 0.01849,
       "invalidation": 0.708179,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2037,10 +2396,13 @@
       "atr_value": 0.001868,
       "invalidation": 0.01723,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -2069,11 +2431,7 @@
       "atr_value": 0.00662,
       "invalidation": 0.164223,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2094,10 +2452,13 @@
       "atr_value": 0.037611,
       "invalidation": 0.5234,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -2126,10 +2487,13 @@
       "atr_value": 0.000127,
       "invalidation": 0.001341,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -2158,11 +2522,7 @@
       "atr_value": 0.016233,
       "invalidation": 0.221277,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2183,10 +2543,13 @@
       "atr_value": 1.229425,
       "invalidation": 11.38,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -2215,11 +2578,7 @@
       "atr_value": 10.659179,
       "invalidation": 212.84806,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2240,11 +2599,7 @@
       "atr_value": 0.071975,
       "invalidation": 1.603844,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2265,11 +2620,7 @@
       "atr_value": 0.005352,
       "invalidation": 0.054677,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2290,10 +2641,13 @@
       "atr_value": 0.003059,
       "invalidation": 0.03667,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": true,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -2322,11 +2676,7 @@
       "atr_value": 0.001157,
       "invalidation": 0.080336,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2347,10 +2697,13 @@
       "atr_value": 0.065022,
       "invalidation": 0.3345,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": false
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": false,
+        "30.0": false
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -2379,11 +2732,7 @@
       "atr_value": 0.005154,
       "invalidation": 0.123434,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2404,11 +2753,7 @@
       "atr_value": 0.24074,
       "invalidation": 4.413873,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2429,11 +2774,7 @@
       "atr_value": 0.001001,
       "invalidation": 0.02899,
       "failure_mode": "STOP_TOO_TIGHT",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2454,10 +2795,13 @@
       "atr_value": 0.339167,
       "invalidation": 3.035,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": true
+      "reversal_ladder": {
+        "15.0": true,
+        "18.0": true,
+        "20.0": true,
+        "22.0": true,
+        "25.0": true,
+        "30.0": true
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -2486,10 +2830,13 @@
       "atr_value": 0.031453,
       "invalidation": 0.15362,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 25.0,
-        "min_rr": 1.0,
-        "would_pass": false
+      "reversal_ladder": {
+        "15.0": false,
+        "18.0": false,
+        "20.0": false,
+        "22.0": false,
+        "25.0": false,
+        "30.0": false
       },
       "cf_atr_fallback": {
         "viable": true,
@@ -2518,11 +2865,7 @@
       "atr_value": 0.000723,
       "invalidation": 0.008072,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2543,11 +2886,7 @@
       "atr_value": 1.596656,
       "invalidation": 17.692148,
       "failure_mode": "PASS",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": true
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     },
     {
@@ -2568,11 +2907,7 @@
       "atr_value": 0.001774,
       "invalidation": 0.010068,
       "failure_mode": "STOP_TOO_WIDE",
-      "cf_setup_specific_max_stop": {
-        "max_stop_pct": 12.0,
-        "min_rr": 1.3,
-        "would_pass": false
-      },
+      "reversal_ladder": null,
       "cf_atr_fallback": null
     }
   ]
