@@ -22,7 +22,7 @@ from .scoring.reversal import score_reversals
 from .scoring.breakout_trend_1_5d import score_breakout_trend_1_5d
 from .scoring.pullback import score_pullbacks
 from .output import ReportGenerator
-from .global_ranking import compute_global_top20
+from .global_ranking import compute_global_ranked_candidates, compute_global_top20
 from .liquidity import fetch_orderbooks_for_top_k, apply_liquidity_metrics_to_shortlist
 from .snapshot import SnapshotManager
 from .runtime_market_meta import RuntimeMarketMetaExporter
@@ -30,6 +30,7 @@ from .discovery import compute_discovery_fields
 from .regime import compute_btc_regime
 from .decision import apply_decision_layer
 from .manifest import derive_pipeline_paths
+from .pre_top20_snapshot import build_pre_top20_snapshot_payload, resolve_runtime_dir, write_pre_top20_snapshot
 
 logger = logging.getLogger(__name__)
 
@@ -406,12 +407,13 @@ def run_pipeline(config: ScannerConfig) -> None:
     pullback_results = score_pullbacks(features, volume_map, config.raw, volume_source_map=volume_source_map)
     logger.info(f"  ✓ Pullbacks: {len(pullback_results)} scored")
 
-    global_top20 = compute_global_top20(
+    global_ranked_candidates = compute_global_ranked_candidates(
         reversal_results=reversal_results,
         breakout_results=breakout_results,
         pullback_results=pullback_results,
         config=config.raw,
     )
+    global_top20 = global_ranked_candidates[:20]
 
     reversal_results = _enrich_scored_entries_with_market_activity(reversal_results, features)
     breakout_results = _enrich_scored_entries_with_market_activity(breakout_results, features)
@@ -423,6 +425,19 @@ def run_pipeline(config: ScannerConfig) -> None:
         logger.info("  Shadow mode legacy_only: skipping decision layer")
 
     logger.info(f"  ✓ Global Top20: {len(global_top20)} entries")
+
+    pre_top20_payload = build_pre_top20_snapshot_payload(
+        run_id=f"{run_date}_{asof_ts_ms}",
+        run_date=run_date,
+        asof_ts_ms=asof_ts_ms,
+        ranked_candidates=global_ranked_candidates,
+    )
+    pre_top20_path = write_pre_top20_snapshot(
+        payload=pre_top20_payload,
+        run_id=f"{run_date}_{asof_ts_ms}",
+        runtime_dir=resolve_runtime_dir(config.raw),
+    )
+    logger.info(f"  ✓ Pre-Top20 snapshot: {pre_top20_path}")
 
     # Step 11: Write reports (Markdown + JSON + Excel)
     logger.info("\n[11/12] Generating reports...")

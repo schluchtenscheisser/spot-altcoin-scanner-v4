@@ -1,3 +1,5 @@
+> ARCHIVED (ticket): Implemented in PR for this ticket. Canonical truth is under `docs/canonical/`.
+
 # [P3] Add deterministic pre-Top20 candidate snapshot for inclusion audit
 
 ## Context / Source

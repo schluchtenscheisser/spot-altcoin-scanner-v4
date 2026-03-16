@@ -117,6 +117,27 @@ Target / RR semantics (authoritative):
 - If `stop_price_initial` is missing/invalid/non-positive or `stop_price_initial >= entry_price_usdt`, target and RR fields MUST be `null`.
 - Target fields are orientation levels for RR evaluation only; they MUST NOT imply mandatory exits or automated take-profit behavior.
 
+
+## Runtime observability artifact: pre-Top20 candidate snapshot
+- The pipeline MUST persist a deterministic runtime artifact at `snapshots/runtime/<run_id>_pre_top20.json`.
+- `run_id` is the same run identifier used in run metadata (default `<run_date>_<asof_ts_ms>`).
+- Snapshot stage is fixed to `post_symbol_dedup_pre_top20_cap`.
+- The artifact MUST contain:
+  - `meta.run_id`, `meta.run_date`, `meta.asof_ts_ms`
+  - `meta.ranking_stage`
+  - `meta.sort_key_description`
+  - `meta.total_candidates`
+  - `meta.top20_cutoff_index` (always `20`)
+  - `meta.top20_cutoff_global_score` (`null` when total candidates `< 20`)
+  - `candidates` (ordered ranked universe used for Top20 selection before cap)
+- Candidate minimum fields:
+  - `rank`, `symbol`, `best_setup_type`, `setup_subtype`, `setup_score`, `global_score`,
+    `tradeability_class`, `risk_acceptable`, `entry_ready`, `entry_state`, `decision`,
+    `decision_reasons`, `risk_pct_to_stop`, `distance_to_entry_pct`
+- Nullable semantics: nullable source fields remain `null` (no implicit coercion).
+- Non-finite numeric values (`NaN`, `inf`, `-inf`) MUST be serialized as `null`.
+- Write behavior MUST be atomic (temp file + rename), with no partial target file on failure.
+
 ## Summary contract
 - `summary` MUST include setup counters (`reversal_count`, `breakout_count`, `pullback_count`, `total_scored`, `global_top20_count`).
 - `summary` MUST include deterministic entry-state diagnostics over `trade_candidates`:

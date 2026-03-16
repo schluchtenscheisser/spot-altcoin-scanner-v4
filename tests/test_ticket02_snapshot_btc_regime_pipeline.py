@@ -164,6 +164,7 @@ def test_run_pipeline_passes_btc_regime_into_snapshot_metadata(monkeypatch) -> N
     monkeypatch.setattr(pipeline, "score_reversals", lambda *args, **kwargs: [])
     monkeypatch.setattr(pipeline, "score_breakout_trend_1_5d", lambda *args, **kwargs: [])
     monkeypatch.setattr(pipeline, "score_pullbacks", lambda *args, **kwargs: [])
+    monkeypatch.setattr(pipeline, "compute_global_ranked_candidates", lambda *args, **kwargs: [])
     monkeypatch.setattr(pipeline, "compute_global_top20", lambda *args, **kwargs: [])
     monkeypatch.setattr(pipeline, "ReportGenerator", _DummyReportGenerator)
     monkeypatch.setattr(pipeline, "SnapshotManager", _DummySnapshotManager)
