@@ -8,8 +8,7 @@ permissions:
 
 env:
   ANALYSIS_SCRIPT: scripts/counterfactual_chased_thresholds_v4.py  # An jeweiliges Skript anpassen
-  ANALYSIS_ARGS: --focus-symbol TAOUSDT                            # Bei Bedarf setzen, sonst auskommentieren
-  
+    
 jobs:
   run-analysis:
     runs-on: ubuntu-latest
@@ -34,7 +33,7 @@ jobs:
 
       - name: Run analysis script
         run: |
-          python "${ANALYSIS_SCRIPT}" ${ANALYSIS_ARGS}
+          python "${ANALYSIS_SCRIPT}"
 
       - name: Show generated files
         run: |
