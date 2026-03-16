@@ -209,10 +209,10 @@ Spikes:
 - `spike_combined = 0.7*spike_1d + 0.3*spike_4h`
 
 Mapping:
-- Wenn `spike_combined < 1.2` → `0`
-- Wenn `spike_combined >= 2.2` → `100`
+- Wenn `spike_combined < 1.0` → `0`
+- Wenn `spike_combined >= 1.4` → `100`
 - Sonst linear:
-  - `((spike_combined - 1.2) / (2.2 - 1.2)) * 100`
+  - `((spike_combined - 1.0) / (1.4 - 1.0)) * 100`
 
 ### 7.3 Trend Score (Option A)
 Voraussetzung: Trend Gate ist erfüllt (sonst Setup invalid).

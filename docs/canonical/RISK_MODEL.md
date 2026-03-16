@@ -56,7 +56,7 @@ For Long-Spot candidates, compute risk fields in this fixed order:
    - `target_3_price = entry_price + 3R`
 6. Compute `rr_to_target_1=1.0`, `rr_to_target_2=2.0`, `rr_to_target_3=3.0` (floating-point tolerance) from that ladder.
 7. Compute `risk_acceptable` from configured bounds:
-   - `min_stop_distance_pct <= risk_pct_to_stop <= max_stop_distance_pct`
+   - `min_stop_distance_pct <= risk_pct_to_stop <= max_stop_distance_pct(setup_type)`
    - `rr_to_target_2 >= min_rr_to_target_1` (existing config key is preserved; evaluation checkpoint is target_2)
 
 Missing vs invalid semantics:

@@ -42,6 +42,59 @@ def test_compute_phase1_risk_fields_missing_and_invalid_are_nullable() -> None:
         assert row["risk_acceptable"] is None
 
 
+
+
+def test_compute_phase1_risk_fields_setup_specific_max_stop_distance() -> None:
+    trade_levels = {
+        "entry_trigger": 100.0,
+        "atr_value": 8.0,
+        "targets": [110.0, 120.0],
+    }
+    cfg = {
+        "risk": {
+            "atr_multiple": 2.0,
+            "min_stop_distance_pct": 3.0,
+            "max_stop_distance_pct": {
+                "default": 12.0,
+                "reversal": 20.0,
+                "pullback": 12.0,
+                "breakout": 12.0,
+            },
+            "min_rr_to_target_1": 0.4,
+        }
+    }
+
+    reversal_fields = compute_phase1_risk_fields("reversal", dict(trade_levels), cfg)
+    breakout_fields = compute_phase1_risk_fields("breakout", dict(trade_levels), cfg)
+    pullback_levels = {
+        "entry_zone": {"center": 100.0},
+        "atr_value": 8.0,
+        "targets": [110.0, 120.0],
+    }
+    pullback_fields = compute_phase1_risk_fields("pullback", pullback_levels, cfg)
+
+    assert reversal_fields["risk_pct_to_stop"] == pytest.approx(16.0)
+    assert reversal_fields["risk_acceptable"] is True
+
+    assert breakout_fields["risk_pct_to_stop"] == pytest.approx(16.0)
+    assert breakout_fields["risk_acceptable"] is False
+
+    assert pullback_fields["risk_pct_to_stop"] == pytest.approx(16.0)
+    assert pullback_fields["risk_acceptable"] is False
+
+
+def test_compute_phase1_risk_fields_missing_max_stop_config_uses_default() -> None:
+    trade_levels = {
+        "entry_trigger": 100.0,
+        "atr_value": 2.0,
+        "targets": [102.0, 104.0],
+    }
+
+    fields = compute_phase1_risk_fields("reversal", trade_levels, {"risk": {"atr_multiple": 2.0, "min_stop_distance_pct": 3.0}})
+
+    assert fields["risk_pct_to_stop"] == pytest.approx(4.0)
+    assert fields["risk_acceptable"] is True
+
 def test_breakout_scoring_emits_phase1_risk_fields() -> None:
     features = {
         "XUSDT": {

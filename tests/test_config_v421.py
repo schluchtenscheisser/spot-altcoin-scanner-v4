@@ -48,6 +48,59 @@ def test_v421_defaults_are_applied_when_new_blocks_missing() -> None:
     assert cfg.btc_regime_risk_off_enter_boost == 15
 
 
+
+
+
+
+def test_v421_risk_max_stop_distance_scalar_remains_valid() -> None:
+    raw = _offline_base()
+    raw["risk"] = {"max_stop_distance_pct": 15.0}
+
+    cfg = ScannerConfig(raw=raw)
+    errors = validate_config(cfg)
+
+    assert errors == []
+    assert cfg.risk_max_stop_distance_pct == 15.0
+
+def test_v421_risk_max_stop_distance_mapping_defaults_and_overrides() -> None:
+    raw = _offline_base()
+    raw["risk"] = {
+        "max_stop_distance_pct": {
+            "default": 12.0,
+            "reversal": 20.0,
+        }
+    }
+
+    cfg = ScannerConfig(raw=raw)
+
+    assert cfg.risk_max_stop_distance_pct == 12.0
+    assert cfg.risk_max_stop_distance_pct_for_setup("reversal") == 20.0
+    assert cfg.risk_max_stop_distance_pct_for_setup("pullback") == 12.0
+
+
+def test_v421_risk_max_stop_distance_mapping_requires_default() -> None:
+    raw = _offline_base()
+    raw["risk"] = {"max_stop_distance_pct": {"reversal": 20.0}}
+
+    errors = validate_config(ScannerConfig(raw=raw))
+
+    assert "risk.max_stop_distance_pct.default is required when risk.max_stop_distance_pct is an object" in errors
+
+
+def test_v421_risk_max_stop_distance_mapping_rejects_invalid_values() -> None:
+    raw = _offline_base()
+    raw["risk"] = {
+        "max_stop_distance_pct": {
+            "default": -1,
+            "reversal": "nan",
+        }
+    }
+
+    errors = validate_config(ScannerConfig(raw=raw))
+
+    assert any("risk.max_stop_distance_pct.default" in e and "must be >= 0" in e for e in errors)
+    assert "risk.max_stop_distance_pct.reversal must be finite" in errors
+
 def test_v421_invalid_threshold_order_fails() -> None:
     raw = _offline_base()
     raw["tradeability"] = {
