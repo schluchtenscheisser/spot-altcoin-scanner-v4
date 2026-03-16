@@ -1,0 +1,297 @@
+{
+  "generated_at_utc": "2026-03-16T12:00:25Z",
+  "thresholds": {
+    "pullback": 8.0,
+    "reversal": 12.0,
+    "breakout": 5.0,
+    "other": 3.0
+  },
+  "total_candidates": 140,
+  "reported_chased": 114,
+  "reclassified_from_reported_chased": 66,
+  "label_only_reclassifications": 66,
+  "report_vs_recomputed_entry_state_mismatches": 0,
+  "reason_counts_non_timing": {
+    "risk_reward_unattractive": 111,
+    "tradeability_marginal": 110,
+    "entry_not_confirmed": 55,
+    "retest_not_reclaimed": 48,
+    "btc_regime_caution": 43,
+    "rebound_not_confirmed": 7,
+    "price_past_target_1": 2
+  },
+  "setup_breakdown": {
+    "reversal": {
+      "candidates": 96,
+      "reported_chased": 84,
+      "reclassified": 52,
+      "threshold_used": 12.0
+    },
+    "pullback": {
+      "candidates": 44,
+      "reported_chased": 30,
+      "reclassified": 14,
+      "threshold_used": 8.0
+    }
+  },
+  "focus_symbol_analysis": {
+    "symbol": "TAOUSDT",
+    "count": 5,
+    "rows": [
+      {
+        "report_date": "2026-03-11",
+        "symbol": "TAOUSDT",
+        "setup_id": "pullback",
+        "setup_bucket": "pullback",
+        "decision_current": "NO_TRADE",
+        "decision_reasons": [
+          "risk_reward_unattractive",
+          "btc_regime_caution",
+          "entry_late"
+        ],
+        "non_timing_reasons": [
+          "risk_reward_unattractive",
+          "btc_regime_caution"
+        ],
+        "reported_entry_state": "late",
+        "recomputed_entry_state": "late",
+        "current_price_usdt": 197.52,
+        "entry_price_usdt": 193.28532561834052,
+        "distance_to_entry_pct": 2.190892851338977,
+        "rr_to_target_2": null,
+        "stop_price_initial": 180.19938039183484,
+        "entry_ready": true,
+        "tradeability_class": "DIRECT_OK",
+        "btc_regime_state": "RISK_OFF",
+        "risk_acceptable": false,
+        "hypothetical_entry_state": "late",
+        "reclassified": false,
+        "reason_implied_floor": "NO_TRADE",
+        "unlock_path": null,
+        "report_state_matches_recomputed": true,
+        "source_path": "$.trade_candidates[4]"
+      },
+      {
+        "report_date": "2026-03-12",
+        "symbol": "TAOUSDT",
+        "setup_id": "reversal",
+        "setup_bucket": "reversal",
+        "decision_current": "NO_TRADE",
+        "decision_reasons": [
+          "risk_reward_unattractive",
+          "entry_chased"
+        ],
+        "non_timing_reasons": [
+          "risk_reward_unattractive"
+        ],
+        "reported_entry_state": "chased",
+        "recomputed_entry_state": "chased",
+        "current_price_usdt": 216.0,
+        "entry_price_usdt": 186.09966722749834,
+        "distance_to_entry_pct": 16.066838387169092,
+        "rr_to_target_2": null,
+        "stop_price_initial": 153.3617360061835,
+        "entry_ready": true,
+        "tradeability_class": "DIRECT_OK",
+        "btc_regime_state": "RISK_OFF",
+        "risk_acceptable": false,
+        "hypothetical_entry_state": "chased",
+        "reclassified": false,
+        "reason_implied_floor": "NO_TRADE",
+        "unlock_path": null,
+        "report_state_matches_recomputed": true,
+        "source_path": "$.trade_candidates[13]"
+      },
+      {
+        "report_date": "2026-03-13",
+        "symbol": "TAOUSDT",
+        "setup_id": "reversal",
+        "setup_bucket": "reversal",
+        "decision_current": "NO_TRADE",
+        "decision_reasons": [
+          "risk_reward_unattractive",
+          "entry_chased"
+        ],
+        "non_timing_reasons": [
+          "risk_reward_unattractive"
+        ],
+        "reported_entry_state": "chased",
+        "recomputed_entry_state": "chased",
+        "current_price_usdt": 230.17,
+        "entry_price_usdt": 189.13015065795926,
+        "distance_to_entry_pct": 21.699263284710767,
+        "rr_to_target_2": 2.0000000000000004,
+        "stop_price_initial": 143.0,
+        "entry_ready": true,
+        "tradeability_class": "DIRECT_OK",
+        "btc_regime_state": "RISK_OFF",
+        "risk_acceptable": false,
+        "hypothetical_entry_state": "chased",
+        "reclassified": false,
+        "reason_implied_floor": "NO_TRADE",
+        "unlock_path": null,
+        "report_state_matches_recomputed": true,
+        "source_path": "$.trade_candidates[5]"
+      },
+      {
+        "report_date": "2026-03-14",
+        "symbol": "TAOUSDT",
+        "setup_id": "pullback",
+        "setup_bucket": "pullback",
+        "decision_current": "WAIT",
+        "decision_reasons": [
+          "entry_chased"
+        ],
+        "non_timing_reasons": [],
+        "reported_entry_state": "chased",
+        "recomputed_entry_state": "chased",
+        "current_price_usdt": 235.86,
+        "entry_price_usdt": 220.60240493413636,
+        "distance_to_entry_pct": 6.916332154411009,
+        "rr_to_target_2": 2.0,
+        "stop_price_initial": 205.4514637276878,
+        "entry_ready": true,
+        "tradeability_class": "DIRECT_OK",
+        "btc_regime_state": "RISK_OFF",
+        "risk_acceptable": true,
+        "hypothetical_entry_state": "late",
+        "reclassified": true,
+        "reason_implied_floor": "UNBLOCKED_BY_REASONS",
+        "unlock_path": "reclassify_chased",
+        "report_state_matches_recomputed": true,
+        "source_path": "$.trade_candidates[6]"
+      },
+      {
+        "report_date": "2026-03-15",
+        "symbol": "TAOUSDT",
+        "setup_id": "pullback",
+        "setup_bucket": "pullback",
+        "decision_current": "WAIT",
+        "decision_reasons": [
+          "btc_regime_caution",
+          "entry_chased"
+        ],
+        "non_timing_reasons": [
+          "btc_regime_caution"
+        ],
+        "reported_entry_state": "chased",
+        "recomputed_entry_state": "chased",
+        "current_price_usdt": 265.78,
+        "entry_price_usdt": 231.08451855627845,
+        "distance_to_entry_pct": 15.014195524860208,
+        "rr_to_target_2": 2.0,
+        "stop_price_initial": 212.84805962279583,
+        "entry_ready": true,
+        "tradeability_class": "DIRECT_OK",
+        "btc_regime_state": "RISK_OFF",
+        "risk_acceptable": true,
+        "hypothetical_entry_state": "chased",
+        "reclassified": false,
+        "reason_implied_floor": "WAIT",
+        "unlock_path": null,
+        "report_state_matches_recomputed": true,
+        "source_path": "$.trade_candidates[2]"
+      }
+    ],
+    "summary": {
+      "reported_chased": 4,
+      "reclassified": 1,
+      "by_setup_bucket": {
+        "pullback": 3,
+        "reversal": 2
+      },
+      "reason_implied_floor_counts": {
+        "NO_TRADE": 3,
+        "UNBLOCKED_BY_REASONS": 1,
+        "WAIT": 1
+      }
+    }
+  },
+  "unblocked_examples": [
+    {
+      "report_date": "2026-03-14",
+      "symbol": "TRUMPUSDT",
+      "setup_id": "reversal",
+      "setup_bucket": "reversal",
+      "decision_current": "ENTER",
+      "decision_reasons": [
+        "entry_chased"
+      ],
+      "non_timing_reasons": [],
+      "reported_entry_state": "chased",
+      "recomputed_entry_state": "chased",
+      "current_price_usdt": 3.923,
+      "entry_price_usdt": 3.2730478849572564,
+      "distance_to_entry_pct": 19.85770260282127,
+      "rr_to_target_2": 2.0,
+      "stop_price_initial": 3.035,
+      "entry_ready": true,
+      "tradeability_class": "DIRECT_OK",
+      "btc_regime_state": "RISK_OFF",
+      "risk_acceptable": true,
+      "hypothetical_entry_state": "chased",
+      "reclassified": false,
+      "reason_implied_floor": "UNBLOCKED_BY_REASONS",
+      "unlock_path": null,
+      "report_state_matches_recomputed": true,
+      "source_path": "$.trade_candidates[0]"
+    },
+    {
+      "report_date": "2026-03-14",
+      "symbol": "TAOUSDT",
+      "setup_id": "pullback",
+      "setup_bucket": "pullback",
+      "decision_current": "WAIT",
+      "decision_reasons": [
+        "entry_chased"
+      ],
+      "non_timing_reasons": [],
+      "reported_entry_state": "chased",
+      "recomputed_entry_state": "chased",
+      "current_price_usdt": 235.86,
+      "entry_price_usdt": 220.60240493413636,
+      "distance_to_entry_pct": 6.916332154411009,
+      "rr_to_target_2": 2.0,
+      "stop_price_initial": 205.4514637276878,
+      "entry_ready": true,
+      "tradeability_class": "DIRECT_OK",
+      "btc_regime_state": "RISK_OFF",
+      "risk_acceptable": true,
+      "hypothetical_entry_state": "late",
+      "reclassified": true,
+      "reason_implied_floor": "UNBLOCKED_BY_REASONS",
+      "unlock_path": "reclassify_chased",
+      "report_state_matches_recomputed": true,
+      "source_path": "$.trade_candidates[6]"
+    },
+    {
+      "report_date": "2026-03-16",
+      "symbol": "RENDERUSDT",
+      "setup_id": "pullback",
+      "setup_bucket": "pullback",
+      "decision_current": "WAIT",
+      "decision_reasons": [
+        "entry_chased"
+      ],
+      "non_timing_reasons": [],
+      "reported_entry_state": "chased",
+      "recomputed_entry_state": "chased",
+      "current_price_usdt": 1.884,
+      "entry_price_usdt": 1.7949233510218332,
+      "distance_to_entry_pct": 4.962699322366948,
+      "rr_to_target_2": 2.0,
+      "stop_price_initial": 1.6588536901955084,
+      "entry_ready": true,
+      "tradeability_class": "DIRECT_OK",
+      "btc_regime_state": "RISK_OFF",
+      "risk_acceptable": true,
+      "hypothetical_entry_state": "late",
+      "reclassified": true,
+      "reason_implied_floor": "UNBLOCKED_BY_REASONS",
+      "unlock_path": "reclassify_chased",
+      "report_state_matches_recomputed": true,
+      "source_path": "$.trade_candidates[6]"
+    }
+  ],
+  "report_state_mismatch_examples": []
+}
