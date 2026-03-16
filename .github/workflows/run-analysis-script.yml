@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 env:
-  ANALYSIS_SCRIPT: scripts/top20_formation_audit.py  # An jeweiliges Skript anpassen
+  ANALYSIS_SCRIPT: scripts/pre_top20_inclusion_audit-1.py  # An jeweiliges Skript anpassen
     
 jobs:
   run-analysis:
