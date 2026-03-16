@@ -1,3 +1,5 @@
+> ARCHIVED (ticket): Implemented in PR for this ticket. Canonical truth is under `docs/canonical/`.
+
 # Title
 [P1] Setup-specific reversal max stop distance and breakout_trend_1_5d volume threshold recalibration
 

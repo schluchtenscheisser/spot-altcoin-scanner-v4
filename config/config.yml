@@ -36,7 +36,11 @@ risk:
   atr_timeframe: "1d"
   atr_multiple: 2.0
   min_stop_distance_pct: 4.0
-  max_stop_distance_pct: 15.0
+  max_stop_distance_pct:
+    default: 12.0
+    reversal: 20.0
+    pullback: 12.0
+    breakout: 12.0
   min_rr_to_target_1: 1.0
 
 decision:
@@ -160,8 +164,8 @@ scoring:
   breakout_trend_1_5d:
     risk_off_min_quote_volume_24h: 15000000
     trigger_4h_lookback_bars: 30
-    volume_score_min_spike: 1.2
-    volume_score_full_spike: 2.2
+    volume_score_min_spike: 1.0
+    volume_score_full_spike: 1.4
     weight_breakout_distance: 0.40
     weight_volume: 0.30
     weight_trend: 0.20

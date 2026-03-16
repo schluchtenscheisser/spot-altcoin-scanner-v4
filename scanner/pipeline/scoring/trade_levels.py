@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, Optional
 
-from scanner.config import resolve_risk_min_rr_to_target_1
+from scanner.config import resolve_risk_max_stop_distance_pct, resolve_risk_min_rr_to_target_1
 
 
 def _to_float(value: Any) -> Optional[float]:
@@ -91,12 +91,12 @@ def reversal_trade_levels(features: Dict[str, Any], multipliers: list[float]) ->
     }
 
 
-def _risk_cfg(root_config: Dict[str, Any]) -> Dict[str, float]:
+def _risk_cfg(root_config: Dict[str, Any], setup_type: str) -> Dict[str, float]:
     risk_cfg = root_config.get("risk", {}) if isinstance(root_config, dict) else {}
     return {
         "atr_multiple": float(risk_cfg.get("atr_multiple", 2.0)),
         "min_stop_distance_pct": float(risk_cfg.get("min_stop_distance_pct", 4.0)),
-        "max_stop_distance_pct": float(risk_cfg.get("max_stop_distance_pct", 12.0)),
+        "max_stop_distance_pct": resolve_risk_max_stop_distance_pct(risk_cfg, setup_type=setup_type),
         "min_rr_to_target_1": resolve_risk_min_rr_to_target_1(risk_cfg),
     }
 
@@ -109,7 +109,7 @@ def _planned_entry_price(setup_type: str, trade_levels: Dict[str, Any]) -> Optio
 
 
 def compute_phase1_risk_fields(setup_type: str, trade_levels: Dict[str, Any], root_config: Dict[str, Any]) -> Dict[str, Any]:
-    cfg = _risk_cfg(root_config)
+    cfg = _risk_cfg(root_config, setup_type=setup_type)
     entry_price = _planned_entry_price(setup_type, trade_levels)
     atr_value = _to_float(trade_levels.get("atr_value"))
 

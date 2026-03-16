@@ -1,6 +1,7 @@
 import json
 
 import yaml
+import pytest
 
 from scanner.pipeline.scoring.breakout_trend_1_5d import score_breakout_trend_1_5d
 
@@ -44,9 +45,10 @@ def test_20260314_breakout_calibration_comparison_set() -> None:
     new_c98 = _find_row(new_rows, "C98USDT")
     assert old_hype and new_hype and old_c98 and new_c98
 
-    # This fixture is a comparison baseline: current scorer output must be stable vs stored snapshot.
-    assert new_hype["final_score"] == old_hype["final_score"]
-    assert new_c98["final_score"] == old_c98["final_score"]
+    # This fixture tracks deterministic recalibrated defaults (volume min/full spike = 1.0 / 1.4).
+    assert new_hype["final_score"] == pytest.approx(55.73602)
+    assert new_c98["final_score"] == pytest.approx(26.043828)
+    assert new_hype["final_score"] > old_hype["final_score"]
     assert new_hype["execution_gate_pass"] is False
     assert new_c98["execution_gate_pass"] is False
 

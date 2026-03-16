@@ -120,6 +120,8 @@ risk:
   atr_multiple_default: 2.0
   min_stop_distance_pct_default: 4.0
   max_stop_distance_pct_default: 12.0
+  max_stop_distance_pct_setup_overrides_optional: [reversal, pullback, breakout]
+  max_stop_distance_pct_mapping_requires_default: true
   min_rr_to_target_1_default: 1.3  # applied to rr_to_target_2 acceptance checkpoint
 
 decision:
@@ -216,8 +218,20 @@ Canonical rule:
 | risk.atr_timeframe_default | risk.atr_timeframe |
 | risk.atr_multiple_default | risk.atr_multiple |
 | risk.min_stop_distance_pct_default | risk.min_stop_distance_pct |
-| risk.max_stop_distance_pct_default | risk.max_stop_distance_pct |
+| risk.max_stop_distance_pct_default | risk.max_stop_distance_pct.default (or scalar `risk.max_stop_distance_pct`) |
+| risk.max_stop_distance_pct_setup_overrides_optional.reversal | risk.max_stop_distance_pct.reversal |
+| risk.max_stop_distance_pct_setup_overrides_optional.pullback | risk.max_stop_distance_pct.pullback |
+| risk.max_stop_distance_pct_setup_overrides_optional.breakout | risk.max_stop_distance_pct.breakout |
 | risk.min_rr_to_target_1_default | risk.min_rr_to_target_1 |
+
+### 3.1 Risk max-stop resolution semantics (deterministic)
+- `risk.max_stop_distance_pct` accepts either:
+  - scalar numeric value, or
+  - object with required key `default` and optional setup keys `{reversal, pullback, breakout}`.
+- Missing top-level `risk.max_stop_distance_pct` resolves to canonical default `12.0`.
+- If object form is used, missing setup key resolves to `risk.max_stop_distance_pct.default`.
+- Object form without `default` is invalid and must fail config validation.
+
 | decision.enabled_default | decision.enabled |
 | decision.min_score_for_enter_default | decision.min_score_for_enter |
 | decision.min_score_for_wait_default | decision.min_score_for_wait |

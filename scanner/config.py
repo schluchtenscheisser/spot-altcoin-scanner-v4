@@ -49,6 +49,33 @@ def resolve_risk_min_rr_to_target_1(risk_cfg: Mapping[str, Any] | None) -> float
     return parsed
 
 
+def resolve_risk_max_stop_distance_pct(risk_cfg: Mapping[str, Any] | None, setup_type: str | None = None) -> float:
+    """Resolve max stop-distance threshold from scalar or setup-specific config."""
+    cfg = risk_cfg if isinstance(risk_cfg, Mapping) else {}
+    raw_value = cfg.get("max_stop_distance_pct", 12.0)
+
+    def _parse(field_name: str, value: Any) -> float:
+        if isinstance(value, bool) or value is None:
+            raise ValueError(f"{field_name} must be numeric")
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{field_name} must be numeric") from exc
+        if not math.isfinite(parsed):
+            raise ValueError(f"{field_name} must be finite")
+        if parsed < 0:
+            raise ValueError(f"{field_name} ({parsed}) must be >= 0")
+        return parsed
+
+    if isinstance(raw_value, Mapping):
+        if "default" not in raw_value:
+            raise ValueError("risk.max_stop_distance_pct.default is required when risk.max_stop_distance_pct is an object")
+        selected_key = setup_type if isinstance(setup_type, str) and setup_type in raw_value else "default"
+        return _parse(f"risk.max_stop_distance_pct.{selected_key}", raw_value.get(selected_key))
+
+    return _parse("risk.max_stop_distance_pct", raw_value)
+
+
 @dataclass
 class ScannerConfig:
     """
@@ -239,7 +266,12 @@ class ScannerConfig:
 
     @property
     def risk_max_stop_distance_pct(self) -> float:
-        return float(self.raw.get("risk", {}).get("max_stop_distance_pct", 12.0))
+        risk_cfg = self.raw.get("risk", {})
+        return resolve_risk_max_stop_distance_pct(risk_cfg if isinstance(risk_cfg, Mapping) else {}, setup_type=None)
+
+    def risk_max_stop_distance_pct_for_setup(self, setup_type: str) -> float:
+        risk_cfg = self.raw.get("risk", {})
+        return resolve_risk_max_stop_distance_pct(risk_cfg if isinstance(risk_cfg, Mapping) else {}, setup_type=setup_type)
 
     @property
     def risk_min_rr_to_target_1(self) -> float:
@@ -518,7 +550,33 @@ def validate_config(config: ScannerConfig) -> List[str]:
         errors.append("risk.atr_timeframe must be '1d' in Phase 1")
     _expect_number(errors, risk_cfg.get("atr_multiple", 2.0), "risk.atr_multiple", minimum=0)
     min_stop = _expect_number(errors, risk_cfg.get("min_stop_distance_pct", 4.0), "risk.min_stop_distance_pct", minimum=0)
-    max_stop = _expect_number(errors, risk_cfg.get("max_stop_distance_pct", 12.0), "risk.max_stop_distance_pct", minimum=0)
+
+    max_stop_cfg = risk_cfg.get("max_stop_distance_pct", 12.0)
+    if isinstance(max_stop_cfg, Mapping):
+        if "default" not in max_stop_cfg:
+            errors.append("risk.max_stop_distance_pct.default is required when risk.max_stop_distance_pct is an object")
+            max_stop_default = None
+        else:
+            max_stop_default = _expect_number(
+                errors,
+                max_stop_cfg.get("default"),
+                "risk.max_stop_distance_pct.default",
+                minimum=0,
+            )
+
+        for setup_key in ["reversal", "pullback", "breakout"]:
+            if setup_key in max_stop_cfg:
+                _expect_number(
+                    errors,
+                    max_stop_cfg.get(setup_key),
+                    f"risk.max_stop_distance_pct.{setup_key}",
+                    minimum=0,
+                )
+
+        max_stop = max_stop_default
+    else:
+        max_stop = _expect_number(errors, max_stop_cfg, "risk.max_stop_distance_pct", minimum=0)
+
     if min_stop is not None and max_stop is not None and min_stop > max_stop:
         errors.append("risk.min_stop_distance_pct must be <= risk.max_stop_distance_pct")
     if "min_rr_to_target_1" in risk_cfg:

@@ -36,7 +36,7 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - `_find_breakout_indices` returns `(first_breakout_idx, last_breakout_idx)` over the configured trigger window.
 - BTC regime state domain is exactly `{RISK_OFF, NEUTRAL, RISK_ON}` with deterministic parsing (`missing => NEUTRAL`, invalid => validation error).
 - `bb_width_rank_120_4h` is interpreted on percent scale `[0..100]`; defensive rank01 input (`<=1.0`) is multiplied by 100 before scoring.
-- Breakout calibration defaults are deterministic: `volume_score_min_spike=1.2`, `volume_score_full_spike=2.2`, weights `(distance,volume,trend,bb)=(0.40,0.30,0.20,0.10)`.
+- Breakout calibration defaults are deterministic: `volume_score_min_spike=1.0`, `volume_score_full_spike=1.4`, weights `(distance,volume,trend,bb)=(0.40,0.30,0.20,0.10)`.
 - Breakout multiplier floors are deterministic: anti-chase minimum `0.80`, overextension pre-hard-gate minimum `0.80`, BTC risk-off multipliers `{0.90, 0.80}`.
 - Missing/non-finite breakout scoring inputs (`volume_quote_spike_*`, `dist_ema20_pct_1d`, `bb_width_rank_120_4h`, trigger close) are non-evaluable and must not emit breakout rows.
 - Deterministic breakout row order is `(final_score desc, retest-first, symbol asc, setup_id asc)`.
@@ -125,6 +125,9 @@ breakout_distance_score = 30 + 40*(dist_pct/2) = 62.868136160
 - Missing/invalid/non-finite scorer inputs must not produce a false-valid confirmation; confirmation fields stay `null` for non-evaluable paths.
 - Invalidation anchor consistency: `invalidation_derivable=false => invalidation_anchor_price=null`; `invalidation_derivable=true` requires finite positive `invalidation_anchor_price`.
 
+
+
+- Setup-specific max-stop resolution is deterministic: scalar `risk.max_stop_distance_pct` applies globally; object form requires `default`, supports optional `{reversal,pullback,breakout}` overrides, and missing setup override falls back to `default`.
 
 ## Decision layer verification boundaries
 - Decision domain is exactly `{ENTER, WAIT, NO_TRADE}` with exactly one status per candidate.
