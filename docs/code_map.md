@@ -1,7 +1,7 @@
 # 📘 Code Map — Automatically Generated
 
 **Repository:** schluchtenscheisser/spot-altcoin-scanner  
-**Last Updated:** 2026-03-16 15:16 UTC  
+**Last Updated:** 2026-03-16 15:27 UTC  
 **Generator:** scripts/update_codemap.py
 
 ---
@@ -20,7 +20,7 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 - **Total Modules:** 46
 - **Total Classes:** 19
-- **Total Functions:** 417
+- **Total Functions:** 420
 
 ---
 
@@ -96,9 +96,9 @@ This Code Map provides a comprehensive structural overview of the Spot Altcoin S
 
 **Classes:** `ScannerConfig`
 
-**Functions:** `_budget_mapping, _expect_integer_number, _expect_number, _parse_integer_budget_value, btc_regime_enabled, btc_regime_mode, btc_regime_risk_off_enter_boost, budget_orderbook_top_k, budget_shortlist_size, cmc_api_key, config_version, decision_enabled, decision_min_effective_rr_to_target_2_for_enter, decision_min_score_for_enter, decision_min_score_for_wait, decision_require_risk_acceptable_for_enter, decision_require_tradeability_for_enter, exclude_leveraged, exclude_stablecoins, exclude_wrapped, load_config, log_file, log_level, log_to_file, lookback_days_1d, lookback_days_4h, market_cap_max, market_cap_min, mexc_enabled, min_history_days_1d, min_mexc_quote_volume_24h_usdt, min_mexc_share_24h, min_quote_volume_24h, min_turnover_24h, pre_shortlist_market_cap_floor_usd, resolve_risk_min_rr_to_target_1, risk_atr_multiple, risk_atr_period, risk_atr_timeframe, risk_enabled, risk_max_stop_distance_pct, risk_min_rr_to_target_1, risk_min_rr_to_tp10, risk_min_stop_distance_pct, risk_stop_method, run_mode, scoring_volume_source, shadow_mode, shortlist_size, spec_version, timezone, tradeability_band_pct, tradeability_class_thresholds, tradeability_enabled, tradeability_max_spread_pct, tradeability_max_tranches, tradeability_min_depth_1pct_usd, tradeability_notional_chunk_usdt, tradeability_notional_total_usdt, validate_config`
+**Functions:** `_budget_mapping, _expect_integer_number, _expect_number, _parse, _parse_integer_budget_value, btc_regime_enabled, btc_regime_mode, btc_regime_risk_off_enter_boost, budget_orderbook_top_k, budget_shortlist_size, cmc_api_key, config_version, decision_enabled, decision_min_effective_rr_to_target_2_for_enter, decision_min_score_for_enter, decision_min_score_for_wait, decision_require_risk_acceptable_for_enter, decision_require_tradeability_for_enter, exclude_leveraged, exclude_stablecoins, exclude_wrapped, load_config, log_file, log_level, log_to_file, lookback_days_1d, lookback_days_4h, market_cap_max, market_cap_min, mexc_enabled, min_history_days_1d, min_mexc_quote_volume_24h_usdt, min_mexc_share_24h, min_quote_volume_24h, min_turnover_24h, pre_shortlist_market_cap_floor_usd, resolve_risk_max_stop_distance_pct, resolve_risk_min_rr_to_target_1, risk_atr_multiple, risk_atr_period, risk_atr_timeframe, risk_enabled, risk_max_stop_distance_pct, risk_max_stop_distance_pct_for_setup, risk_min_rr_to_target_1, risk_min_rr_to_tp10, risk_min_stop_distance_pct, risk_stop_method, run_mode, scoring_volume_source, shadow_mode, shortlist_size, spec_version, timezone, tradeability_band_pct, tradeability_class_thresholds, tradeability_enabled, tradeability_max_spread_pct, tradeability_max_tranches, tradeability_min_depth_1pct_usd, tradeability_notional_chunk_usdt, tradeability_notional_total_usdt, validate_config`
 
-**Module Variables:** `CONFIG_PATH, allowed_shadow_modes, btc_cfg, budget_cfg, cfg, cfg_path, class_thresholds, configured_primary, d, decision_cfg` _(+24 more)_
+**Module Variables:** `CONFIG_PATH, allowed_shadow_modes, btc_cfg, budget_cfg, cfg, cfg_path, class_thresholds, configured_primary, d, decision_cfg` _(+28 more)_
 
 **Imports:** `dataclasses, math, os, pathlib, typing, yaml`
 
@@ -565,6 +565,7 @@ _This section shows which functions call which other functions, helping identify
 | `_budget_mapping` | — | `get` |
 | `_expect_integer_number` | `_expect_number` | `append`, `is_integer` |
 | `_expect_number` | — | `append`, `isfinite` |
+| `_parse` | — | `ValueError`, `isfinite` |
 | `_parse_integer_budget_value` | — | `ValueError`, `is_integer` |
 | `btc_regime_enabled` | — | `get` |
 | `btc_regime_mode` | — | `get` |
@@ -596,12 +597,14 @@ _This section shows which functions call which other functions, helping identify
 | `min_mexc_share_24h` | — | `get` |
 | `min_turnover_24h` | — | `get` |
 | `pre_shortlist_market_cap_floor_usd` | `_budget_mapping`, `_parse_integer_budget_value` | `get` |
+| `resolve_risk_max_stop_distance_pct` | `_parse` | `ValueError`, `get` |
 | `resolve_risk_min_rr_to_target_1` | — | `ValueError`, `get`, `isfinite` |
 | `risk_atr_multiple` | — | `get` |
 | `risk_atr_period` | — | `get` |
 | `risk_atr_timeframe` | — | `get` |
 | `risk_enabled` | — | `get` |
-| `risk_max_stop_distance_pct` | — | `get` |
+| `risk_max_stop_distance_pct` | `resolve_risk_max_stop_distance_pct` | `get` |
+| `risk_max_stop_distance_pct_for_setup` | `resolve_risk_max_stop_distance_pct` | `get` |
 | `risk_min_rr_to_target_1` | `resolve_risk_min_rr_to_target_1` | `get` |
 | `risk_min_stop_distance_pct` | — | `get` |
 | `risk_stop_method` | — | `get` |
@@ -930,7 +933,7 @@ _This section shows which functions call which other functions, helping identify
 |------------------|----------------|----------------|
 | `_atr_absolute` | `_to_float` | `get` |
 | `_planned_entry_price` | `_to_float` | `get` |
-| `_risk_cfg` | — | `get`, `resolve_risk_min_rr_to_target_1` |
+| `_risk_cfg` | — | `get`, `resolve_risk_max_stop_distance_pct`, `resolve_risk_min_rr_to_target_1` |
 | `_to_float` | — | `isfinite` |
 | `breakout_trade_levels` | `_atr_absolute`, `_targets`, `_to_float` | `get` |
 | `compute_phase1_risk_fields` | `_planned_entry_price`, `_risk_cfg`, `_to_float` | `get`, `update` |
@@ -1100,7 +1103,7 @@ _Modules with high external call counts may benefit from refactoring._
 | Module | Internal Calls | External Calls | Total | Coupling |
 |--------|----------------|----------------|-------|----------|
 | `scanner/pipeline/output.py` | 41 | 71 | 112 | 🔴 High |
-| `scanner/config.py` | 10 | 69 | 79 | 🔴 High |
+| `scanner/config.py` | 13 | 74 | 87 | 🔴 High |
 | `scanner/tools/backfill_snapshots.py` | 18 | 60 | 78 | 🔴 High |
 | `scanner/pipeline/features.py` | 29 | 48 | 77 | 🔴 High |
 | `scanner/pipeline/__init__.py` | 9 | 49 | 58 | 🔴 High |
@@ -1121,8 +1124,8 @@ _Modules with high external call counts may benefit from refactoring._
 | `scanner/pipeline/runtime_market_meta.py` | 12 | 18 | 30 | 🔴 High |
 | `scanner/backtest/e2_model.py` | 10 | 15 | 25 | 🔴 High |
 | `scanner/clients/mapping.py` | 4 | 21 | 25 | 🔴 High |
+| `scanner/pipeline/scoring/trade_levels.py` | 14 | 11 | 25 | ⚠️ Medium |
 | `scanner/pipeline/manifest.py` | 5 | 19 | 24 | 🔴 High |
-| `scanner/pipeline/scoring/trade_levels.py` | 14 | 10 | 24 | ⚠️ Medium |
 | `scanner/pipeline/snapshot.py` | 2 | 22 | 24 | 🔴 High |
 | `scanner/utils/raw_collector.py` | 4 | 15 | 19 | 🔴 High |
 | `scanner/pipeline/ohlcv.py` | 1 | 15 | 16 | 🔴 High |
@@ -1157,4 +1160,4 @@ _Modules with high external call counts may benefit from refactoring._
 
 ---
 
-_Generated by GitHub Actions • 2026-03-16 15:16 UTC_
+_Generated by GitHub Actions • 2026-03-16 15:27 UTC_
