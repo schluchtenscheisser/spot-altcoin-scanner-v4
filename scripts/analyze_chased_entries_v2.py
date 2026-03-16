@@ -163,7 +163,9 @@ def extract_candidates(report_data: Any, report_date: str) -> list[CandidateRow]
         setup_id = (
             str(node.get("setup_id"))
             if node.get("setup_id") is not None
-            else str(node.get("setup_type")) if node.get("setup_type") is not None else None
+            else str(node.get("setup_type"))
+            if node.get("setup_type") is not None
+            else None
         )
         entry_state = (
             str(node.get("entry_state")) if node.get("entry_state") is not None else None
@@ -201,6 +203,14 @@ def extract_candidates(report_data: Any, report_date: str) -> list[CandidateRow]
 
 
 def dedup_key(row: CandidateRow) -> tuple[Any, ...]:
+    """
+    Ziel:
+    - offensichtliche Duplikate aus $ und $.trade_candidates[...] zusammenführen
+    - echte Mehrfach-Setups pro Symbol bestehen lassen
+
+    Deshalb bewusst KEIN setup_id im Schlüssel.
+    Stattdessen nutzen wir Symbol + Decision + Entry-State + grobe numerische Signatur.
+    """
     distance = None if row.distance_to_entry_pct is None else round(row.distance_to_entry_pct, 6)
     planned = None if row.planned_entry_price is None else round(row.planned_entry_price, 12)
     current = None if row.current_price is None else round(row.current_price, 12)
@@ -210,43 +220,88 @@ def dedup_key(row: CandidateRow) -> tuple[Any, ...]:
         row.symbol,
         row.decision,
         row.entry_state,
-        row.setup_id or "",
         distance,
         planned,
         current,
     )
 
 
-def row_quality_score(row: CandidateRow) -> tuple[int, int, int, int, int]:
-    has_setup = 1 if row.setup_id else 0
-    has_planned = 1 if row.planned_entry_price is not None else 0
-    has_current = 1 if row.current_price is not None else 0
-    reason_count = len(row.decision_reasons)
-    from_trade_candidates = 1 if ".trade_candidates[" in row.source_path else 0
+def is_better_string(current: str | None, candidate: str | None) -> bool:
+    if not candidate:
+        return False
+    if not current:
+        return True
+    return len(candidate) > len(current)
 
-    return (
-        has_setup,
-        has_planned,
-        has_current,
-        reason_count,
-        from_trade_candidates,
+
+def choose_preferred_source_path(current: str, candidate: str) -> str:
+    current_trade = ".trade_candidates[" in current
+    candidate_trade = ".trade_candidates[" in candidate
+
+    if candidate_trade and not current_trade:
+        return candidate
+    if current_trade and not candidate_trade:
+        return current
+    return candidate if len(candidate) > len(current) else current
+
+
+def merge_rows(base: CandidateRow, incoming: CandidateRow) -> CandidateRow:
+    merged = CandidateRow(
+        report_date=base.report_date,
+        symbol=base.symbol,
+        decision=base.decision,
+        setup_id=base.setup_id,
+        entry_state=base.entry_state,
+        distance_to_entry_pct=base.distance_to_entry_pct,
+        current_price=base.current_price,
+        planned_entry_price=base.planned_entry_price,
+        decision_reasons=list(base.decision_reasons),
+        source_path=base.source_path,
     )
+
+    if is_better_string(merged.setup_id, incoming.setup_id):
+        merged.setup_id = incoming.setup_id
+
+    if merged.distance_to_entry_pct is None and incoming.distance_to_entry_pct is not None:
+        merged.distance_to_entry_pct = incoming.distance_to_entry_pct
+
+    if merged.current_price is None and incoming.current_price is not None:
+        merged.current_price = incoming.current_price
+
+    if merged.planned_entry_price is None and incoming.planned_entry_price is not None:
+        merged.planned_entry_price = incoming.planned_entry_price
+
+    if is_better_string(merged.decision, incoming.decision):
+        merged.decision = incoming.decision
+
+    if is_better_string(merged.entry_state, incoming.entry_state):
+        merged.entry_state = incoming.entry_state
+
+    merged.source_path = choose_preferred_source_path(merged.source_path, incoming.source_path)
+
+    merged_reasons = []
+    seen = set()
+    for reason in list(merged.decision_reasons) + list(incoming.decision_reasons):
+        if reason not in seen:
+            seen.add(reason)
+            merged_reasons.append(reason)
+    merged.decision_reasons = merged_reasons
+
+    return merged
 
 
 def deduplicate_rows(rows: list[CandidateRow]) -> list[CandidateRow]:
-    chosen: dict[tuple[Any, ...], CandidateRow] = {}
+    merged_rows: dict[tuple[Any, ...], CandidateRow] = {}
 
     for row in rows:
         key = dedup_key(row)
-        existing = chosen.get(key)
+        existing = merged_rows.get(key)
         if existing is None:
-            chosen[key] = row
-            continue
+            merged_rows[key] = row
+        else:
+            merged_rows[key] = merge_rows(existing, row)
 
-        if row_quality_score(row) > row_quality_score(existing):
-            chosen[key] = row
-
-    return list(chosen.values())
+    return list(merged_rows.values())
 
 
 def select_report_files(
@@ -303,7 +358,7 @@ def classify_distance_bucket(distance: float | None) -> str:
     for label, lower, upper in DISTANCE_BUCKETS:
         if lower is not None and distance < lower:
             continue
-        if upper is None and distance >= lower:
+        if upper is None and lower is not None and distance >= lower:
             return label
         if lower is not None and upper is not None and lower <= distance < upper:
             return label
@@ -316,6 +371,7 @@ def bucket_counter(rows: list[CandidateRow], chased_only: bool = False) -> dict[
         if chased_only and row.entry_state != "chased":
             continue
         counter[classify_distance_bucket(row.distance_to_entry_pct)] += 1
+
     ordered = {label: counter.get(label, 0) for label, _, _ in DISTANCE_BUCKETS}
     if counter.get("unknown", 0):
         ordered["unknown"] = counter["unknown"]
@@ -341,7 +397,11 @@ def summarize_subset(rows: list[CandidateRow], label: str) -> dict[str, Any]:
     for report_date in sorted(rows_by_date):
         day_rows = rows_by_date[report_date]
         chased_rows = [r for r in day_rows if r.entry_state == "chased"]
-        distances = [r.distance_to_entry_pct for r in chased_rows if r.distance_to_entry_pct is not None]
+        distances = [
+            r.distance_to_entry_pct
+            for r in chased_rows
+            if r.distance_to_entry_pct is not None
+        ]
         per_run.append(
             {
                 "report_date": report_date,
@@ -402,7 +462,11 @@ def build_summary(rows: list[CandidateRow]) -> dict[str, Any]:
     for report_date in sorted(rows_by_date):
         day_rows = rows_by_date[report_date]
         chased_rows = [r for r in day_rows if r.entry_state == "chased"]
-        distances = [r.distance_to_entry_pct for r in chased_rows if r.distance_to_entry_pct is not None]
+        distances = [
+            r.distance_to_entry_pct
+            for r in chased_rows
+            if r.distance_to_entry_pct is not None
+        ]
         bucket_counts = Counter(normalize_setup_bucket(r.setup_id) for r in day_rows)
         chased_bucket_counts = Counter(normalize_setup_bucket(r.setup_id) for r in chased_rows)
 
@@ -512,7 +576,12 @@ def render_subset_markdown(subset: dict[str, Any]) -> list[str]:
     lines.append("")
 
     lines.extend(render_distance_bucket_table("### Distance buckets (all)", subset["distance_buckets_all"]))
-    lines.extend(render_distance_bucket_table("### Distance buckets (chased only)", subset["distance_buckets_chased"]))
+    lines.extend(
+        render_distance_bucket_table(
+            "### Distance buckets (chased only)",
+            subset["distance_buckets_chased"],
+        )
+    )
 
     lines.append("### Per-run summary")
     lines.append("")
@@ -584,7 +653,12 @@ def render_markdown(summary: dict[str, Any], source_files: list[Path]) -> str:
     lines.append("")
 
     lines.extend(render_distance_bucket_table("## Overall distance buckets (all)", summary["distance_buckets_all"]))
-    lines.extend(render_distance_bucket_table("## Overall distance buckets (chased only)", summary["distance_buckets_chased"]))
+    lines.extend(
+        render_distance_bucket_table(
+            "## Overall distance buckets (chased only)",
+            summary["distance_buckets_chased"],
+        )
+    )
 
     lines.append("## Per-run chased summary")
     lines.append("")
