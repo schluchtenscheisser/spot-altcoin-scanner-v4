@@ -7,7 +7,8 @@ permissions:
   contents: write
 
 env:
-  ANALYSIS_SCRIPT: scripts/counterfactual_chased_thresholds_v3.py
+  ANALYSIS_SCRIPT: scripts/counterfactual_chased_thresholds_v4.py  # An jeweiliges Skript anpassen
+  ANALYSIS_ARGS: --focus-symbol TAOUSDT                            # Bei Bedarf setzen, sonst auskommentieren
   
 jobs:
   run-analysis:
@@ -33,7 +34,7 @@ jobs:
 
       - name: Run analysis script
         run: |
-          python "${ANALYSIS_SCRIPT}"
+          python "${ANALYSIS_SCRIPT}" ${ANALYSIS_ARGS}
 
       - name: Show generated files
         run: |
