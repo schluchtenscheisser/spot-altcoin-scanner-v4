@@ -1,0 +1,882 @@
+{
+  "analysis_name": "post_risk_unlock_audit",
+  "generated_at_utc": "2026-03-16T20:50:41Z",
+  "runs_analyzed": 5,
+  "aggregate": {
+    "runs_analyzed": 5,
+    "waterfall_sums": {
+      "risk_acceptable_true": 36,
+      "risk_acceptable_true_direct_ok": 14,
+      "risk_acceptable_true_entry_eligible_tradeability": 14,
+      "risk_acceptable_true_fail": 0,
+      "risk_acceptable_true_marginal": 22,
+      "risk_acceptable_true_tranche_ok": 0,
+      "risk_acceptable_true_unknown": 0,
+      "risk_ok_plus_entry_eligible_plus_entry_ready": 9,
+      "risk_ok_plus_entry_eligible_plus_entry_ready_non_enter": 8,
+      "timing_only_after_risk_tradeability_readiness": 2,
+      "top_candidates": 100
+    },
+    "distribution_sums": {
+      "decision": {
+        "ENTER": 1,
+        "NO_TRADE": 67,
+        "WAIT": 32
+      },
+      "tradeability_class": {
+        "DIRECT_OK": 23,
+        "MARGINAL": 77
+      },
+      "entry_ready": {
+        "False": 41,
+        "True": 59
+      },
+      "entry_state": {
+        "chased": 85,
+        "early": 7,
+        "late": 8
+      },
+      "best_setup_type": {
+        "pullback": 30,
+        "reversal": 70
+      }
+    },
+    "post_risk_blockers": {
+      "all_risk_ok_non_enter_reason_counts": {
+        "entry_chased": 33,
+        "tradeability_marginal": 22,
+        "entry_not_confirmed": 16,
+        "retest_not_reclaimed": 16,
+        "btc_regime_caution": 4,
+        "price_past_target_1": 3,
+        "effective_rr_insufficient": 1,
+        "entry_late": 1,
+        "entry_too_early": 1
+      },
+      "all_risk_ok_non_enter_bucket_counts": {
+        "timing": 35,
+        "tradeability": 22,
+        "confirmation": 16,
+        "btc_regime": 4,
+        "late_entry_guard": 4
+      },
+      "risk_ok_entry_eligible_non_enter_reason_counts": {
+        "entry_chased": 13,
+        "entry_not_confirmed": 5,
+        "retest_not_reclaimed": 5,
+        "price_past_target_1": 3,
+        "btc_regime_caution": 2,
+        "effective_rr_insufficient": 1
+      },
+      "risk_ok_entry_eligible_non_enter_bucket_counts": {
+        "timing": 13,
+        "confirmation": 5,
+        "late_entry_guard": 4,
+        "btc_regime": 2
+      },
+      "risk_ok_entry_eligible_entry_ready_non_enter_reason_counts": {
+        "entry_chased": 8,
+        "price_past_target_1": 3,
+        "btc_regime_caution": 2,
+        "effective_rr_insufficient": 1
+      },
+      "risk_ok_entry_eligible_entry_ready_non_enter_bucket_counts": {
+        "timing": 8,
+        "late_entry_guard": 4,
+        "btc_regime": 2
+      }
+    },
+    "setup_breakdown_risk_ok_rows_sum": {
+      "pullback": {
+        "decision::NO_TRADE": 1,
+        "decision::WAIT": 12,
+        "entry_ready::True": 13,
+        "entry_state::chased": 13,
+        "risk_ok::True": 13,
+        "rows": 13,
+        "tradeability::DIRECT_OK": 5,
+        "tradeability::MARGINAL": 8
+      },
+      "reversal": {
+        "decision::ENTER": 1,
+        "decision::NO_TRADE": 2,
+        "decision::WAIT": 20,
+        "entry_ready::False": 16,
+        "entry_ready::True": 7,
+        "entry_state::chased": 21,
+        "entry_state::early": 1,
+        "entry_state::late": 1,
+        "risk_ok::True": 23,
+        "rows": 23,
+        "tradeability::DIRECT_OK": 9,
+        "tradeability::MARGINAL": 14
+      }
+    }
+  },
+  "runs": [
+    {
+      "run_id": "2026-03-16_1773675009352",
+      "timestamp_utc": "2026-03-16T15:30:09Z",
+      "canonical_schema_version": "6.3.0",
+      "source_file": "reports/2026-03-16.json",
+      "waterfall": {
+        "top_candidates": 20,
+        "risk_acceptable_true": 14,
+        "risk_acceptable_true_direct_ok": 6,
+        "risk_acceptable_true_tranche_ok": 0,
+        "risk_acceptable_true_entry_eligible_tradeability": 6,
+        "risk_acceptable_true_marginal": 8,
+        "risk_acceptable_true_fail": 0,
+        "risk_acceptable_true_unknown": 0,
+        "risk_ok_plus_entry_eligible_plus_entry_ready": 3,
+        "risk_ok_plus_entry_eligible_plus_entry_ready_non_enter": 3,
+        "timing_only_after_risk_tradeability_readiness": 1
+      },
+      "distributions": {
+        "decision": {
+          "NO_TRADE": 7,
+          "WAIT": 13
+        },
+        "tradeability_class": {
+          "DIRECT_OK": 7,
+          "MARGINAL": 13
+        },
+        "entry_ready": {
+          "False": 12,
+          "True": 8
+        },
+        "entry_state": {
+          "chased": 20
+        },
+        "best_setup_type": {
+          "pullback": 4,
+          "reversal": 16
+        }
+      },
+      "post_risk_blockers": {
+        "all_risk_ok_non_enter_reason_counts": {
+          "entry_chased": 14,
+          "entry_not_confirmed": 9,
+          "retest_not_reclaimed": 9,
+          "tradeability_marginal": 8,
+          "effective_rr_insufficient": 1,
+          "price_past_target_1": 1
+        },
+        "all_risk_ok_non_enter_bucket_counts": {
+          "timing": 14,
+          "confirmation": 9,
+          "tradeability": 8,
+          "late_entry_guard": 2
+        },
+        "risk_ok_entry_eligible_non_enter_reason_counts": {
+          "entry_chased": 6,
+          "entry_not_confirmed": 3,
+          "retest_not_reclaimed": 3,
+          "effective_rr_insufficient": 1,
+          "price_past_target_1": 1
+        },
+        "risk_ok_entry_eligible_non_enter_bucket_counts": {
+          "timing": 6,
+          "confirmation": 3,
+          "late_entry_guard": 2
+        },
+        "risk_ok_entry_eligible_entry_ready_non_enter_reason_counts": {
+          "entry_chased": 3,
+          "effective_rr_insufficient": 1,
+          "price_past_target_1": 1
+        },
+        "risk_ok_entry_eligible_entry_ready_non_enter_bucket_counts": {
+          "timing": 3,
+          "late_entry_guard": 2
+        }
+      },
+      "setup_breakdown_all_rows": {
+        "pullback": {
+          "decision::NO_TRADE": 2,
+          "decision::WAIT": 2,
+          "entry_ready::False": 1,
+          "entry_ready::True": 3,
+          "entry_state::chased": 4,
+          "risk_ok::False": 2,
+          "risk_ok::True": 2,
+          "rows": 4,
+          "tradeability::DIRECT_OK": 2,
+          "tradeability::MARGINAL": 2
+        },
+        "reversal": {
+          "decision::NO_TRADE": 5,
+          "decision::WAIT": 11,
+          "entry_ready::False": 11,
+          "entry_ready::True": 5,
+          "entry_state::chased": 16,
+          "risk_ok::False": 4,
+          "risk_ok::True": 12,
+          "rows": 16,
+          "tradeability::DIRECT_OK": 5,
+          "tradeability::MARGINAL": 11
+        }
+      },
+      "setup_breakdown_risk_ok_rows": {
+        "pullback": {
+          "decision::WAIT": 2,
+          "entry_ready::True": 2,
+          "entry_state::chased": 2,
+          "risk_ok::True": 2,
+          "rows": 2,
+          "tradeability::DIRECT_OK": 1,
+          "tradeability::MARGINAL": 1
+        },
+        "reversal": {
+          "decision::NO_TRADE": 1,
+          "decision::WAIT": 11,
+          "entry_ready::False": 9,
+          "entry_ready::True": 3,
+          "entry_state::chased": 12,
+          "risk_ok::True": 12,
+          "rows": 12,
+          "tradeability::DIRECT_OK": 5,
+          "tradeability::MARGINAL": 7
+        }
+      },
+      "timing_only_rows": [
+        {
+          "symbol": "TAOUSDT",
+          "decision": "WAIT",
+          "decision_reasons": [
+            "entry_chased"
+          ],
+          "best_setup_type": "pullback",
+          "tradeability_class": "DIRECT_OK",
+          "entry_ready": true,
+          "entry_readiness_reasons": [],
+          "entry_state": "chased",
+          "risk_acceptable": true,
+          "setup_score": 64.8,
+          "global_score": 58.32,
+          "distance_to_entry_pct": 12.9295909328339,
+          "risk_pct_to_stop": 10.302308652097201,
+          "rr_to_target_2": 2.0
+        }
+      ],
+      "risk_ok_entry_eligible_entry_ready_non_enter_rows": [
+        {
+          "symbol": "CAKEUSDT",
+          "decision": "WAIT",
+          "decision_reasons": [
+            "effective_rr_insufficient",
+            "entry_chased"
+          ],
+          "best_setup_type": "reversal",
+          "tradeability_class": "DIRECT_OK",
+          "entry_ready": true,
+          "entry_readiness_reasons": [],
+          "entry_state": "chased",
+          "risk_acceptable": true,
+          "setup_score": 94.88,
+          "global_score": 75.904,
+          "distance_to_entry_pct": 9.031501289318467,
+          "risk_pct_to_stop": 15.141261646329362,
+          "rr_to_target_2": 2.0
+        },
+        {
+          "symbol": "TAOUSDT",
+          "decision": "WAIT",
+          "decision_reasons": [
+            "entry_chased"
+          ],
+          "best_setup_type": "pullback",
+          "tradeability_class": "DIRECT_OK",
+          "entry_ready": true,
+          "entry_readiness_reasons": [],
+          "entry_state": "chased",
+          "risk_acceptable": true,
+          "setup_score": 64.8,
+          "global_score": 58.32,
+          "distance_to_entry_pct": 12.9295909328339,
+          "risk_pct_to_stop": 10.302308652097201,
+          "rr_to_target_2": 2.0
+        },
+        {
+          "symbol": "FETUSDT",
+          "decision": "NO_TRADE",
+          "decision_reasons": [
+            "price_past_target_1",
+            "entry_chased"
+          ],
+          "best_setup_type": "reversal",
+          "tradeability_class": "DIRECT_OK",
+          "entry_ready": true,
+          "entry_readiness_reasons": [],
+          "entry_state": "chased",
+          "risk_acceptable": true,
+          "setup_score": 86.24,
+          "global_score": 68.992,
+          "distance_to_entry_pct": 39.06471972787797,
+          "risk_pct_to_stop": 18.72210400889192,
+          "rr_to_target_2": 2.0
+        }
+      ]
+    },
+    {
+      "run_id": "2026-03-15_1773553334743",
+      "timestamp_utc": "2026-03-15T05:42:14Z",
+      "canonical_schema_version": "6.3.0",
+      "source_file": "reports/2026-03-15.json",
+      "waterfall": {
+        "top_candidates": 20,
+        "risk_acceptable_true": 9,
+        "risk_acceptable_true_direct_ok": 4,
+        "risk_acceptable_true_tranche_ok": 0,
+        "risk_acceptable_true_entry_eligible_tradeability": 4,
+        "risk_acceptable_true_marginal": 5,
+        "risk_acceptable_true_fail": 0,
+        "risk_acceptable_true_unknown": 0,
+        "risk_ok_plus_entry_eligible_plus_entry_ready": 4,
+        "risk_ok_plus_entry_eligible_plus_entry_ready_non_enter": 4,
+        "timing_only_after_risk_tradeability_readiness": 0
+      },
+      "distributions": {
+        "decision": {
+          "NO_TRADE": 13,
+          "WAIT": 7
+        },
+        "tradeability_class": {
+          "DIRECT_OK": 4,
+          "MARGINAL": 16
+        },
+        "entry_ready": {
+          "False": 7,
+          "True": 13
+        },
+        "entry_state": {
+          "chased": 16,
+          "early": 3,
+          "late": 1
+        },
+        "best_setup_type": {
+          "pullback": 12,
+          "reversal": 8
+        }
+      },
+      "post_risk_blockers": {
+        "all_risk_ok_non_enter_reason_counts": {
+          "entry_chased": 9,
+          "tradeability_marginal": 5,
+          "btc_regime_caution": 3,
+          "price_past_target_1": 2,
+          "entry_not_confirmed": 1,
+          "retest_not_reclaimed": 1
+        },
+        "all_risk_ok_non_enter_bucket_counts": {
+          "timing": 9,
+          "tradeability": 5,
+          "btc_regime": 3,
+          "late_entry_guard": 2,
+          "confirmation": 1
+        },
+        "risk_ok_entry_eligible_non_enter_reason_counts": {
+          "entry_chased": 4,
+          "btc_regime_caution": 2,
+          "price_past_target_1": 2
+        },
+        "risk_ok_entry_eligible_non_enter_bucket_counts": {
+          "timing": 4,
+          "btc_regime": 2,
+          "late_entry_guard": 2
+        },
+        "risk_ok_entry_eligible_entry_ready_non_enter_reason_counts": {
+          "entry_chased": 4,
+          "btc_regime_caution": 2,
+          "price_past_target_1": 2
+        },
+        "risk_ok_entry_eligible_entry_ready_non_enter_bucket_counts": {
+          "timing": 4,
+          "btc_regime": 2,
+          "late_entry_guard": 2
+        }
+      },
+      "setup_breakdown_all_rows": {
+        "pullback": {
+          "decision::NO_TRADE": 6,
+          "decision::WAIT": 6,
+          "entry_ready::False": 3,
+          "entry_ready::True": 9,
+          "entry_state::chased": 9,
+          "entry_state::early": 3,
+          "risk_ok::False": 5,
+          "risk_ok::True": 7,
+          "rows": 12,
+          "tradeability::DIRECT_OK": 3,
+          "tradeability::MARGINAL": 9
+        },
+        "reversal": {
+          "decision::NO_TRADE": 7,
+          "decision::WAIT": 1,
+          "entry_ready::False": 4,
+          "entry_ready::True": 4,
+          "entry_state::chased": 7,
+          "entry_state::late": 1,
+          "risk_ok::False": 6,
+          "risk_ok::True": 2,
+          "rows": 8,
+          "tradeability::DIRECT_OK": 1,
+          "tradeability::MARGINAL": 7
+        }
+      },
+      "setup_breakdown_risk_ok_rows": {
+        "pullback": {
+          "decision::NO_TRADE": 1,
+          "decision::WAIT": 6,
+          "entry_ready::True": 7,
+          "entry_state::chased": 7,
+          "risk_ok::True": 7,
+          "rows": 7,
+          "tradeability::DIRECT_OK": 3,
+          "tradeability::MARGINAL": 4
+        },
+        "reversal": {
+          "decision::NO_TRADE": 1,
+          "decision::WAIT": 1,
+          "entry_ready::False": 1,
+          "entry_ready::True": 1,
+          "entry_state::chased": 2,
+          "risk_ok::True": 2,
+          "rows": 2,
+          "tradeability::DIRECT_OK": 1,
+          "tradeability::MARGINAL": 1
+        }
+      },
+      "timing_only_rows": [],
+      "risk_ok_entry_eligible_entry_ready_non_enter_rows": [
+        {
+          "symbol": "RENDERUSDT",
+          "decision": "WAIT",
+          "decision_reasons": [
+            "btc_regime_caution",
+            "entry_chased"
+          ],
+          "best_setup_type": "pullback",
+          "tradeability_class": "DIRECT_OK",
+          "entry_ready": true,
+          "entry_readiness_reasons": [],
+          "entry_state": "chased",
+          "risk_acceptable": true,
+          "setup_score": 68.0,
+          "global_score": 61.2,
+          "distance_to_entry_pct": 6.062939220608898,
+          "risk_pct_to_stop": 7.750310322171111,
+          "rr_to_target_2": 2.0000000000000018
+        },
+        {
+          "symbol": "TAOUSDT",
+          "decision": "WAIT",
+          "decision_reasons": [
+            "btc_regime_caution",
+            "entry_chased"
+          ],
+          "best_setup_type": "pullback",
+          "tradeability_class": "DIRECT_OK",
+          "entry_ready": true,
+          "entry_readiness_reasons": [],
+          "entry_state": "chased",
+          "risk_acceptable": true,
+          "setup_score": 68.0,
+          "global_score": 61.2,
+          "distance_to_entry_pct": 15.014195524860208,
+          "risk_pct_to_stop": 7.89168354826042,
+          "rr_to_target_2": 2.0
+        },
+        {
+          "symbol": "FETUSDT",
+          "decision": "NO_TRADE",
+          "decision_reasons": [
+            "price_past_target_1",
+            "entry_chased"
+          ],
+          "best_setup_type": "pullback",
+          "tradeability_class": "DIRECT_OK",
+          "entry_ready": true,
+          "entry_readiness_reasons": [],
+          "entry_state": "chased",
+          "risk_acceptable": true,
+          "setup_score": 76.0,
+          "global_score": 68.4,
+          "distance_to_entry_pct": 7.629297783999411,
+          "risk_pct_to_stop": 5.530628986057737,
+          "rr_to_target_2": 2.0
+        },
+        {
+          "symbol": "TRUMPUSDT",
+          "decision": "NO_TRADE",
+          "decision_reasons": [
+            "price_past_target_1",
+            "entry_chased"
+          ],
+          "best_setup_type": "reversal",
+          "tradeability_class": "DIRECT_OK",
+          "entry_ready": true,
+          "entry_readiness_reasons": [],
+          "entry_state": "chased",
+          "risk_acceptable": true,
+          "setup_score": 70.0,
+          "global_score": 56.0,
+          "distance_to_entry_pct": 17.065631525314707,
+          "risk_pct_to_stop": 9.224784956737322,
+          "rr_to_target_2": 2.0
+        }
+      ]
+    },
+    {
+      "run_id": "2026-03-14_1773483267911",
+      "timestamp_utc": "2026-03-14T10:14:27Z",
+      "canonical_schema_version": "6.3.0",
+      "source_file": "reports/2026-03-14.json",
+      "waterfall": {
+        "top_candidates": 20,
+        "risk_acceptable_true": 8,
+        "risk_acceptable_true_direct_ok": 3,
+        "risk_acceptable_true_tranche_ok": 0,
+        "risk_acceptable_true_entry_eligible_tradeability": 3,
+        "risk_acceptable_true_marginal": 5,
+        "risk_acceptable_true_fail": 0,
+        "risk_acceptable_true_unknown": 0,
+        "risk_ok_plus_entry_eligible_plus_entry_ready": 2,
+        "risk_ok_plus_entry_eligible_plus_entry_ready_non_enter": 1,
+        "timing_only_after_risk_tradeability_readiness": 1
+      },
+      "distributions": {
+        "decision": {
+          "ENTER": 1,
+          "NO_TRADE": 12,
+          "WAIT": 7
+        },
+        "tradeability_class": {
+          "DIRECT_OK": 4,
+          "MARGINAL": 16
+        },
+        "entry_ready": {
+          "False": 8,
+          "True": 12
+        },
+        "entry_state": {
+          "chased": 17,
+          "early": 3
+        },
+        "best_setup_type": {
+          "pullback": 6,
+          "reversal": 14
+        }
+      },
+      "post_risk_blockers": {
+        "all_risk_ok_non_enter_reason_counts": {
+          "entry_chased": 6,
+          "tradeability_marginal": 5,
+          "entry_not_confirmed": 3,
+          "retest_not_reclaimed": 3,
+          "btc_regime_caution": 1,
+          "entry_too_early": 1
+        },
+        "all_risk_ok_non_enter_bucket_counts": {
+          "timing": 7,
+          "tradeability": 5,
+          "confirmation": 3,
+          "btc_regime": 1
+        },
+        "risk_ok_entry_eligible_non_enter_reason_counts": {
+          "entry_chased": 2,
+          "entry_not_confirmed": 1,
+          "retest_not_reclaimed": 1
+        },
+        "risk_ok_entry_eligible_non_enter_bucket_counts": {
+          "timing": 2,
+          "confirmation": 1
+        },
+        "risk_ok_entry_eligible_entry_ready_non_enter_reason_counts": {
+          "entry_chased": 1
+        },
+        "risk_ok_entry_eligible_entry_ready_non_enter_bucket_counts": {
+          "timing": 1
+        }
+      },
+      "setup_breakdown_all_rows": {
+        "pullback": {
+          "decision::NO_TRADE": 3,
+          "decision::WAIT": 3,
+          "entry_ready::False": 1,
+          "entry_ready::True": 5,
+          "entry_state::chased": 5,
+          "entry_state::early": 1,
+          "risk_ok::False": 3,
+          "risk_ok::True": 3,
+          "rows": 6,
+          "tradeability::DIRECT_OK": 1,
+          "tradeability::MARGINAL": 5
+        },
+        "reversal": {
+          "decision::ENTER": 1,
+          "decision::NO_TRADE": 9,
+          "decision::WAIT": 4,
+          "entry_ready::False": 7,
+          "entry_ready::True": 7,
+          "entry_state::chased": 12,
+          "entry_state::early": 2,
+          "risk_ok::False": 9,
+          "risk_ok::True": 5,
+          "rows": 14,
+          "tradeability::DIRECT_OK": 3,
+          "tradeability::MARGINAL": 11
+        }
+      },
+      "setup_breakdown_risk_ok_rows": {
+        "pullback": {
+          "decision::WAIT": 3,
+          "entry_ready::True": 3,
+          "entry_state::chased": 3,
+          "risk_ok::True": 3,
+          "rows": 3,
+          "tradeability::DIRECT_OK": 1,
+          "tradeability::MARGINAL": 2
+        },
+        "reversal": {
+          "decision::ENTER": 1,
+          "decision::WAIT": 4,
+          "entry_ready::False": 3,
+          "entry_ready::True": 2,
+          "entry_state::chased": 4,
+          "entry_state::early": 1,
+          "risk_ok::True": 5,
+          "rows": 5,
+          "tradeability::DIRECT_OK": 2,
+          "tradeability::MARGINAL": 3
+        }
+      },
+      "timing_only_rows": [
+        {
+          "symbol": "TAOUSDT",
+          "decision": "WAIT",
+          "decision_reasons": [
+            "entry_chased"
+          ],
+          "best_setup_type": "pullback",
+          "tradeability_class": "DIRECT_OK",
+          "entry_ready": true,
+          "entry_readiness_reasons": [],
+          "entry_state": "chased",
+          "risk_acceptable": true,
+          "setup_score": 64.8,
+          "global_score": 58.32,
+          "distance_to_entry_pct": 6.916332154411009,
+          "risk_pct_to_stop": 6.867985510390086,
+          "rr_to_target_2": 2.0
+        }
+      ],
+      "risk_ok_entry_eligible_entry_ready_non_enter_rows": [
+        {
+          "symbol": "TAOUSDT",
+          "decision": "WAIT",
+          "decision_reasons": [
+            "entry_chased"
+          ],
+          "best_setup_type": "pullback",
+          "tradeability_class": "DIRECT_OK",
+          "entry_ready": true,
+          "entry_readiness_reasons": [],
+          "entry_state": "chased",
+          "risk_acceptable": true,
+          "setup_score": 64.8,
+          "global_score": 58.32,
+          "distance_to_entry_pct": 6.916332154411009,
+          "risk_pct_to_stop": 6.867985510390086,
+          "rr_to_target_2": 2.0
+        }
+      ]
+    },
+    {
+      "run_id": "2026-03-13_1773431126642",
+      "timestamp_utc": "2026-03-13T19:45:26Z",
+      "canonical_schema_version": "6.3.0",
+      "source_file": "reports/2026-03-13.json",
+      "waterfall": {
+        "top_candidates": 20,
+        "risk_acceptable_true": 5,
+        "risk_acceptable_true_direct_ok": 1,
+        "risk_acceptable_true_tranche_ok": 0,
+        "risk_acceptable_true_entry_eligible_tradeability": 1,
+        "risk_acceptable_true_marginal": 4,
+        "risk_acceptable_true_fail": 0,
+        "risk_acceptable_true_unknown": 0,
+        "risk_ok_plus_entry_eligible_plus_entry_ready": 0,
+        "risk_ok_plus_entry_eligible_plus_entry_ready_non_enter": 0,
+        "timing_only_after_risk_tradeability_readiness": 0
+      },
+      "distributions": {
+        "decision": {
+          "NO_TRADE": 15,
+          "WAIT": 5
+        },
+        "tradeability_class": {
+          "DIRECT_OK": 6,
+          "MARGINAL": 14
+        },
+        "entry_ready": {
+          "False": 10,
+          "True": 10
+        },
+        "entry_state": {
+          "chased": 17,
+          "late": 3
+        },
+        "best_setup_type": {
+          "pullback": 1,
+          "reversal": 19
+        }
+      },
+      "post_risk_blockers": {
+        "all_risk_ok_non_enter_reason_counts": {
+          "entry_chased": 4,
+          "tradeability_marginal": 4,
+          "entry_not_confirmed": 3,
+          "retest_not_reclaimed": 3,
+          "entry_late": 1
+        },
+        "all_risk_ok_non_enter_bucket_counts": {
+          "timing": 5,
+          "tradeability": 4,
+          "confirmation": 3
+        },
+        "risk_ok_entry_eligible_non_enter_reason_counts": {
+          "entry_chased": 1,
+          "entry_not_confirmed": 1,
+          "retest_not_reclaimed": 1
+        },
+        "risk_ok_entry_eligible_non_enter_bucket_counts": {
+          "confirmation": 1,
+          "timing": 1
+        },
+        "risk_ok_entry_eligible_entry_ready_non_enter_reason_counts": {},
+        "risk_ok_entry_eligible_entry_ready_non_enter_bucket_counts": {}
+      },
+      "setup_breakdown_all_rows": {
+        "pullback": {
+          "decision::WAIT": 1,
+          "entry_ready::True": 1,
+          "entry_state::chased": 1,
+          "risk_ok::True": 1,
+          "rows": 1,
+          "tradeability::MARGINAL": 1
+        },
+        "reversal": {
+          "decision::NO_TRADE": 15,
+          "decision::WAIT": 4,
+          "entry_ready::False": 10,
+          "entry_ready::True": 9,
+          "entry_state::chased": 16,
+          "entry_state::late": 3,
+          "risk_ok::False": 15,
+          "risk_ok::True": 4,
+          "rows": 19,
+          "tradeability::DIRECT_OK": 6,
+          "tradeability::MARGINAL": 13
+        }
+      },
+      "setup_breakdown_risk_ok_rows": {
+        "pullback": {
+          "decision::WAIT": 1,
+          "entry_ready::True": 1,
+          "entry_state::chased": 1,
+          "risk_ok::True": 1,
+          "rows": 1,
+          "tradeability::MARGINAL": 1
+        },
+        "reversal": {
+          "decision::WAIT": 4,
+          "entry_ready::False": 3,
+          "entry_ready::True": 1,
+          "entry_state::chased": 3,
+          "entry_state::late": 1,
+          "risk_ok::True": 4,
+          "rows": 4,
+          "tradeability::DIRECT_OK": 1,
+          "tradeability::MARGINAL": 3
+        }
+      },
+      "timing_only_rows": [],
+      "risk_ok_entry_eligible_entry_ready_non_enter_rows": []
+    },
+    {
+      "run_id": "2026-03-12_1773335486896",
+      "timestamp_utc": "2026-03-12T17:11:26Z",
+      "canonical_schema_version": "5.7.0",
+      "source_file": "reports/2026-03-12.json",
+      "waterfall": {
+        "top_candidates": 20,
+        "risk_acceptable_true": 0,
+        "risk_acceptable_true_direct_ok": 0,
+        "risk_acceptable_true_tranche_ok": 0,
+        "risk_acceptable_true_entry_eligible_tradeability": 0,
+        "risk_acceptable_true_marginal": 0,
+        "risk_acceptable_true_fail": 0,
+        "risk_acceptable_true_unknown": 0,
+        "risk_ok_plus_entry_eligible_plus_entry_ready": 0,
+        "risk_ok_plus_entry_eligible_plus_entry_ready_non_enter": 0,
+        "timing_only_after_risk_tradeability_readiness": 0
+      },
+      "distributions": {
+        "decision": {
+          "NO_TRADE": 20
+        },
+        "tradeability_class": {
+          "DIRECT_OK": 2,
+          "MARGINAL": 18
+        },
+        "entry_ready": {
+          "False": 4,
+          "True": 16
+        },
+        "entry_state": {
+          "chased": 15,
+          "early": 1,
+          "late": 4
+        },
+        "best_setup_type": {
+          "pullback": 7,
+          "reversal": 13
+        }
+      },
+      "post_risk_blockers": {
+        "all_risk_ok_non_enter_reason_counts": {},
+        "all_risk_ok_non_enter_bucket_counts": {},
+        "risk_ok_entry_eligible_non_enter_reason_counts": {},
+        "risk_ok_entry_eligible_non_enter_bucket_counts": {},
+        "risk_ok_entry_eligible_entry_ready_non_enter_reason_counts": {},
+        "risk_ok_entry_eligible_entry_ready_non_enter_bucket_counts": {}
+      },
+      "setup_breakdown_all_rows": {
+        "pullback": {
+          "decision::NO_TRADE": 7,
+          "entry_ready::True": 7,
+          "entry_state::chased": 5,
+          "entry_state::late": 2,
+          "risk_ok::False": 7,
+          "rows": 7,
+          "tradeability::MARGINAL": 7
+        },
+        "reversal": {
+          "decision::NO_TRADE": 13,
+          "entry_ready::False": 4,
+          "entry_ready::True": 9,
+          "entry_state::chased": 10,
+          "entry_state::early": 1,
+          "entry_state::late": 2,
+          "risk_ok::False": 13,
+          "rows": 13,
+          "tradeability::DIRECT_OK": 2,
+          "tradeability::MARGINAL": 11
+        }
+      },
+      "setup_breakdown_risk_ok_rows": {},
+      "timing_only_rows": [],
+      "risk_ok_entry_eligible_entry_ready_non_enter_rows": []
+    }
+  ]
+}
