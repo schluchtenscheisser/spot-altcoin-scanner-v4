@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 env:
-  ANALYSIS_SCRIPT: scripts/post_risk_unlock_audit.py  # An jeweiliges Skript anpassen
+  ANALYSIS_SCRIPT: scripts/top20_formation_audit.py  # An jeweiliges Skript anpassen
     
 jobs:
   run-analysis:
