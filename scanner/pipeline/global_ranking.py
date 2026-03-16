@@ -48,13 +48,13 @@ def _resolve_setup_weight(setup_type: str, setup_id: str, root: Dict[str, Any]) 
     return 1.0
 
 
-def compute_global_top20(
+def compute_global_ranked_candidates(
     reversal_results: List[Dict[str, Any]],
     breakout_results: List[Dict[str, Any]],
     pullback_results: List[Dict[str, Any]],
     config: Dict[str, Any],
 ) -> List[Dict[str, Any]]:
-    """Build unique global top-20 list from setup results using weighted setup score."""
+    """Build deterministically sorted global candidate list after symbol-level dedup."""
     root = config.raw if hasattr(config, "raw") else config
     setup_weights_active = bool(_config_get(root, ["phase_policy", "setup_weights_active"], False))
 
@@ -118,7 +118,22 @@ def compute_global_top20(
         ),
     )
 
-    top20 = ranked[:20]
-    for i, e in enumerate(top20, start=1):
+    for i, e in enumerate(ranked, start=1):
         e["rank"] = i
-    return top20
+    return ranked
+
+
+def compute_global_top20(
+    reversal_results: List[Dict[str, Any]],
+    breakout_results: List[Dict[str, Any]],
+    pullback_results: List[Dict[str, Any]],
+    config: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    """Build unique global top-20 list from setup results using weighted setup score."""
+    ranked = compute_global_ranked_candidates(
+        reversal_results=reversal_results,
+        breakout_results=breakout_results,
+        pullback_results=pullback_results,
+        config=config,
+    )
+    return ranked[:20]

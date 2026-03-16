@@ -133,6 +133,7 @@ def _patch_runtime(monkeypatch, shortlist_after_liquidity):
     monkeypatch.setattr(pipeline, "score_reversals", lambda *args, **kwargs: [])
     monkeypatch.setattr(pipeline, "score_breakout_trend_1_5d", lambda *args, **kwargs: [])
     monkeypatch.setattr(pipeline, "score_pullbacks", lambda *args, **kwargs: [])
+    monkeypatch.setattr(pipeline, "compute_global_ranked_candidates", lambda *args, **kwargs: [{"symbol": "AAAUSDT", "score": 70}])
     monkeypatch.setattr(pipeline, "compute_global_top20", lambda *args, **kwargs: [{"symbol": "AAAUSDT", "score": 70}])
     monkeypatch.setattr(pipeline, "ReportGenerator", _DummyReportGenerator)
     monkeypatch.setattr(pipeline, "SnapshotManager", _DummySnapshotManager)
