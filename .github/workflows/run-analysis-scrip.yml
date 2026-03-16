@@ -7,7 +7,7 @@ permissions:
   contents: write
 
 env:
-  ANALYSIS_SCRIPT: scripts/counterfactual_chased_thresholds_v4.py  # An jeweiliges Skript anpassen
+  ANALYSIS_SCRIPT: scripts/diagnose_risk_reward.py  # An jeweiliges Skript anpassen
     
 jobs:
   run-analysis:
