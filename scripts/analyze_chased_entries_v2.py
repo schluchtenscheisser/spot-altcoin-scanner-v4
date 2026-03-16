@@ -33,6 +33,15 @@ class CandidateRow:
     source_path: str
 
 
+@dataclass
+class SetupHint:
+    report_date: str
+    symbol: str
+    setup_id: str | None
+    source_path: str
+    inferred_from_path: bool
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Analyze chased-entry behavior across recent Spot Altcoin Scanner reports."
@@ -123,10 +132,6 @@ def iter_dict_nodes(obj: Any, path: str = "$") -> Iterable[tuple[dict[str, Any],
             yield from iter_dict_nodes(value, f"{path}[{idx}]")
 
 
-def looks_like_candidate(node: dict[str, Any]) -> bool:
-    return "symbol" in node and "decision" in node and "entry_state" in node
-
-
 def first_non_null_float(node: dict[str, Any], keys: list[str]) -> float | None:
     for key in keys:
         value = coerce_float(node.get(key))
@@ -148,11 +153,46 @@ def normalize_setup_bucket(setup_id: str | None) -> str:
     return "other"
 
 
-def extract_candidates(report_data: Any, report_date: str) -> list[CandidateRow]:
+def infer_setup_id_from_path(path: str) -> str | None:
+    p = path.lower()
+    if "pullback" in p:
+        return "pullback"
+    if "reversal" in p:
+        return "reversal"
+    if "breakout" in p:
+        return "breakout"
+    return None
+
+
+def canonicalize_setup_id(raw: str | None, source_path: str = "") -> str | None:
+    if raw:
+        value = str(raw).strip()
+        if value:
+            return value
+    return infer_setup_id_from_path(source_path)
+
+
+def looks_like_trade_candidate(node: dict[str, Any], path: str) -> bool:
+    if "symbol" not in node or "decision" not in node or "entry_state" not in node:
+        return False
+    # We prefer actual trade_candidates, but keep fallback for schema drift.
+    return ".trade_candidates[" in path or True
+
+
+def looks_like_setup_hint(node: dict[str, Any], path: str) -> bool:
+    if "symbol" not in node:
+        return False
+    if "setup_id" in node or "setup_type" in node:
+        return True
+    inferred = infer_setup_id_from_path(path)
+    return inferred is not None
+
+
+def extract_trade_candidates(report_data: Any, report_date: str) -> list[CandidateRow]:
     rows: list[CandidateRow] = []
 
     for node, source_path in iter_dict_nodes(report_data):
-        if not looks_like_candidate(node):
+        if not looks_like_trade_candidate(node, source_path):
             continue
 
         symbol = str(node.get("symbol") or "").strip()
@@ -160,15 +200,12 @@ def extract_candidates(report_data: Any, report_date: str) -> list[CandidateRow]
             continue
 
         decision = str(node.get("decision")) if node.get("decision") is not None else None
-        setup_id = (
-            str(node.get("setup_id"))
-            if node.get("setup_id") is not None
-            else str(node.get("setup_type"))
-            if node.get("setup_type") is not None
-            else None
-        )
         entry_state = (
             str(node.get("entry_state")) if node.get("entry_state") is not None else None
+        )
+        setup_id = canonicalize_setup_id(
+            node.get("setup_id") or node.get("setup_type"),
+            source_path,
         )
 
         planned_entry_price = first_non_null_float(
@@ -199,18 +236,99 @@ def extract_candidates(report_data: Any, report_date: str) -> list[CandidateRow]
             )
         )
 
-    return deduplicate_rows(rows)
+    return rows
+
+
+def extract_setup_hints(report_data: Any, report_date: str) -> list[SetupHint]:
+    hints: list[SetupHint] = []
+
+    for node, source_path in iter_dict_nodes(report_data):
+        if not looks_like_setup_hint(node, source_path):
+            continue
+
+        symbol = str(node.get("symbol") or "").strip()
+        if not symbol:
+            continue
+
+        explicit = node.get("setup_id") or node.get("setup_type")
+        setup_id = canonicalize_setup_id(explicit, source_path)
+        if not setup_id:
+            continue
+
+        hints.append(
+            SetupHint(
+                report_date=report_date,
+                symbol=symbol,
+                setup_id=setup_id,
+                source_path=source_path,
+                inferred_from_path=explicit is None,
+            )
+        )
+
+    return deduplicate_setup_hints(hints)
+
+
+def deduplicate_setup_hints(hints: list[SetupHint]) -> list[SetupHint]:
+    chosen: dict[tuple[str, str, str], SetupHint] = {}
+    for hint in hints:
+        key = (hint.report_date, hint.symbol, hint.setup_id or "")
+        existing = chosen.get(key)
+        if existing is None:
+            chosen[key] = hint
+            continue
+
+        existing_score = setup_hint_quality(existing)
+        hint_score = setup_hint_quality(hint)
+        if hint_score > existing_score:
+            chosen[key] = hint
+
+    return list(chosen.values())
+
+
+def setup_hint_quality(hint: SetupHint) -> tuple[int, int]:
+    explicit_bonus = 1 if not hint.inferred_from_path else 0
+    trade_path_bonus = 1 if ".trade_candidates[" in hint.source_path else 0
+    return (explicit_bonus, trade_path_bonus)
+
+
+def build_setup_index(hints: list[SetupHint]) -> dict[tuple[str, str], list[SetupHint]]:
+    index: dict[tuple[str, str], list[SetupHint]] = defaultdict(list)
+    for hint in hints:
+        index[(hint.report_date, hint.symbol)].append(hint)
+
+    for key in index:
+        index[key] = sorted(index[key], key=setup_hint_quality, reverse=True)
+
+    return index
+
+
+def resolve_candidate_setup(
+    candidate: CandidateRow,
+    setup_index: dict[tuple[str, str], list[SetupHint]],
+) -> tuple[CandidateRow, str]:
+    if candidate.setup_id:
+        return candidate, "already_present"
+
+    matches = setup_index.get((candidate.report_date, candidate.symbol), [])
+    if not matches:
+        return candidate, "unresolved"
+
+    if len(matches) == 1:
+        candidate.setup_id = matches[0].setup_id
+        return candidate, "joined_unique"
+
+    preferred = choose_best_setup_match(matches, candidate)
+    candidate.setup_id = preferred.setup_id
+    return candidate, "joined_multi"
+
+
+def choose_best_setup_match(matches: list[SetupHint], candidate: CandidateRow) -> SetupHint:
+    # For now prefer the richest / most explicit hint.
+    # This keeps behavior deterministic and debuggable.
+    return sorted(matches, key=setup_hint_quality, reverse=True)[0]
 
 
 def dedup_key(row: CandidateRow) -> tuple[Any, ...]:
-    """
-    Ziel:
-    - offensichtliche Duplikate aus $ und $.trade_candidates[...] zusammenführen
-    - echte Mehrfach-Setups pro Symbol bestehen lassen
-
-    Deshalb bewusst KEIN setup_id im Schlüssel.
-    Stattdessen nutzen wir Symbol + Decision + Entry-State + grobe numerische Signatur.
-    """
     distance = None if row.distance_to_entry_pct is None else round(row.distance_to_entry_pct, 6)
     planned = None if row.planned_entry_price is None else round(row.planned_entry_price, 12)
     current = None if row.current_price is None else round(row.current_price, 12)
@@ -223,6 +341,7 @@ def dedup_key(row: CandidateRow) -> tuple[Any, ...]:
         distance,
         planned,
         current,
+        row.setup_id or "",
     )
 
 
@@ -279,7 +398,7 @@ def merge_rows(base: CandidateRow, incoming: CandidateRow) -> CandidateRow:
 
     merged.source_path = choose_preferred_source_path(merged.source_path, incoming.source_path)
 
-    merged_reasons = []
+    merged_reasons: list[str] = []
     seen = set()
     for reason in list(merged.decision_reasons) + list(incoming.decision_reasons):
         if reason not in seen:
@@ -435,7 +554,7 @@ def summarize_subset(rows: list[CandidateRow], label: str) -> dict[str, Any]:
     }
 
 
-def build_summary(rows: list[CandidateRow]) -> dict[str, Any]:
+def build_summary(rows: list[CandidateRow], join_stats: dict[str, Any]) -> dict[str, Any]:
     rows_by_date: dict[str, list[CandidateRow]] = defaultdict(list)
     for row in rows:
         rows_by_date[row.report_date].append(row)
@@ -468,7 +587,6 @@ def build_summary(rows: list[CandidateRow]) -> dict[str, Any]:
             if r.distance_to_entry_pct is not None
         ]
         bucket_counts = Counter(normalize_setup_bucket(r.setup_id) for r in day_rows)
-        chased_bucket_counts = Counter(normalize_setup_bucket(r.setup_id) for r in chased_rows)
 
         per_run.append(
             {
@@ -477,7 +595,6 @@ def build_summary(rows: list[CandidateRow]) -> dict[str, Any]:
                 "decision_counts": dict(Counter((r.decision or "null") for r in day_rows)),
                 "entry_state_counts": dict(Counter((r.entry_state or "null") for r in day_rows)),
                 "setup_bucket_counts": dict(bucket_counts),
-                "chased_bucket_counts": dict(chased_bucket_counts),
                 "chased_count": len(chased_rows),
                 "chased_pct": safe_pct(len(chased_rows), len(day_rows)),
                 "median_chased_distance_to_entry_pct": median_or_none(distances),
@@ -527,6 +644,7 @@ def build_summary(rows: list[CandidateRow]) -> dict[str, Any]:
         "reason_counts": dict(reason_counter.most_common()),
         "distance_buckets_all": bucket_counter(rows, chased_only=False),
         "distance_buckets_chased": bucket_counter(rows, chased_only=True),
+        "join_stats": join_stats,
         "per_run": per_run,
         "setup_breakdown": setup_breakdown,
         "setup_bucket_summaries": setup_bucket_summaries,
@@ -631,6 +749,8 @@ def render_subset_markdown(subset: dict[str, Any]) -> list[str]:
 
 
 def render_markdown(summary: dict[str, Any], source_files: list[Path]) -> str:
+    join_stats = summary["join_stats"]
+
     lines: list[str] = []
     lines.append("# Chased Entry Analysis")
     lines.append("")
@@ -638,6 +758,16 @@ def render_markdown(summary: dict[str, Any], source_files: list[Path]) -> str:
     lines.append(f"- Runs analyzed: {summary['runs_analyzed']}")
     lines.append(f"- Total candidates: {summary['total_candidates']}")
     lines.append(f"- Source files: {', '.join(p.name for p in source_files)}")
+    lines.append("")
+
+    lines.append("## Setup join diagnostics")
+    lines.append("")
+    lines.append(f"- Candidates with setup already present: {join_stats['already_present']}")
+    lines.append(f"- Candidates joined via unique symbol match: {join_stats['joined_unique']}")
+    lines.append(f"- Candidates joined via multi-match heuristic: {join_stats['joined_multi']}")
+    lines.append(f"- Candidates unresolved after join: {join_stats['unresolved']}")
+    if join_stats["unresolved_symbols"]:
+        lines.append(f"- Unresolved symbols: {', '.join(join_stats['unresolved_symbols'][:25])}")
     lines.append("")
 
     lines.append("## Overall entry-state counts")
@@ -739,6 +869,23 @@ def render_markdown(summary: dict[str, Any], source_files: list[Path]) -> str:
     return "\n".join(lines)
 
 
+def analyze_report(report_data: Any, report_date: str) -> tuple[list[CandidateRow], dict[str, int]]:
+    trade_candidates = extract_trade_candidates(report_data, report_date)
+    setup_hints = extract_setup_hints(report_data, report_date)
+    setup_index = build_setup_index(setup_hints)
+
+    join_counter: Counter[str] = Counter()
+    resolved_rows: list[CandidateRow] = []
+
+    for candidate in trade_candidates:
+        resolved, mode = resolve_candidate_setup(candidate, setup_index)
+        join_counter[mode] += 1
+        resolved_rows.append(resolved)
+
+    deduped = deduplicate_rows(resolved_rows)
+    return deduped, dict(join_counter)
+
+
 def main() -> int:
     args = parse_args()
 
@@ -756,15 +903,35 @@ def main() -> int:
         raise SystemExit("No matching daily report JSON files found.")
 
     all_rows: list[CandidateRow] = []
+    total_join_counter: Counter[str] = Counter()
+
     for report_file in report_files:
         report_data = load_json(report_file)
         report_date = parse_report_date(report_file)
-        all_rows.extend(extract_candidates(report_data, report_date))
+        rows, join_counter = analyze_report(report_data, report_date)
+        all_rows.extend(rows)
+        total_join_counter.update(join_counter)
 
     if not all_rows:
         raise SystemExit("No candidate rows found in selected reports.")
 
-    summary = build_summary(all_rows)
+    unresolved_symbols = sorted(
+        {
+            row.symbol
+            for row in all_rows
+            if not row.setup_id
+        }
+    )
+
+    join_stats = {
+        "already_present": total_join_counter.get("already_present", 0),
+        "joined_unique": total_join_counter.get("joined_unique", 0),
+        "joined_multi": total_join_counter.get("joined_multi", 0),
+        "unresolved": total_join_counter.get("unresolved", 0),
+        "unresolved_symbols": unresolved_symbols,
+    }
+
+    summary = build_summary(all_rows, join_stats)
 
     latest_date = parse_report_date(report_files[-1])
     stem = f"chased_entry_analysis_{latest_date}"
