@@ -1,6 +1,6 @@
 # Counterfactual Chased Threshold Analysis
 
-- Generated: 2026-03-16T09:25:17.142951+00:00
+- Generated: 2026-03-16T09:45:49.615155+00:00
 - Current threshold: 3.0%
 - Hypothetical thresholds: pullback=8.0%, reversal=12.0%, breakout=5.0%, default=3.0%
 

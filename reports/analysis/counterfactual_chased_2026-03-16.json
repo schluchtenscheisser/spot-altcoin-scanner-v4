@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-03-16T09:25:17.142951+00:00",
+  "generated_at_utc": "2026-03-16T09:45:49.615155+00:00",
   "analysis_type": "counterfactual_chased_thresholds",
   "architecture_note": "entry_state is appended in output.py after the decision layer. Therefore threshold changes are label-only in the current architecture.",
   "current_threshold_pct": 3.0,
@@ -2135,6 +2135,7 @@
       }
     }
   },
+  "focus_symbol_analysis": null,
   "rows": [
     {
       "report_date": "2026-03-10",
