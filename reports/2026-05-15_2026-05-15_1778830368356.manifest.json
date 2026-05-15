@@ -1,0 +1,55 @@
+{
+  "run_id": "2026-05-15_1778830368356",
+  "timestamp_utc": "2026-05-15T07:32:48Z",
+  "config_hash": "aadf6b23583ab0808138df77404507492a41b13d29851e11565de4e92efd5967",
+  "canonical_schema_version": "6.3.0",
+  "feature_flags": {
+    "decision_enabled": true,
+    "risk_enabled": true,
+    "tradeability_enabled": true,
+    "btc_regime_enabled": true,
+    "breakout_scoring_enabled": true,
+    "pullback_scoring_enabled": true,
+    "reversal_scoring_enabled": true,
+    "mexc_enabled": true,
+    "shadow_mode_parallel": true
+  },
+  "pipeline_paths": {
+    "shadow_mode": "parallel",
+    "legacy_path_enabled": true,
+    "new_path_enabled": true,
+    "primary_path": "new",
+    "primary_path_source": "config"
+  },
+  "counts_per_stage": {
+    "universe": 1828,
+    "filtered": 489,
+    "shortlist": 182,
+    "orderbook_requested": 200,
+    "orderbook_selected": 200,
+    "tradeability_passed": 182,
+    "tradeability_stopped": 18,
+    "ohlcv_symbols": 173,
+    "features": 173,
+    "reversal_scored": 170,
+    "breakout_scored": 24,
+    "pullback_scored": 173,
+    "global_top20": 20,
+    "legacy_path_enabled": 1,
+    "new_path_enabled": 1,
+    "trade_candidates": 20
+  },
+  "shortlist_size_used": 200,
+  "orderbook_top_k_used": 200,
+  "data_freshness": {
+    "exchange_info_ts_utc": "2026-05-15T07:32:48Z",
+    "tickers_24h_ts_utc": "2026-05-15T07:32:48Z",
+    "market_cap_listings_ts_utc": "2026-05-15T07:32:48Z",
+    "asof_iso_utc": "2026-05-15T07:32:48Z",
+    "asof_ts_ms": 1778830368356
+  },
+  "warnings": [
+    "tradeability_gate_stopped_symbols"
+  ],
+  "duration_seconds": 94.020477712
+}
