@@ -1,0 +1,4546 @@
+{
+  "schema_version": "v1.18",
+  "meta": {
+    "date": "2026-11-14",
+    "generated_at": "2026-11-14T11:28:21.337565Z",
+    "version": "1.9",
+    "mode": "standard",
+    "run_id": "2026-11-14_1794655617593",
+    "timestamp_utc": "2026-11-14T11:26:57Z",
+    "asof_ts_ms": 1794655617593,
+    "asof_iso": "2026-11-14T11:26:57Z",
+    "stage_counts": {
+      "universe": 1329,
+      "filtered": 389,
+      "shortlist": 112,
+      "orderbook_requested": 200,
+      "orderbook_selected": 200,
+      "tradeability_passed": 112,
+      "tradeability_stopped": 88,
+      "ohlcv_symbols": 109,
+      "features": 109,
+      "reversal_scored": 108,
+      "breakout_scored": 0,
+      "pullback_scored": 109,
+      "global_top20": 20,
+      "legacy_path_enabled": 1,
+      "new_path_enabled": 1
+    },
+    "warnings": [
+      "tradeability_gate_stopped_symbols"
+    ],
+    "duration_seconds": 83.743243208,
+    "shortlist_size_used": 200,
+    "orderbook_top_k_used": 200,
+    "pipeline_paths": {
+      "shadow_mode": "parallel",
+      "legacy_path_enabled": true,
+      "new_path_enabled": true,
+      "primary_path": "new",
+      "primary_path_source": "config"
+    },
+    "data_freshness": {
+      "exchange_info_ts_utc": "2026-11-14T11:26:57Z",
+      "tickers_24h_ts_utc": "2026-11-14T11:26:57Z",
+      "market_cap_listings_ts_utc": "2026-11-14T11:26:57Z",
+      "asof_iso_utc": "2026-11-14T11:26:57Z",
+      "asof_ts_ms": 1794655617593
+    }
+  },
+  "summary": {
+    "reversal_count": 108,
+    "breakout_count": 0,
+    "pullback_count": 109,
+    "total_scored": 217,
+    "global_top20_count": 20,
+    "entry_state_counts_all": {
+      "early": 11,
+      "at_trigger": 3,
+      "late": 3,
+      "chased": 3,
+      "null": 0
+    },
+    "entry_state_counts_enter": {
+      "early": 0,
+      "at_trigger": 0,
+      "late": 0,
+      "chased": 0,
+      "null": 0
+    },
+    "entry_state_counts_wait": {
+      "early": 0,
+      "at_trigger": 0,
+      "late": 2,
+      "chased": 3,
+      "null": 0
+    },
+    "entry_state_counts_no_trade": {
+      "early": 11,
+      "at_trigger": 3,
+      "late": 1,
+      "chased": 0,
+      "null": 0
+    }
+  },
+  "setups": {
+    "reversals": [
+      {
+        "symbol": "INJUSDT",
+        "price_usdt": 7.958,
+        "coin_name": "Injective",
+        "market_cap": 793589922.3942279,
+        "quote_volume_24h": 6652876.819,
+        "proxy_liquidity_score": 98.453608,
+        "spread_bps": 7.549069,
+        "slippage_bps": 38.681312,
+        "liquidity_grade": "B",
+        "liquidity_insufficient": false,
+        "score": 56.78,
+        "raw_score": 56.783584,
+        "penalty_multiplier": 1.0,
+        "components": {
+          "drawdown": 0.0,
+          "base": 88.66,
+          "reclaim": 60.0,
+          "volume": 20.61
+        },
+        "penalties": {},
+        "flags": [],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Partial reclaim in progress"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "reclaim_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 6.438,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 7.824106889688406,
+            "invalidation": 6.438,
+            "targets": [
+              9.210213779376812,
+              10.596320669065218,
+              11.982427558753624
+            ],
+            "atr_value": 0.6718531635560614
+          }
+        },
+        "stop_price_initial": 6.438,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 17.715848073537856,
+        "rr_to_target_1": 0.9999999999999993,
+        "rr_to_target_2": 1.9999999999999993,
+        "rr_to_target_3": 2.9999999999999996,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 2237,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 169530075.87635082,
+        "turnover_24h": 0.21362428011293996,
+        "mexc_share_24h": 0.03924304749236573,
+        "spread_pct": 0.07549068948162228,
+        "depth_bid_1pct_usd": 90512.32971,
+        "depth_ask_1pct_usd": 30665.35886,
+        "slippage_bps_5k": 31.884718,
+        "slippage_bps_20k": 38.681312,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 1
+      },
+      {
+        "symbol": "OPGUSDT",
+        "price_usdt": 0.1386,
+        "coin_name": "OpenGradient",
+        "market_cap": 33020083.204818442,
+        "quote_volume_24h": 62411.74767,
+        "proxy_liquidity_score": 51.804124,
+        "spread_bps": 15.862715,
+        "slippage_bps": 102.385346,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 50.5,
+        "raw_score": 63.119314,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 77.06,
+          "reclaim": 100.0,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Reclaimed EMAs (12.6% above EMA50)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "reclaim_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 0.10781,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.1269396843194874,
+            "invalidation": 0.10781,
+            "targets": [
+              0.1460693686389748,
+              0.1651990529584622,
+              0.18432873727794963
+            ],
+            "atr_value": 0.011270174273849881
+          }
+        },
+        "stop_price_initial": 0.10781,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 15.069900655606617,
+        "rr_to_target_1": 0.9999999999999992,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.000000000000001,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 235,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 9117919.923229683,
+        "turnover_24h": 0.27613255444187235,
+        "mexc_share_24h": 0.006844954572478079,
+        "spread_pct": 0.15862715408464775,
+        "depth_bid_1pct_usd": 14322.1255101,
+        "depth_ask_1pct_usd": 15953.4013245,
+        "slippage_bps_5k": 32.473907,
+        "slippage_bps_20k": 102.385346,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 2
+      },
+      {
+        "symbol": "MERLUSDT",
+        "price_usdt": 0.03174,
+        "coin_name": "Merlin Chain",
+        "market_cap": 45390898.49329553,
+        "quote_volume_24h": 86033.47084,
+        "proxy_liquidity_score": 70.103093,
+        "spread_bps": 18.879799,
+        "slippage_bps": 12441.722637,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 47.74,
+        "raw_score": 59.670214,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 84.37,
+          "reclaim": 85.9,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Reclaimed EMAs (8.7% above EMA50)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "reclaim_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 0.02411,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.029565731264768386,
+            "invalidation": 0.02411,
+            "targets": [
+              0.03502146252953677,
+              0.04047719379430516,
+              0.045932925059073544
+            ],
+            "atr_value": 0.0032421880226338635
+          }
+        },
+        "stop_price_initial": 0.02411,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 18.45288795974966,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 941,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 10071740.755760925,
+        "turnover_24h": 0.2218889929497336,
+        "mexc_share_24h": 0.008542065659383638,
+        "spread_pct": 0.18879798615480664,
+        "depth_bid_1pct_usd": 5798.7877067,
+        "depth_ask_1pct_usd": 5700.3974446,
+        "slippage_bps_5k": 35.633337,
+        "slippage_bps_20k": 12441.722637,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 3
+      },
+      {
+        "symbol": "TSLAXUSDT",
+        "price_usdt": 389.24,
+        "coin_name": "Tesla tokenized stock (xStock)",
+        "market_cap": 68972100.0347798,
+        "quote_volume_24h": 63928.88,
+        "proxy_liquidity_score": 54.896907,
+        "spread_bps": 16.698994,
+        "slippage_bps": 9.035515,
+        "liquidity_grade": "A",
+        "liquidity_insufficient": false,
+        "score": 43.92,
+        "raw_score": 54.904221,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 81.91,
+          "reclaim": 75.83,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Reclaimed EMAs (3.2% above EMA50)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "reclaim_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 346.6,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 380.97739827452085,
+            "invalidation": 346.6,
+            "targets": [
+              415.3547965490417,
+              449.7321948235625,
+              484.10959309808334
+            ],
+            "atr_value": 15.554818760360355
+          }
+        },
+        "stop_price_initial": 346.6,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 9.023474471246589,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 500,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 15610928.706653886,
+        "turnover_24h": 0.22633686227883354,
+        "mexc_share_24h": 0.00409513624725936,
+        "spread_pct": 0.16698994206732964,
+        "depth_bid_1pct_usd": 66684.28332,
+        "depth_ask_1pct_usd": 90109.25835,
+        "slippage_bps_5k": 8.457038,
+        "slippage_bps_20k": 9.035515,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 4
+      },
+      {
+        "symbol": "STRCONUSDT",
+        "price_usdt": 107.11,
+        "coin_name": "Strategy Stretch Preferred Tokenized Stock (Ondo)",
+        "market_cap": 53934196.05617133,
+        "quote_volume_24h": 158447.11,
+        "proxy_liquidity_score": 80.927835,
+        "spread_bps": 75.676181,
+        "slippage_bps": 299.42751,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 43.25,
+        "raw_score": 54.058981,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 99.17,
+          "reclaim": 60.77,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Reclaimed EMAs (1.7% above EMA50)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "reclaim_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 103.16,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 106.33409674475428,
+            "invalidation": 103.16,
+            "targets": [
+              109.50819348950856,
+              112.68229023426284,
+              115.85638697901712
+            ],
+            "atr_value": 1.3860162676352448
+          }
+        },
+        "stop_price_initial": 103.16,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 2.985022529860222,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 197,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 450126.7880526703,
+        "turnover_24h": 0.008345851444302103,
+        "mexc_share_24h": 0.35200551090387394,
+        "spread_pct": 0.7567618068856004,
+        "depth_bid_1pct_usd": 3189.4397,
+        "depth_ask_1pct_usd": 1563.7688,
+        "slippage_bps_5k": 109.872911,
+        "slippage_bps_20k": 299.42751,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 5
+      },
+      {
+        "symbol": "VRUSDT",
+        "price_usdt": 0.001665,
+        "coin_name": "Victoria VR",
+        "market_cap": 27940079.766289663,
+        "quote_volume_24h": 358482.990476,
+        "proxy_liquidity_score": 87.886598,
+        "spread_bps": 12.012012,
+        "slippage_bps": 19997.382653,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 42.44,
+        "raw_score": 53.053803,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 96.85,
+          "reclaim": 60.0,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Partial reclaim in progress",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "reclaim_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 0.001456,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.0016035710181589481,
+            "invalidation": 0.001456,
+            "targets": [
+              0.0017511420363178962,
+              0.0018987130544768443,
+              0.002046284072635792
+            ],
+            "atr_value": 2.7567923436432554e-05
+          }
+        },
+        "stop_price_initial": 0.001456,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 9.202649367433294,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 2.9999999999999987,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 1821,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 1005519.6446702334,
+        "turnover_24h": 0.03598843142471682,
+        "mexc_share_24h": 0.3565151535090762,
+        "spread_pct": 0.12012012012012306,
+        "depth_bid_1pct_usd": 2243.5961461,
+        "depth_ask_1pct_usd": 2009.09816501,
+        "slippage_bps_5k": 1736.404037,
+        "slippage_bps_20k": 19997.382653,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 6
+      },
+      {
+        "symbol": "APEPEUSDT",
+        "price_usdt": 1.218e-06,
+        "coin_name": "Ape and Pepe",
+        "market_cap": 255367508.989699,
+        "quote_volume_24h": 108166.2743625686,
+        "proxy_liquidity_score": 74.742268,
+        "spread_bps": 10.671045,
+        "slippage_bps": 28479.139213,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 41.5,
+        "raw_score": 51.877083,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 0.0,
+          "reclaim": 68.38,
+          "volume": 81.74
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "No base detected (still declining)",
+          "Reclaimed EMAs (1.2% above EMA50)",
+          "Strong volume (2.7x average)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "reclaim_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 1.12e-06,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 1.2242673089715486e-06,
+            "invalidation": 1.12e-06,
+            "targets": [
+              1.328534617943097e-06,
+              1.4328019269146455e-06,
+              1.537069235886194e-06
+            ],
+            "atr_value": 5.563641680255182e-08
+          }
+        },
+        "stop_price_initial": 1.12e-06,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 8.51671103258803,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 843,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 14786627.378907211,
+        "turnover_24h": 0.057903323086821015,
+        "mexc_share_24h": 0.007315141687878423,
+        "spread_pct": 0.10671044531090479,
+        "depth_bid_1pct_usd": 8.8107364271,
+        "depth_ask_1pct_usd": 64.3314650065,
+        "slippage_bps_5k": 534.807962,
+        "slippage_bps_20k": 28479.139213,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 7
+      },
+      {
+        "symbol": "BARDUSDT",
+        "price_usdt": 0.1207,
+        "coin_name": "Lombard",
+        "market_cap": 47764307.69151022,
+        "quote_volume_24h": 167943.5863,
+        "proxy_liquidity_score": 82.216495,
+        "spread_bps": 8.295313,
+        "slippage_bps": 46.134313,
+        "liquidity_grade": "B",
+        "liquidity_insufficient": false,
+        "score": 38.48,
+        "raw_score": 68.716719,
+        "penalty_multiplier": 0.56,
+        "components": {
+          "drawdown": 0.0,
+          "base": 0.0,
+          "reclaim": 100.0,
+          "volume": 95.72
+        },
+        "penalties": {
+          "overextension": 0.7,
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "overextended",
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "No base detected (still declining)",
+          "Reclaimed EMAs (20.6% above EMA50)",
+          "Strong volume (2.9x average)",
+          "⚠️ Overextended (20.6% above EMA50)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "reclaim_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 0.1011,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.11087140595249655,
+            "invalidation": 0.1011,
+            "targets": [
+              0.1206428119049931,
+              0.13041421785748963,
+              0.1401856238099862
+            ],
+            "atr_value": 0.014636822526600837
+          }
+        },
+        "stop_price_initial": 0.1011,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 8.813278652462623,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 1.9999999999999987,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 424,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 118685813.8098665,
+        "turnover_24h": 2.4848222353898386,
+        "mexc_share_24h": 0.0014150266228872472,
+        "spread_pct": 0.08295313148071577,
+        "depth_bid_1pct_usd": 38408.91424,
+        "depth_ask_1pct_usd": 29651.07157,
+        "slippage_bps_5k": 19.165403,
+        "slippage_bps_20k": 46.134313,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 8
+      },
+      {
+        "symbol": "LITUSDT",
+        "price_usdt": 3.0908,
+        "coin_name": "Lighter",
+        "market_cap": 774058872.3019413,
+        "quote_volume_24h": 5538800.0939,
+        "proxy_liquidity_score": 97.680412,
+        "spread_bps": 16.500315,
+        "slippage_bps": 2365.812761,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 33.87,
+        "raw_score": 33.866509,
+        "penalty_multiplier": 1.0,
+        "components": {
+          "drawdown": 0.0,
+          "base": 86.22,
+          "reclaim": 20.0,
+          "volume": 0.0
+        },
+        "penalties": {},
+        "flags": [],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Below EMAs (no reclaim yet)"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "reclaim_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 2.5905,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 3.2510685283340766,
+            "invalidation": 2.5905,
+            "targets": [
+              3.911637056668153,
+              4.57220558500223,
+              5.232774113336307
+            ],
+            "atr_value": 0.36916275912412605
+          }
+        },
+        "stop_price_initial": 2.5905,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 20.31850521073351,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.000000000000001,
+        "rr_to_target_3": 3.000000000000001,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 319,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 70186692.39456375,
+        "turnover_24h": 0.09067358427898188,
+        "mexc_share_24h": 0.07891524596661294,
+        "spread_pct": 0.1650031544720742,
+        "depth_bid_1pct_usd": 2210.973232,
+        "depth_ask_1pct_usd": 911.289039,
+        "slippage_bps_5k": 575.353607,
+        "slippage_bps_20k": 2365.812761,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 9
+      },
+      {
+        "symbol": "TIAUSDT",
+        "price_usdt": 0.3658,
+        "coin_name": "Celestia",
+        "market_cap": 361951775.0944476,
+        "quote_volume_24h": 1792379.9951,
+        "proxy_liquidity_score": 95.618557,
+        "spread_bps": 16.393443,
+        "slippage_bps": 20.529296,
+        "liquidity_grade": "B",
+        "liquidity_insufficient": false,
+        "score": 30.0,
+        "raw_score": 30.0,
+        "penalty_multiplier": 1.0,
+        "components": {
+          "drawdown": 70.3,
+          "base": 0.0,
+          "reclaim": 0.0,
+          "volume": 100.0
+        },
+        "penalties": {},
+        "flags": [],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Strong drawdown setup (44.1% from ATH)",
+          "No base detected (still declining)",
+          "Below EMAs (no reclaim yet)",
+          "Strong volume (4.6x average)"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "reclaim_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.385,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.45545624384172084,
+            "invalidation": 0.385,
+            "targets": [
+              0.5259124876834417,
+              0.5963687315251625,
+              0.6668249753668833
+            ],
+            "atr_value": 0.05120696054189681
+          }
+        },
+        "stop_price_initial": 0.385,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 15.469377090416096,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 1.9999999999999991,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 1109,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 57495339.12520521,
+        "turnover_24h": 0.1588480650777369,
+        "mexc_share_24h": 0.031174352954016125,
+        "spread_pct": 0.16393442622950533,
+        "depth_bid_1pct_usd": 22209.224757,
+        "depth_ask_1pct_usd": 68109.730795,
+        "slippage_bps_5k": 16.155395,
+        "slippage_bps_20k": 20.529296,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 10
+      }
+    ],
+    "breakouts": [],
+    "breakout_immediate_1_5d": [],
+    "breakout_retest_1_5d": [],
+    "pullbacks": [
+      {
+        "symbol": "SHAREUSDT",
+        "price_usdt": 2.6376,
+        "coin_name": "ShareX",
+        "market_cap": 47531448.455732174,
+        "quote_volume_24h": 112314.4471,
+        "proxy_liquidity_score": 75.515464,
+        "spread_bps": 12.50924,
+        "slippage_bps": 8098.650732,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 52.48,
+        "raw_score": 65.6,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 60.0,
+          "pullback": 100.0,
+          "rebound": 8.0,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Moderate uptrend (24.4% above EMA50)",
+          "At support level (1.8% from EMA20)",
+          "No rebound yet",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 2.648734372603475,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 2.6376297522717103,
+              "lower": 2.611253454748993,
+              "upper": 2.6640060497944273,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 2.648734372603475,
+            "targets": [
+              2.699600832691096,
+              2.7615719131104814,
+              2.823542993529867
+            ],
+            "atr_value": 0.03098554020969271
+          }
+        },
+        "stop_price_initial": 2.5756586718523247,
+        "stop_source": "atr_fallback",
+        "risk_pct_to_stop": 2.349498839479339,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 192,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 1252033.2818538696,
+        "turnover_24h": 0.026341155646033704,
+        "mexc_share_24h": 0.08970564019967381,
+        "spread_pct": 0.12509239779381962,
+        "depth_bid_1pct_usd": 95.324977,
+        "depth_ask_1pct_usd": 210.934859,
+        "slippage_bps_5k": 5941.856747,
+        "slippage_bps_20k": 8098.650732,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 1
+      },
+      {
+        "symbol": "KIIUSDT",
+        "price_usdt": 0.0844,
+        "coin_name": "KiiChain",
+        "market_cap": 26358920.50635931,
+        "quote_volume_24h": 1224595.71995,
+        "proxy_liquidity_score": 94.072165,
+        "spread_bps": 7.11069,
+        "slippage_bps": 20.892774,
+        "liquidity_grade": "B",
+        "liquidity_insufficient": false,
+        "score": 49.6,
+        "raw_score": 49.6,
+        "penalty_multiplier": 1.0,
+        "components": {
+          "trend": 20.0,
+          "pullback": 100.0,
+          "rebound": 8.0,
+          "volume": 17.73
+        },
+        "penalties": {},
+        "flags": [],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Weak/no uptrend",
+          "At support level (-0.8% from EMA20)",
+          "No rebound yet"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.08449456472235894,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 0.0843763904206544,
+              "lower": 0.08353262651644786,
+              "upper": 0.08522015432486094,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 0.08449456472235894,
+            "targets": [
+              0.08521471275058054,
+              0.08605303508050668,
+              0.08689135741043283
+            ],
+            "atr_value": 0.0004191611649630736
+          }
+        },
+        "stop_price_initial": 0.08353806809072825,
+        "stop_source": "atr_fallback",
+        "risk_pct_to_stop": 0.9935508330549921,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": true,
+        "discovery_age_days": 91,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 6018285.784692096,
+        "turnover_24h": 0.22832064701739715,
+        "mexc_share_24h": 0.2034791573150015,
+        "spread_pct": 0.07110689736905013,
+        "depth_bid_1pct_usd": 41194.3800499,
+        "depth_ask_1pct_usd": 47447.6517816,
+        "slippage_bps_5k": 19.575119,
+        "slippage_bps_20k": 20.892774,
+        "tradeability_class": "DIRECT_OK",
+        "execution_mode": "direct",
+        "rank": 2
+      },
+      {
+        "symbol": "BARDUSDT",
+        "price_usdt": 0.1207,
+        "coin_name": "Lombard",
+        "market_cap": 47764307.69151022,
+        "quote_volume_24h": 167943.5863,
+        "proxy_liquidity_score": 82.216495,
+        "spread_bps": 8.295313,
+        "slippage_bps": 46.134313,
+        "liquidity_grade": "B",
+        "liquidity_insufficient": false,
+        "score": 48.0,
+        "raw_score": 60.0,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 100.0,
+          "pullback": 20.0,
+          "rebound": 60.0,
+          "volume": 100.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Strong uptrend (20.6% above EMA50)",
+          "No clear pullback",
+          "Moderate rebound",
+          "Strong volume (2.9x)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 0.11162818198165494,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 0.1202560655796397,
+              "lower": 0.11905350492384331,
+              "upper": 0.1214586262354361,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 0.11162818198165494,
+            "targets": [
+              0.12888394917762447,
+              0.13751183277560924,
+              0.146139716373594
+            ],
+            "atr_value": 0.014290204102204425
+          }
+        },
+        "stop_price_initial": 0.11162818198165494,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 7.174593278432958,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0000000000000018,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 424,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 118685813.8098665,
+        "turnover_24h": 2.4848222353898386,
+        "mexc_share_24h": 0.0014150266228872472,
+        "spread_pct": 0.08295313148071577,
+        "depth_bid_1pct_usd": 38408.91424,
+        "depth_ask_1pct_usd": 29651.07157,
+        "slippage_bps_5k": 19.165403,
+        "slippage_bps_20k": 46.134313,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 3
+      },
+      {
+        "symbol": "OPGUSDT",
+        "price_usdt": 0.1386,
+        "coin_name": "OpenGradient",
+        "market_cap": 33020083.204818442,
+        "quote_volume_24h": 62411.74767,
+        "proxy_liquidity_score": 51.804124,
+        "spread_bps": 15.862715,
+        "slippage_bps": 102.385346,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 43.52,
+        "raw_score": 54.4,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 90.0,
+          "pullback": 20.0,
+          "rebound": 52.0,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Strong uptrend (12.6% above EMA50)",
+          "No clear pullback",
+          "Moderate rebound",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 0.13131888895232222,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 0.13708105304124457,
+              "lower": 0.13571024251083214,
+              "upper": 0.138451863571657,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 0.13131888895232222,
+            "targets": [
+              0.14284321713016693,
+              0.14860538121908928,
+              0.15436754530801164
+            ],
+            "atr_value": 0.006355182509597174
+          }
+        },
+        "stop_price_initial": 0.13131888895232222,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 4.203472296925419,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 235,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 9117919.923229683,
+        "turnover_24h": 0.27613255444187235,
+        "mexc_share_24h": 0.006844954572478079,
+        "spread_pct": 0.15862715408464775,
+        "depth_bid_1pct_usd": 14322.1255101,
+        "depth_ask_1pct_usd": 15953.4013245,
+        "slippage_bps_5k": 32.473907,
+        "slippage_bps_20k": 102.385346,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 4
+      },
+      {
+        "symbol": "TSLAXUSDT",
+        "price_usdt": 389.24,
+        "coin_name": "Tesla tokenized stock (xStock)",
+        "market_cap": 68972100.0347798,
+        "quote_volume_24h": 63928.88,
+        "proxy_liquidity_score": 54.896907,
+        "spread_bps": 16.698994,
+        "slippage_bps": 9.035515,
+        "liquidity_grade": "A",
+        "liquidity_insufficient": false,
+        "score": 42.21,
+        "raw_score": 52.765772,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 20.0,
+          "pullback": 100.0,
+          "rebound": 23.83,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Weak/no uptrend",
+          "At support level (1.8% from EMA20)",
+          "No rebound yet",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 383.085437858007,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 388.78558667188923,
+              "lower": 384.89773080517034,
+              "upper": 392.6734425386081,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 383.085437858007,
+            "targets": [
+              394.48573548577144,
+              400.18588429965365,
+              405.88603311353586
+            ],
+            "atr_value": 5.4034828299394695
+          }
+        },
+        "stop_price_initial": 383.085437858007,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 1.466142009706954,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 500,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 15610928.706653886,
+        "turnover_24h": 0.22633686227883354,
+        "mexc_share_24h": 0.00409513624725936,
+        "spread_pct": 0.16698994206732964,
+        "depth_bid_1pct_usd": 66684.28332,
+        "depth_ask_1pct_usd": 90109.25835,
+        "slippage_bps_5k": 8.457038,
+        "slippage_bps_20k": 9.035515,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 5
+      },
+      {
+        "symbol": "STRCONUSDT",
+        "price_usdt": 107.11,
+        "coin_name": "Strategy Stretch Preferred Tokenized Stock (Ondo)",
+        "market_cap": 53934196.05617133,
+        "quote_volume_24h": 158447.11,
+        "proxy_liquidity_score": 80.927835,
+        "spread_bps": 75.676181,
+        "slippage_bps": 299.42751,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 41.08,
+        "raw_score": 51.353889,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 20.0,
+          "pullback": 100.0,
+          "rebound": 16.77,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Weak/no uptrend",
+          "At support level (0.6% from EMA20)",
+          "No rebound yet",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 106.61297924195341,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 106.74161363026023,
+              "lower": 105.67419749395764,
+              "upper": 107.80902976656283,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 106.61297924195341,
+            "targets": [
+              106.87024801856705,
+              106.99888240687388,
+              107.1275167951807
+            ],
+            "atr_value": 0.8170311136105864
+          }
+        },
+        "stop_price_initial": 106.61297924195341,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 0.12051006531753859,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 197,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 450126.7880526703,
+        "turnover_24h": 0.008345851444302103,
+        "mexc_share_24h": 0.35200551090387394,
+        "spread_pct": 0.7567618068856004,
+        "depth_bid_1pct_usd": 3189.4397,
+        "depth_ask_1pct_usd": 1563.7688,
+        "slippage_bps_5k": 109.872911,
+        "slippage_bps_20k": 299.42751,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 6
+      },
+      {
+        "symbol": "MERLUSDT",
+        "price_usdt": 0.03174,
+        "coin_name": "Merlin Chain",
+        "market_cap": 45390898.49329553,
+        "quote_volume_24h": 86033.47084,
+        "proxy_liquidity_score": 70.103093,
+        "spread_bps": 18.879799,
+        "slippage_bps": 12441.722637,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 40.62,
+        "raw_score": 50.78002,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 80.0,
+          "pullback": 40.0,
+          "rebound": 13.9,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Strong uptrend (8.7% above EMA50)",
+          "No clear pullback",
+          "No rebound yet",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.030300434467564964,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 0.03053719099090571,
+              "lower": 0.030231819080996654,
+              "upper": 0.030842562900814767,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 0.030300434467564964,
+            "targets": [
+              0.030773947514246457,
+              0.031010704037587204,
+              0.03124746056092795
+            ],
+            "atr_value": 0.0012697682791139805
+          }
+        },
+        "stop_price_initial": 0.030300434467564964,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 0.7753055066893855,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 941,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 10071740.755760925,
+        "turnover_24h": 0.2218889929497336,
+        "mexc_share_24h": 0.008542065659383638,
+        "spread_pct": 0.18879798615480664,
+        "depth_bid_1pct_usd": 5798.7877067,
+        "depth_ask_1pct_usd": 5700.3974446,
+        "slippage_bps_5k": 35.633337,
+        "slippage_bps_20k": 12441.722637,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 7
+      },
+      {
+        "symbol": "APEPEUSDT",
+        "price_usdt": 1.218e-06,
+        "coin_name": "Ape and Pepe",
+        "market_cap": 255367508.989699,
+        "quote_volume_24h": 108166.2743625686,
+        "proxy_liquidity_score": 74.742268,
+        "spread_bps": 10.671045,
+        "slippage_bps": 28479.139213,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 39.74,
+        "raw_score": 49.676829,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 20.0,
+          "pullback": 100.0,
+          "rebound": 8.38,
+          "volume": 100.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Weak/no uptrend",
+          "At support level (0.5% from EMA20)",
+          "No rebound yet",
+          "Strong volume (2.7x)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 1.2319919460101036e-06,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 1.2339172240667114e-06,
+              "lower": 1.2215780518260443e-06,
+              "upper": 1.2462563963073786e-06,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 1.2319919460101036e-06,
+            "targets": [
+              1.2358425021233192e-06,
+              1.237767780179927e-06,
+              1.2396930582365348e-06
+            ],
+            "atr_value": 1.9400699084262993e-08
+          }
+        },
+        "stop_price_initial": 1.2319919460101036e-06,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 0.15602975783598372,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 843,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 14786627.378907211,
+        "turnover_24h": 0.057903323086821015,
+        "mexc_share_24h": 0.007315141687878423,
+        "spread_pct": 0.10671044531090479,
+        "depth_bid_1pct_usd": 8.8107364271,
+        "depth_ask_1pct_usd": 64.3314650065,
+        "slippage_bps_5k": 534.807962,
+        "slippage_bps_20k": 28479.139213,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 8
+      },
+      {
+        "symbol": "INJUSDT",
+        "price_usdt": 7.958,
+        "coin_name": "Injective",
+        "market_cap": 793589922.3942279,
+        "quote_volume_24h": 6652876.819,
+        "proxy_liquidity_score": 98.453608,
+        "spread_bps": 7.549069,
+        "slippage_bps": 38.681312,
+        "liquidity_grade": "B",
+        "liquidity_insufficient": false,
+        "score": 33.6,
+        "raw_score": 33.6,
+        "penalty_multiplier": 1.0,
+        "components": {
+          "trend": 40.0,
+          "pullback": 40.0,
+          "rebound": 8.0,
+          "volume": 50.92
+        },
+        "penalties": {},
+        "flags": [],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Moderate uptrend (6.8% above EMA50)",
+          "No clear pullback",
+          "No rebound yet",
+          "Moderate volume (1.8x)"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 7.860972252569292,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 7.842830114440021,
+              "lower": 7.7644018132956205,
+              "upper": 7.921258415584422,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 7.860972252569292,
+            "targets": [
+              8.487736470364558,
+              9.132642826289095,
+              9.777549182213631
+            ],
+            "atr_value": 0.32245317796226847
+          }
+        },
+        "stop_price_initial": 7.1979237585154845,
+        "stop_source": "atr_fallback",
+        "risk_pct_to_stop": 8.222878049304565,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 2237,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 169530075.87635082,
+        "turnover_24h": 0.21362428011293996,
+        "mexc_share_24h": 0.03924304749236573,
+        "spread_pct": 0.07549068948162228,
+        "depth_bid_1pct_usd": 90512.32971,
+        "depth_ask_1pct_usd": 30665.35886,
+        "slippage_bps_5k": 31.884718,
+        "slippage_bps_20k": 38.681312,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 9
+      },
+      {
+        "symbol": "VRUSDT",
+        "price_usdt": 0.001665,
+        "coin_name": "Victoria VR",
+        "market_cap": 27940079.766289663,
+        "quote_volume_24h": 358482.990476,
+        "proxy_liquidity_score": 87.886598,
+        "spread_bps": 12.012012,
+        "slippage_bps": 19997.382653,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 26.88,
+        "raw_score": 33.6,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 40.0,
+          "pullback": 40.0,
+          "rebound": 8.0,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Moderate uptrend (7.4% above EMA50)",
+          "No clear pullback",
+          "No rebound yet",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.0016498279555911982,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 0.0016641907418728176,
+              "lower": 0.0016475488344540894,
+              "upper": 0.0016808326492915458,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 0.0016498279555911982,
+            "targets": [
+              0.001678553528154437,
+              0.0016929163144360564,
+              0.0017072791007176759
+            ],
+            "atr_value": 5.679037797508777e-06
+          }
+        },
+        "stop_price_initial": 0.0016498279555911982,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 0.8630492839694618,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 1821,
+        "discovery_source": "cmc_date_added",
+        "global_volume_24h_usd": 1005519.6446702334,
+        "turnover_24h": 0.03598843142471682,
+        "mexc_share_24h": 0.3565151535090762,
+        "spread_pct": 0.12012012012012306,
+        "depth_bid_1pct_usd": 2243.5961461,
+        "depth_ask_1pct_usd": 2009.09816501,
+        "slippage_bps_5k": 1736.404037,
+        "slippage_bps_20k": 19997.382653,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "rank": 10
+      }
+    ],
+    "global_top20": [
+      {
+        "symbol": "SHAREUSDT",
+        "price_usdt": 2.6376,
+        "coin_name": "ShareX",
+        "market_cap": 47531448.455732174,
+        "quote_volume_24h": 112314.4471,
+        "proxy_liquidity_score": 75.515464,
+        "spread_bps": 12.50924,
+        "slippage_bps": 8098.650732,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 52.48,
+        "raw_score": 65.6,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 60.0,
+          "pullback": 100.0,
+          "rebound": 8.0,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Moderate uptrend (24.4% above EMA50)",
+          "At support level (1.8% from EMA20)",
+          "No rebound yet",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 2.648734372603475,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 2.6376297522717103,
+              "lower": 2.611253454748993,
+              "upper": 2.6640060497944273,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 2.648734372603475,
+            "targets": [
+              2.699600832691096,
+              2.7615719131104814,
+              2.823542993529867
+            ],
+            "atr_value": 0.03098554020969271
+          }
+        },
+        "stop_price_initial": 2.5756586718523247,
+        "stop_source": "atr_fallback",
+        "risk_pct_to_stop": 2.349498839479339,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 192,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 52.48,
+        "best_setup_type": "pullback",
+        "best_setup_score": 52.48,
+        "setup_weight": 0.9,
+        "global_score": 47.232,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "rank": 1,
+        "global_volume_24h_usd": 1252033.2818538696,
+        "turnover_24h": 0.026341155646033704,
+        "mexc_share_24h": 0.08970564019967381,
+        "spread_pct": 0.12509239779381962,
+        "depth_bid_1pct_usd": 95.324977,
+        "depth_ask_1pct_usd": 210.934859,
+        "slippage_bps_5k": 5941.856747,
+        "slippage_bps_20k": 8098.650732,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "risk_reward_unattractive",
+          "entry_not_confirmed",
+          "rebound_not_confirmed"
+        ]
+      },
+      {
+        "symbol": "INJUSDT",
+        "price_usdt": 7.958,
+        "coin_name": "Injective",
+        "market_cap": 793589922.3942279,
+        "quote_volume_24h": 6652876.819,
+        "proxy_liquidity_score": 98.453608,
+        "spread_bps": 7.549069,
+        "slippage_bps": 38.681312,
+        "liquidity_grade": "B",
+        "liquidity_insufficient": false,
+        "score": 56.78,
+        "raw_score": 56.783584,
+        "penalty_multiplier": 1.0,
+        "components": {
+          "drawdown": 0.0,
+          "base": 88.66,
+          "reclaim": 60.0,
+          "volume": 20.61
+        },
+        "penalties": {},
+        "flags": [],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Partial reclaim in progress"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 6.438,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 7.824106889688406,
+            "invalidation": 6.438,
+            "targets": [
+              9.210213779376812,
+              10.596320669065218,
+              11.982427558753624
+            ],
+            "atr_value": 0.6718531635560614
+          }
+        },
+        "stop_price_initial": 6.438,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 17.715848073537856,
+        "rr_to_target_1": 0.9999999999999993,
+        "rr_to_target_2": 1.9999999999999993,
+        "rr_to_target_3": 2.9999999999999996,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 2237,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 56.78,
+        "best_setup_type": "reversal",
+        "best_setup_score": 56.78,
+        "setup_weight": 0.8,
+        "global_score": 45.424,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": true,
+        "rank": 2,
+        "global_volume_24h_usd": 169530075.87635082,
+        "turnover_24h": 0.21362428011293996,
+        "mexc_share_24h": 0.03924304749236573,
+        "spread_pct": 0.07549068948162228,
+        "depth_bid_1pct_usd": 90512.32971,
+        "depth_ask_1pct_usd": 30665.35886,
+        "slippage_bps_5k": 31.884718,
+        "slippage_bps_20k": 38.681312,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "WAIT",
+        "decision_reasons": [
+          "tradeability_marginal"
+        ]
+      },
+      {
+        "symbol": "KIIUSDT",
+        "price_usdt": 0.0844,
+        "coin_name": "KiiChain",
+        "market_cap": 26358920.50635931,
+        "quote_volume_24h": 1224595.71995,
+        "proxy_liquidity_score": 94.072165,
+        "spread_bps": 7.11069,
+        "slippage_bps": 20.892774,
+        "liquidity_grade": "B",
+        "liquidity_insufficient": false,
+        "score": 49.6,
+        "raw_score": 49.6,
+        "penalty_multiplier": 1.0,
+        "components": {
+          "trend": 20.0,
+          "pullback": 100.0,
+          "rebound": 8.0,
+          "volume": 17.73
+        },
+        "penalties": {},
+        "flags": [],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Weak/no uptrend",
+          "At support level (-0.8% from EMA20)",
+          "No rebound yet"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.08449456472235894,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 0.0843763904206544,
+              "lower": 0.08353262651644786,
+              "upper": 0.08522015432486094,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 0.08449456472235894,
+            "targets": [
+              0.08521471275058054,
+              0.08605303508050668,
+              0.08689135741043283
+            ],
+            "atr_value": 0.0004191611649630736
+          }
+        },
+        "stop_price_initial": 0.08353806809072825,
+        "stop_source": "atr_fallback",
+        "risk_pct_to_stop": 0.9935508330549921,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": true,
+        "discovery_age_days": 91,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 49.6,
+        "best_setup_type": "pullback",
+        "best_setup_score": 49.6,
+        "setup_weight": 0.9,
+        "global_score": 44.64,
+        "confluence": 1,
+        "valid_setups": [
+          "pullback"
+        ],
+        "rank": 3,
+        "global_volume_24h_usd": 6018285.784692096,
+        "turnover_24h": 0.22832064701739715,
+        "mexc_share_24h": 0.2034791573150015,
+        "spread_pct": 0.07110689736905013,
+        "depth_bid_1pct_usd": 41194.3800499,
+        "depth_ask_1pct_usd": 47447.6517816,
+        "slippage_bps_5k": 19.575119,
+        "slippage_bps_20k": 20.892774,
+        "tradeability_class": "DIRECT_OK",
+        "execution_mode": "direct",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "risk_reward_unattractive",
+          "entry_not_confirmed",
+          "rebound_not_confirmed"
+        ]
+      },
+      {
+        "symbol": "BARDUSDT",
+        "price_usdt": 0.1207,
+        "coin_name": "Lombard",
+        "market_cap": 47764307.69151022,
+        "quote_volume_24h": 167943.5863,
+        "proxy_liquidity_score": 82.216495,
+        "spread_bps": 8.295313,
+        "slippage_bps": 46.134313,
+        "liquidity_grade": "B",
+        "liquidity_insufficient": false,
+        "score": 48.0,
+        "raw_score": 60.0,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 100.0,
+          "pullback": 20.0,
+          "rebound": 60.0,
+          "volume": 100.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Strong uptrend (20.6% above EMA50)",
+          "No clear pullback",
+          "Moderate rebound",
+          "Strong volume (2.9x)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 0.11162818198165494,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 0.1202560655796397,
+              "lower": 0.11905350492384331,
+              "upper": 0.1214586262354361,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 0.11162818198165494,
+            "targets": [
+              0.12888394917762447,
+              0.13751183277560924,
+              0.146139716373594
+            ],
+            "atr_value": 0.014290204102204425
+          }
+        },
+        "stop_price_initial": 0.11162818198165494,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 7.174593278432958,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0000000000000018,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 424,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 48.0,
+        "best_setup_type": "pullback",
+        "best_setup_score": 48.0,
+        "setup_weight": 0.9,
+        "global_score": 43.2,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "rank": 4,
+        "global_volume_24h_usd": 118685813.8098665,
+        "turnover_24h": 2.4848222353898386,
+        "mexc_share_24h": 0.0014150266228872472,
+        "spread_pct": 0.08295313148071577,
+        "depth_bid_1pct_usd": 38408.91424,
+        "depth_ask_1pct_usd": 29651.07157,
+        "slippage_bps_5k": 19.165403,
+        "slippage_bps_20k": 46.134313,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "WAIT",
+        "decision_reasons": [
+          "tradeability_marginal"
+        ]
+      },
+      {
+        "symbol": "OPGUSDT",
+        "price_usdt": 0.1386,
+        "coin_name": "OpenGradient",
+        "market_cap": 33020083.204818442,
+        "quote_volume_24h": 62411.74767,
+        "proxy_liquidity_score": 51.804124,
+        "spread_bps": 15.862715,
+        "slippage_bps": 102.385346,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 50.5,
+        "raw_score": 63.119314,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 77.06,
+          "reclaim": 100.0,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Reclaimed EMAs (12.6% above EMA50)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": true,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 0.10781,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.1269396843194874,
+            "invalidation": 0.10781,
+            "targets": [
+              0.1460693686389748,
+              0.1651990529584622,
+              0.18432873727794963
+            ],
+            "atr_value": 0.011270174273849881
+          }
+        },
+        "stop_price_initial": 0.10781,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 15.069900655606617,
+        "rr_to_target_1": 0.9999999999999992,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.000000000000001,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 235,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 50.5,
+        "best_setup_type": "reversal",
+        "best_setup_score": 50.5,
+        "setup_weight": 0.8,
+        "global_score": 40.4,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": true,
+        "rank": 5,
+        "global_volume_24h_usd": 9117919.923229683,
+        "turnover_24h": 0.27613255444187235,
+        "mexc_share_24h": 0.006844954572478079,
+        "spread_pct": 0.15862715408464775,
+        "depth_bid_1pct_usd": 14322.1255101,
+        "depth_ask_1pct_usd": 15953.4013245,
+        "slippage_bps_5k": 32.473907,
+        "slippage_bps_20k": 102.385346,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "WAIT",
+        "decision_reasons": [
+          "tradeability_marginal"
+        ]
+      },
+      {
+        "symbol": "MERLUSDT",
+        "price_usdt": 0.03174,
+        "coin_name": "Merlin Chain",
+        "market_cap": 45390898.49329553,
+        "quote_volume_24h": 86033.47084,
+        "proxy_liquidity_score": 70.103093,
+        "spread_bps": 18.879799,
+        "slippage_bps": 12441.722637,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 47.74,
+        "raw_score": 59.670214,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 84.37,
+          "reclaim": 85.9,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Reclaimed EMAs (8.7% above EMA50)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 0.02411,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.029565731264768386,
+            "invalidation": 0.02411,
+            "targets": [
+              0.03502146252953677,
+              0.04047719379430516,
+              0.045932925059073544
+            ],
+            "atr_value": 0.0032421880226338635
+          }
+        },
+        "stop_price_initial": 0.02411,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 18.45288795974966,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 941,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 47.74,
+        "best_setup_type": "reversal",
+        "best_setup_score": 47.74,
+        "setup_weight": 0.8,
+        "global_score": 38.192,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": true,
+        "rank": 6,
+        "global_volume_24h_usd": 10071740.755760925,
+        "turnover_24h": 0.2218889929497336,
+        "mexc_share_24h": 0.008542065659383638,
+        "spread_pct": 0.18879798615480664,
+        "depth_bid_1pct_usd": 5798.7877067,
+        "depth_ask_1pct_usd": 5700.3974446,
+        "slippage_bps_5k": 35.633337,
+        "slippage_bps_20k": 12441.722637,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "WAIT",
+        "decision_reasons": [
+          "tradeability_marginal"
+        ]
+      },
+      {
+        "symbol": "TSLAXUSDT",
+        "price_usdt": 389.24,
+        "coin_name": "Tesla tokenized stock (xStock)",
+        "market_cap": 68972100.0347798,
+        "quote_volume_24h": 63928.88,
+        "proxy_liquidity_score": 54.896907,
+        "spread_bps": 16.698994,
+        "slippage_bps": 9.035515,
+        "liquidity_grade": "A",
+        "liquidity_insufficient": false,
+        "score": 42.21,
+        "raw_score": 52.765772,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 20.0,
+          "pullback": 100.0,
+          "rebound": 23.83,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Weak/no uptrend",
+          "At support level (1.8% from EMA20)",
+          "No rebound yet",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 383.085437858007,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 388.78558667188923,
+              "lower": 384.89773080517034,
+              "upper": 392.6734425386081,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 383.085437858007,
+            "targets": [
+              394.48573548577144,
+              400.18588429965365,
+              405.88603311353586
+            ],
+            "atr_value": 5.4034828299394695
+          }
+        },
+        "stop_price_initial": 383.085437858007,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 1.466142009706954,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 500,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 42.21,
+        "best_setup_type": "pullback",
+        "best_setup_score": 42.21,
+        "setup_weight": 0.9,
+        "global_score": 37.989,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "rank": 7,
+        "global_volume_24h_usd": 15610928.706653886,
+        "turnover_24h": 0.22633686227883354,
+        "mexc_share_24h": 0.00409513624725936,
+        "spread_pct": 0.16698994206732964,
+        "depth_bid_1pct_usd": 66684.28332,
+        "depth_ask_1pct_usd": 90109.25835,
+        "slippage_bps_5k": 8.457038,
+        "slippage_bps_20k": 9.035515,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "risk_reward_unattractive",
+          "entry_not_confirmed",
+          "rebound_not_confirmed"
+        ]
+      },
+      {
+        "symbol": "STRCONUSDT",
+        "price_usdt": 107.11,
+        "coin_name": "Strategy Stretch Preferred Tokenized Stock (Ondo)",
+        "market_cap": 53934196.05617133,
+        "quote_volume_24h": 158447.11,
+        "proxy_liquidity_score": 80.927835,
+        "spread_bps": 75.676181,
+        "slippage_bps": 299.42751,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 41.08,
+        "raw_score": 51.353889,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 20.0,
+          "pullback": 100.0,
+          "rebound": 16.77,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Weak/no uptrend",
+          "At support level (0.6% from EMA20)",
+          "No rebound yet",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 106.61297924195341,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 106.74161363026023,
+              "lower": 105.67419749395764,
+              "upper": 107.80902976656283,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 106.61297924195341,
+            "targets": [
+              106.87024801856705,
+              106.99888240687388,
+              107.1275167951807
+            ],
+            "atr_value": 0.8170311136105864
+          }
+        },
+        "stop_price_initial": 106.61297924195341,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 0.12051006531753859,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 197,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 41.08,
+        "best_setup_type": "pullback",
+        "best_setup_score": 41.08,
+        "setup_weight": 0.9,
+        "global_score": 36.972,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "rank": 8,
+        "global_volume_24h_usd": 450126.7880526703,
+        "turnover_24h": 0.008345851444302103,
+        "mexc_share_24h": 0.35200551090387394,
+        "spread_pct": 0.7567618068856004,
+        "depth_bid_1pct_usd": 3189.4397,
+        "depth_ask_1pct_usd": 1563.7688,
+        "slippage_bps_5k": 109.872911,
+        "slippage_bps_20k": 299.42751,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "risk_reward_unattractive",
+          "entry_not_confirmed",
+          "rebound_not_confirmed"
+        ]
+      },
+      {
+        "symbol": "APEPEUSDT",
+        "price_usdt": 1.218e-06,
+        "coin_name": "Ape and Pepe",
+        "market_cap": 255367508.989699,
+        "quote_volume_24h": 108166.2743625686,
+        "proxy_liquidity_score": 74.742268,
+        "spread_bps": 10.671045,
+        "slippage_bps": 28479.139213,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 39.74,
+        "raw_score": 49.676829,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "trend": 20.0,
+          "pullback": 100.0,
+          "rebound": 8.38,
+          "volume": 100.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Weak/no uptrend",
+          "At support level (0.5% from EMA20)",
+          "No rebound yet",
+          "Strong volume (2.7x)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "rebound_not_confirmed"
+        ],
+        "setup_subtype": "pullback_to_ema",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 1.2319919460101036e-06,
+        "invalidation_anchor_type": "support_level",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_zone": {
+              "center": 1.2339172240667114e-06,
+              "lower": 1.2215780518260443e-06,
+              "upper": 1.2462563963073786e-06,
+              "tolerance_pct": 1.0
+            },
+            "invalidation": 1.2319919460101036e-06,
+            "targets": [
+              1.2358425021233192e-06,
+              1.237767780179927e-06,
+              1.2396930582365348e-06
+            ],
+            "atr_value": 1.9400699084262993e-08
+          }
+        },
+        "stop_price_initial": 1.2319919460101036e-06,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 0.15602975783598372,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 843,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 39.74,
+        "best_setup_type": "pullback",
+        "best_setup_score": 39.74,
+        "setup_weight": 0.9,
+        "global_score": 35.766,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "rank": 9,
+        "global_volume_24h_usd": 14786627.378907211,
+        "turnover_24h": 0.057903323086821015,
+        "mexc_share_24h": 0.007315141687878423,
+        "spread_pct": 0.10671044531090479,
+        "depth_bid_1pct_usd": 8.8107364271,
+        "depth_ask_1pct_usd": 64.3314650065,
+        "slippage_bps_5k": 534.807962,
+        "slippage_bps_20k": 28479.139213,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "risk_reward_unattractive",
+          "insufficient_edge",
+          "entry_not_confirmed",
+          "rebound_not_confirmed"
+        ]
+      },
+      {
+        "symbol": "VRUSDT",
+        "price_usdt": 0.001665,
+        "coin_name": "Victoria VR",
+        "market_cap": 27940079.766289663,
+        "quote_volume_24h": 358482.990476,
+        "proxy_liquidity_score": 87.886598,
+        "spread_bps": 12.012012,
+        "slippage_bps": 19997.382653,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 42.44,
+        "raw_score": 53.053803,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 96.85,
+          "reclaim": 60.0,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Partial reclaim in progress",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": true,
+        "entry_readiness_reasons": [],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": true,
+        "invalidation_anchor_price": 0.001456,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.0016035710181589481,
+            "invalidation": 0.001456,
+            "targets": [
+              0.0017511420363178962,
+              0.0018987130544768443,
+              0.002046284072635792
+            ],
+            "atr_value": 2.7567923436432554e-05
+          }
+        },
+        "stop_price_initial": 0.001456,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 9.202649367433294,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 2.9999999999999987,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 1821,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 42.44,
+        "best_setup_type": "reversal",
+        "best_setup_score": 42.44,
+        "setup_weight": 0.8,
+        "global_score": 33.952,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": true,
+        "rank": 10,
+        "global_volume_24h_usd": 1005519.6446702334,
+        "turnover_24h": 0.03598843142471682,
+        "mexc_share_24h": 0.3565151535090762,
+        "spread_pct": 0.12012012012012306,
+        "depth_bid_1pct_usd": 2243.5961461,
+        "depth_ask_1pct_usd": 2009.09816501,
+        "slippage_bps_5k": 1736.404037,
+        "slippage_bps_20k": 19997.382653,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "WAIT",
+        "decision_reasons": [
+          "tradeability_marginal"
+        ]
+      },
+      {
+        "symbol": "LITUSDT",
+        "price_usdt": 3.0908,
+        "coin_name": "Lighter",
+        "market_cap": 774058872.3019413,
+        "quote_volume_24h": 5538800.0939,
+        "proxy_liquidity_score": 97.680412,
+        "spread_bps": 16.500315,
+        "slippage_bps": 2365.812761,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 33.87,
+        "raw_score": 33.866509,
+        "penalty_multiplier": 1.0,
+        "components": {
+          "drawdown": 0.0,
+          "base": 86.22,
+          "reclaim": 20.0,
+          "volume": 0.0
+        },
+        "penalties": {},
+        "flags": [],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Below EMAs (no reclaim yet)"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 2.5905,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 3.2510685283340766,
+            "invalidation": 2.5905,
+            "targets": [
+              3.911637056668153,
+              4.57220558500223,
+              5.232774113336307
+            ],
+            "atr_value": 0.36916275912412605
+          }
+        },
+        "stop_price_initial": 2.5905,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 20.31850521073351,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.000000000000001,
+        "rr_to_target_3": 3.000000000000001,
+        "risk_acceptable": false,
+        "discovery": false,
+        "discovery_age_days": 319,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 33.87,
+        "best_setup_type": "reversal",
+        "best_setup_score": 33.87,
+        "setup_weight": 0.8,
+        "global_score": 27.096,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": false,
+        "rank": 11,
+        "global_volume_24h_usd": 70186692.39456375,
+        "turnover_24h": 0.09067358427898188,
+        "mexc_share_24h": 0.07891524596661294,
+        "spread_pct": 0.1650031544720742,
+        "depth_bid_1pct_usd": 2210.973232,
+        "depth_ask_1pct_usd": 911.289039,
+        "slippage_bps_5k": 575.353607,
+        "slippage_bps_20k": 2365.812761,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "risk_reward_unattractive",
+          "insufficient_edge",
+          "entry_not_confirmed",
+          "retest_not_reclaimed"
+        ]
+      },
+      {
+        "symbol": "TIAUSDT",
+        "price_usdt": 0.3658,
+        "coin_name": "Celestia",
+        "market_cap": 361951775.0944476,
+        "quote_volume_24h": 1792379.9951,
+        "proxy_liquidity_score": 95.618557,
+        "spread_bps": 16.393443,
+        "slippage_bps": 20.529296,
+        "liquidity_grade": "B",
+        "liquidity_insufficient": false,
+        "score": 30.0,
+        "raw_score": 30.0,
+        "penalty_multiplier": 1.0,
+        "components": {
+          "drawdown": 70.3,
+          "base": 0.0,
+          "reclaim": 0.0,
+          "volume": 100.0
+        },
+        "penalties": {},
+        "flags": [],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Strong drawdown setup (44.1% from ATH)",
+          "No base detected (still declining)",
+          "Below EMAs (no reclaim yet)",
+          "Strong volume (4.6x average)"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.385,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.45545624384172084,
+            "invalidation": 0.385,
+            "targets": [
+              0.5259124876834417,
+              0.5963687315251625,
+              0.6668249753668833
+            ],
+            "atr_value": 0.05120696054189681
+          }
+        },
+        "stop_price_initial": 0.385,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 15.469377090416096,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 1.9999999999999991,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 1109,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 30.0,
+        "best_setup_type": "reversal",
+        "best_setup_score": 30.0,
+        "setup_weight": 0.8,
+        "global_score": 24.0,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": false,
+        "rank": 12,
+        "global_volume_24h_usd": 57495339.12520521,
+        "turnover_24h": 0.1588480650777369,
+        "mexc_share_24h": 0.031174352954016125,
+        "spread_pct": 0.16393442622950533,
+        "depth_bid_1pct_usd": 22209.224757,
+        "depth_ask_1pct_usd": 68109.730795,
+        "slippage_bps_5k": 16.155395,
+        "slippage_bps_20k": 20.529296,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "insufficient_edge",
+          "entry_not_confirmed",
+          "retest_not_reclaimed"
+        ]
+      },
+      {
+        "symbol": "METUSDT",
+        "price_usdt": 0.2818,
+        "coin_name": "Meteora",
+        "market_cap": 157110556.2083115,
+        "quote_volume_24h": 61900.5456,
+        "proxy_liquidity_score": 50.257732,
+        "spread_bps": 85.439658,
+        "slippage_bps": 1310.411534,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 29.35,
+        "raw_score": 36.68251,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 77.11,
+          "reclaim": 29.1,
+          "volume": 6.37
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Below EMAs (no reclaim yet)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.2627,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.30071399490684947,
+            "invalidation": 0.2627,
+            "targets": [
+              0.33872798981369895,
+              0.37674198472054843,
+              0.4147559796273979
+            ],
+            "atr_value": 0.031069109846982683
+          }
+        },
+        "stop_price_initial": 0.2627,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 12.641245685497566,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 429,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 29.35,
+        "best_setup_type": "reversal",
+        "best_setup_score": 29.35,
+        "setup_weight": 0.8,
+        "global_score": 23.48,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": false,
+        "rank": 13,
+        "global_volume_24h_usd": 12892714.195639145,
+        "turnover_24h": 0.08206141271974628,
+        "mexc_share_24h": 0.004801203583721522,
+        "spread_pct": 0.8543965824136749,
+        "depth_bid_1pct_usd": 6673.941464,
+        "depth_ask_1pct_usd": 7149.855865,
+        "slippage_bps_5k": 63.16534,
+        "slippage_bps_20k": 1310.411534,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "insufficient_edge",
+          "entry_not_confirmed",
+          "retest_not_reclaimed"
+        ]
+      },
+      {
+        "symbol": "STABLEUSDT",
+        "price_usdt": 0.026263,
+        "coin_name": "Stable",
+        "market_cap": 473006868.1532074,
+        "quote_volume_24h": 62485.24966,
+        "proxy_liquidity_score": 52.061856,
+        "spread_bps": 17.503139,
+        "slippage_bps": 680.396963,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 29.22,
+        "raw_score": 36.522197,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 83.4,
+          "reclaim": 28.76,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Below EMAs (no reclaim yet)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.023668,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.026683906667857124,
+            "invalidation": 0.023668,
+            "targets": [
+              0.029699813335714247,
+              0.03271572000357137,
+              0.03573162667142849
+            ],
+            "atr_value": 0.0018927220308048187
+          }
+        },
+        "stop_price_initial": 0.023668,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 11.302343039184816,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 372,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 29.22,
+        "best_setup_type": "reversal",
+        "best_setup_score": 29.22,
+        "setup_weight": 0.8,
+        "global_score": 23.376,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": false,
+        "rank": 14,
+        "global_volume_24h_usd": 6781685.287487165,
+        "turnover_24h": 0.014337392845827706,
+        "mexc_share_24h": 0.009213823262381557,
+        "spread_pct": 0.17503139149956584,
+        "depth_bid_1pct_usd": 348.53992296,
+        "depth_ask_1pct_usd": 1352.26679087,
+        "slippage_bps_5k": 136.880863,
+        "slippage_bps_20k": 680.396963,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "insufficient_edge",
+          "entry_not_confirmed",
+          "retest_not_reclaimed"
+        ]
+      },
+      {
+        "symbol": "TRXUSDT",
+        "price_usdt": 0.3131,
+        "coin_name": "TRON",
+        "market_cap": 29735661823.2113,
+        "quote_volume_24h": 3038573.242,
+        "proxy_liquidity_score": 96.649485,
+        "spread_bps": 3.194378,
+        "slippage_bps": 4.252135,
+        "liquidity_grade": "A",
+        "liquidity_insufficient": false,
+        "score": 29.2,
+        "raw_score": 29.201155,
+        "penalty_multiplier": 1.0,
+        "components": {
+          "drawdown": 0.0,
+          "base": 97.34,
+          "reclaim": 0.0,
+          "volume": 0.0
+        },
+        "penalties": {},
+        "flags": [],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Below EMAs (no reclaim yet)"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.3001,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.3206132079236493,
+            "invalidation": 0.3001,
+            "targets": [
+              0.3411264158472986,
+              0.3616396237709479,
+              0.3821528316945972
+            ],
+            "atr_value": 0.007407267652202627
+          }
+        },
+        "stop_price_initial": 0.3001,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 6.398116926154305,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 3349,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 29.2,
+        "best_setup_type": "reversal",
+        "best_setup_score": 29.2,
+        "setup_weight": 0.8,
+        "global_score": 23.36,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": false,
+        "rank": 15,
+        "global_volume_24h_usd": 339979055.0602015,
+        "turnover_24h": 0.011433377776539615,
+        "mexc_share_24h": 0.008937530700124886,
+        "spread_pct": 0.03194377894904615,
+        "depth_bid_1pct_usd": 420235.841808,
+        "depth_ask_1pct_usd": 333008.471957,
+        "slippage_bps_5k": 2.204957,
+        "slippage_bps_20k": 4.252135,
+        "tradeability_class": "DIRECT_OK",
+        "execution_mode": "direct",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "insufficient_edge",
+          "entry_not_confirmed",
+          "retest_not_reclaimed"
+        ]
+      },
+      {
+        "symbol": "IMXUSDT",
+        "price_usdt": 0.10052,
+        "coin_name": "Immutable",
+        "market_cap": 201034819.1337741,
+        "quote_volume_24h": 63183.1285,
+        "proxy_liquidity_score": 53.350515,
+        "spread_bps": 12.929534,
+        "slippage_bps": 1218.746866,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 26.85,
+        "raw_score": 33.560123,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 82.25,
+          "base": 85.2,
+          "reclaim": 20.0,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Strong drawdown setup (46.5% from ATH)",
+          "Clean base formation detected",
+          "Below EMAs (no reclaim yet)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.10706,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.12484481643420438,
+            "invalidation": 0.10706,
+            "targets": [
+              0.14262963286840874,
+              0.16041444930261312,
+              0.1781992657368175
+            ],
+            "atr_value": 0.010874691160058542
+          }
+        },
+        "stop_price_initial": 0.10706,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 14.245538535095942,
+        "rr_to_target_1": 0.9999999999999992,
+        "rr_to_target_2": 1.9999999999999991,
+        "rr_to_target_3": 2.999999999999999,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 1969,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 26.85,
+        "best_setup_type": "reversal",
+        "best_setup_score": 26.85,
+        "setup_weight": 0.8,
+        "global_score": 21.48,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": false,
+        "rank": 16,
+        "global_volume_24h_usd": 18464580.21106868,
+        "turnover_24h": 0.09184767241132412,
+        "mexc_share_24h": 0.003421855670573251,
+        "spread_pct": 0.12929534039485316,
+        "depth_bid_1pct_usd": 8425.465761,
+        "depth_ask_1pct_usd": 7618.5412232,
+        "slippage_bps_5k": 27.62289,
+        "slippage_bps_20k": 1218.746866,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "insufficient_edge",
+          "entry_not_confirmed",
+          "retest_not_reclaimed"
+        ]
+      },
+      {
+        "symbol": "EDGEUSDT",
+        "price_usdt": 0.3196,
+        "coin_name": "edgeX",
+        "market_cap": 111677929.23932222,
+        "quote_volume_24h": 66961.7379,
+        "proxy_liquidity_score": 60.051546,
+        "spread_bps": 21.905805,
+        "slippage_bps": 7629.007807,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 25.61,
+        "raw_score": 32.013575,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 85.68,
+          "base": 66.6,
+          "reclaim": 30.08,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Strong drawdown setup (47.1% from ATH)",
+          "Clean base formation detected",
+          "Partial reclaim in progress",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.2778,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.3451031981842001,
+            "invalidation": 0.2778,
+            "targets": [
+              0.4124063963684002,
+              0.4797095945526003,
+              0.5470127927368005
+            ],
+            "atr_value": 0.03845503904358285
+          }
+        },
+        "stop_price_initial": 0.2778,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 19.502339746001653,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.000000000000001,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 239,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 25.61,
+        "best_setup_type": "reversal",
+        "best_setup_score": 25.61,
+        "setup_weight": 0.8,
+        "global_score": 20.488,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": false,
+        "rank": 17,
+        "global_volume_24h_usd": 2999384.7743947967,
+        "turnover_24h": 0.02685745334664302,
+        "mexc_share_24h": 0.022325157636205996,
+        "spread_pct": 0.2190580503833622,
+        "depth_bid_1pct_usd": 8052.401299,
+        "depth_ask_1pct_usd": 7663.389051,
+        "slippage_bps_5k": 32.329007,
+        "slippage_bps_20k": 7629.007807,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "insufficient_edge",
+          "entry_not_confirmed",
+          "retest_not_reclaimed"
+        ]
+      },
+      {
+        "symbol": "WLFIUSDT",
+        "price_usdt": 0.04737,
+        "coin_name": "World Liberty Financial",
+        "market_cap": 1511605075.3049664,
+        "quote_volume_24h": 443526.804,
+        "proxy_liquidity_score": 90.206186,
+        "spread_bps": 67.410996,
+        "slippage_bps": 237.182994,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 24.03,
+        "raw_score": 30.034453,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 0.0,
+          "reclaim": 0.09,
+          "volume": 100.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "No base detected (still declining)",
+          "Below EMAs (no reclaim yet)",
+          "Strong volume (4.6x average)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 0.04964,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 0.04895740236478277,
+            "invalidation": 0.04964,
+            "targets": [
+              0.05394421014583498,
+              0.058931017926887194,
+              0.06391782570793941
+            ],
+            "atr_value": 0.0024934038905261072
+          }
+        },
+        "stop_price_initial": 0.04397059458373056,
+        "stop_source": "atr_fallback",
+        "risk_pct_to_stop": 10.186013840961962,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0000000000000013,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 774,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 24.03,
+        "best_setup_type": "reversal",
+        "best_setup_score": 24.03,
+        "setup_weight": 0.8,
+        "global_score": 19.224,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": false,
+        "rank": 18,
+        "global_volume_24h_usd": 45142679.24004247,
+        "turnover_24h": 0.029864069641956537,
+        "mexc_share_24h": 0.009824999567296013,
+        "spread_pct": 0.67410996418791,
+        "depth_bid_1pct_usd": 4179.585337500001,
+        "depth_ask_1pct_usd": 10734.8670607,
+        "slippage_bps_5k": 75.127234,
+        "slippage_bps_20k": 237.182994,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "insufficient_edge",
+          "entry_not_confirmed",
+          "retest_not_reclaimed"
+        ]
+      },
+      {
+        "symbol": "SPYONUSDT",
+        "price_usdt": 758.88,
+        "coin_name": "SPDR S&P 500 Tokenized ETF (Ondo)",
+        "market_cap": 47312618.425371915,
+        "quote_volume_24h": 150605.04,
+        "proxy_liquidity_score": 79.896907,
+        "spread_bps": 8.957741,
+        "slippage_bps": 4.758352,
+        "liquidity_grade": "A",
+        "liquidity_insufficient": false,
+        "score": 24.01,
+        "raw_score": 30.010622,
+        "penalty_multiplier": 0.8,
+        "components": {
+          "drawdown": 0.0,
+          "base": 94.99,
+          "reclaim": 3.79,
+          "volume": 0.0
+        },
+        "penalties": {
+          "low_liquidity": 0.8
+        },
+        "flags": [
+          "low_liquidity"
+        ],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Below EMAs (no reclaim yet)",
+          "⚠️ Low liquidity"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": false,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 707.48,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 762.2267659973043,
+            "invalidation": 707.48,
+            "targets": [
+              816.9735319946085,
+              871.7202979919127,
+              926.467063989217
+            ],
+            "atr_value": 12.635316916549476
+          }
+        },
+        "stop_price_initial": 707.48,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 7.182477504010645,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 3.0,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 437,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 24.01,
+        "best_setup_type": "reversal",
+        "best_setup_score": 24.01,
+        "setup_weight": 0.8,
+        "global_score": 19.208,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": false,
+        "rank": 19,
+        "global_volume_24h_usd": 2369426.440088215,
+        "turnover_24h": 0.050080222125638764,
+        "mexc_share_24h": 0.06356181287248272,
+        "spread_pct": 0.08957740541680678,
+        "depth_bid_1pct_usd": 203636.96172,
+        "depth_ask_1pct_usd": 190931.73121,
+        "slippage_bps_5k": 4.483097,
+        "slippage_bps_20k": 4.758352,
+        "tradeability_class": "DIRECT_OK",
+        "execution_mode": "direct",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "insufficient_edge",
+          "entry_not_confirmed",
+          "retest_not_reclaimed"
+        ]
+      },
+      {
+        "symbol": "ZROUSDT",
+        "price_usdt": 1.527,
+        "coin_name": "LayerZero",
+        "market_cap": 621152085.4536439,
+        "quote_volume_24h": 1267666.5372,
+        "proxy_liquidity_score": 94.329897,
+        "spread_bps": 43.227666,
+        "slippage_bps": 135.173834,
+        "liquidity_grade": "D",
+        "liquidity_insufficient": false,
+        "score": 23.08,
+        "raw_score": 23.079725,
+        "penalty_multiplier": 1.0,
+        "components": {
+          "drawdown": 0.0,
+          "base": 76.93,
+          "reclaim": 0.0,
+          "volume": 0.0
+        },
+        "penalties": {},
+        "flags": [],
+        "risk_flags": [],
+        "reasons": [
+          "Volume source used: mexc",
+          "Clean base formation detected",
+          "Below EMAs (no reclaim yet)"
+        ],
+        "volume_source_used": "mexc",
+        "entry_ready": false,
+        "entry_readiness_reasons": [
+          "retest_not_reclaimed"
+        ],
+        "setup_subtype": "reversal_base_reclaim",
+        "rebound_confirmed": true,
+        "retest_reclaimed": false,
+        "invalidation_anchor_price": 1.4151,
+        "invalidation_anchor_type": "base_low",
+        "invalidation_derivable": true,
+        "analysis": {
+          "trade_levels": {
+            "entry_trigger": 1.6564996312261377,
+            "invalidation": 1.4151,
+            "targets": [
+              1.8978992624522755,
+              2.139298893678413,
+              2.3806985249045507
+            ],
+            "atr_value": 0.16681003613053186
+          }
+        },
+        "stop_price_initial": 1.4151,
+        "stop_source": "invalidation",
+        "risk_pct_to_stop": 14.572875639426144,
+        "rr_to_target_1": 1.0,
+        "rr_to_target_2": 2.0,
+        "rr_to_target_3": 2.999999999999999,
+        "risk_acceptable": true,
+        "discovery": false,
+        "discovery_age_days": 877,
+        "discovery_source": "cmc_date_added",
+        "setup_score": 23.08,
+        "best_setup_type": "reversal",
+        "best_setup_score": 23.08,
+        "setup_weight": 0.8,
+        "global_score": 18.464,
+        "confluence": 2,
+        "valid_setups": [
+          "pullback",
+          "reversal"
+        ],
+        "reclaim_confirmed": false,
+        "rank": 20,
+        "global_volume_24h_usd": 69355418.87577668,
+        "turnover_24h": 0.1116560992065648,
+        "mexc_share_24h": 0.01827782973195696,
+        "spread_pct": 0.4322766570605147,
+        "depth_bid_1pct_usd": 4.35721,
+        "depth_ask_1pct_usd": 293.356206,
+        "slippage_bps_5k": 128.074255,
+        "slippage_bps_20k": 135.173834,
+        "tradeability_class": "MARGINAL",
+        "execution_mode": "none",
+        "btc_regime_state": "RISK_OFF",
+        "decision": "NO_TRADE",
+        "decision_reasons": [
+          "tradeability_marginal",
+          "insufficient_edge",
+          "entry_not_confirmed",
+          "retest_not_reclaimed"
+        ]
+      }
+    ]
+  },
+  "trade_candidates": [
+    {
+      "rank": 1,
+      "symbol": "INJUSDT",
+      "coin_name": "Injective",
+      "decision": "WAIT",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_late"
+      ],
+      "entry_price_usdt": 7.824106889688406,
+      "current_price_usdt": 7.958,
+      "distance_to_entry_pct": 1.7112893803643558,
+      "entry_state": "late",
+      "stop_price_initial": 6.438,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 17.715848073537856,
+      "target_1_price": 9.210213779376812,
+      "target_2_price": 10.596320669065218,
+      "target_3_price": 11.982427558753624,
+      "rr_to_target_1": 0.9999999999999993,
+      "rr_to_target_2": 1.9999999999999993,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 56.78,
+      "global_score": 45.424,
+      "entry_ready": true,
+      "entry_readiness_reasons": [],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.07549068948162228,
+      "depth_bid_1pct_usd": 90512.32971,
+      "depth_ask_1pct_usd": 30665.35886,
+      "slippage_bps_5k": 31.884718,
+      "slippage_bps_20k": 38.681312,
+      "risk_acceptable": true,
+      "market_cap_usd": 793589922.3942279,
+      "btc_regime": "RISK_OFF",
+      "flags": []
+    },
+    {
+      "rank": 2,
+      "symbol": "BARDUSDT",
+      "coin_name": "Lombard",
+      "decision": "WAIT",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_late"
+      ],
+      "entry_price_usdt": 0.1202560655796397,
+      "current_price_usdt": 0.1207,
+      "distance_to_entry_pct": 0.36915761231710587,
+      "entry_state": "late",
+      "stop_price_initial": 0.11162818198165494,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 7.174593278432958,
+      "target_1_price": 0.12888394917762447,
+      "target_2_price": 0.13751183277560924,
+      "target_3_price": 0.146139716373594,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0000000000000018,
+      "best_setup_type": "pullback",
+      "setup_subtype": "pullback_to_ema",
+      "setup_score": 48.0,
+      "global_score": 43.2,
+      "entry_ready": true,
+      "entry_readiness_reasons": [],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.08295313148071577,
+      "depth_bid_1pct_usd": 38408.91424,
+      "depth_ask_1pct_usd": 29651.07157,
+      "slippage_bps_5k": 19.165403,
+      "slippage_bps_20k": 46.134313,
+      "risk_acceptable": true,
+      "market_cap_usd": 47764307.69151022,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 3,
+      "symbol": "OPGUSDT",
+      "coin_name": "OpenGradient",
+      "decision": "WAIT",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_chased"
+      ],
+      "entry_price_usdt": 0.1269396843194874,
+      "current_price_usdt": 0.1386,
+      "distance_to_entry_pct": 9.185713469371315,
+      "entry_state": "chased",
+      "stop_price_initial": 0.10781,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 15.069900655606617,
+      "target_1_price": 0.1460693686389748,
+      "target_2_price": 0.1651990529584622,
+      "target_3_price": 0.18432873727794963,
+      "rr_to_target_1": 0.9999999999999992,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 50.5,
+      "global_score": 40.4,
+      "entry_ready": true,
+      "entry_readiness_reasons": [],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.15862715408464775,
+      "depth_bid_1pct_usd": 14322.1255101,
+      "depth_ask_1pct_usd": 15953.4013245,
+      "slippage_bps_5k": 32.473907,
+      "slippage_bps_20k": 102.385346,
+      "risk_acceptable": true,
+      "market_cap_usd": 33020083.204818442,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 4,
+      "symbol": "MERLUSDT",
+      "coin_name": "Merlin Chain",
+      "decision": "WAIT",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_chased"
+      ],
+      "entry_price_usdt": 0.029565731264768386,
+      "current_price_usdt": 0.03174,
+      "distance_to_entry_pct": 7.354016431254484,
+      "entry_state": "chased",
+      "stop_price_initial": 0.02411,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 18.45288795974966,
+      "target_1_price": 0.03502146252953677,
+      "target_2_price": 0.04047719379430516,
+      "target_3_price": 0.045932925059073544,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 47.74,
+      "global_score": 38.192,
+      "entry_ready": true,
+      "entry_readiness_reasons": [],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.18879798615480664,
+      "depth_bid_1pct_usd": 5798.7877067,
+      "depth_ask_1pct_usd": 5700.3974446,
+      "slippage_bps_5k": 35.633337,
+      "slippage_bps_20k": 12441.722637,
+      "risk_acceptable": true,
+      "market_cap_usd": 45390898.49329553,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 5,
+      "symbol": "VRUSDT",
+      "coin_name": "Victoria VR",
+      "decision": "WAIT",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "entry_chased"
+      ],
+      "entry_price_usdt": 0.0016035710181589481,
+      "current_price_usdt": 0.001665,
+      "distance_to_entry_pct": 3.83076154067552,
+      "entry_state": "chased",
+      "stop_price_initial": 0.001456,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 9.202649367433294,
+      "target_1_price": 0.0017511420363178962,
+      "target_2_price": 0.0018987130544768443,
+      "target_3_price": 0.002046284072635792,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 42.44,
+      "global_score": 33.952,
+      "entry_ready": true,
+      "entry_readiness_reasons": [],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.12012012012012306,
+      "depth_bid_1pct_usd": 2243.5961461,
+      "depth_ask_1pct_usd": 2009.09816501,
+      "slippage_bps_5k": 1736.404037,
+      "slippage_bps_20k": 19997.382653,
+      "risk_acceptable": true,
+      "market_cap_usd": 27940079.766289663,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 6,
+      "symbol": "SHAREUSDT",
+      "coin_name": "ShareX",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "risk_reward_unattractive",
+        "entry_not_confirmed",
+        "rebound_not_confirmed"
+      ],
+      "entry_price_usdt": 2.6376297522717103,
+      "current_price_usdt": 2.6376,
+      "distance_to_entry_pct": -0.0011279927247032084,
+      "entry_state": "at_trigger",
+      "stop_price_initial": 2.5756586718523247,
+      "stop_source": "atr_fallback",
+      "risk_pct_to_stop": 2.349498839479339,
+      "target_1_price": 2.699600832691096,
+      "target_2_price": 2.7615719131104814,
+      "target_3_price": 2.823542993529867,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "pullback",
+      "setup_subtype": "pullback_to_ema",
+      "setup_score": 52.48,
+      "global_score": 47.232,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "rebound_not_confirmed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.12509239779381962,
+      "depth_bid_1pct_usd": 95.324977,
+      "depth_ask_1pct_usd": 210.934859,
+      "slippage_bps_5k": 5941.856747,
+      "slippage_bps_20k": 8098.650732,
+      "risk_acceptable": false,
+      "market_cap_usd": 47531448.455732174,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 7,
+      "symbol": "KIIUSDT",
+      "coin_name": "KiiChain",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "risk_reward_unattractive",
+        "entry_not_confirmed",
+        "rebound_not_confirmed"
+      ],
+      "entry_price_usdt": 0.0843763904206544,
+      "current_price_usdt": 0.0844,
+      "distance_to_entry_pct": 0.027981262563980813,
+      "entry_state": "at_trigger",
+      "stop_price_initial": 0.08353806809072825,
+      "stop_source": "atr_fallback",
+      "risk_pct_to_stop": 0.9935508330549921,
+      "target_1_price": 0.08521471275058054,
+      "target_2_price": 0.08605303508050668,
+      "target_3_price": 0.08689135741043283,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "pullback",
+      "setup_subtype": "pullback_to_ema",
+      "setup_score": 49.6,
+      "global_score": 44.64,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "rebound_not_confirmed"
+      ],
+      "tradeability_class": "DIRECT_OK",
+      "execution_mode": "direct",
+      "spread_pct": 0.07110689736905013,
+      "depth_bid_1pct_usd": 41194.3800499,
+      "depth_ask_1pct_usd": 47447.6517816,
+      "slippage_bps_5k": 19.575119,
+      "slippage_bps_20k": 20.892774,
+      "risk_acceptable": false,
+      "market_cap_usd": 26358920.50635931,
+      "btc_regime": "RISK_OFF",
+      "flags": []
+    },
+    {
+      "rank": 8,
+      "symbol": "TSLAXUSDT",
+      "coin_name": "Tesla tokenized stock (xStock)",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "risk_reward_unattractive",
+        "entry_not_confirmed",
+        "rebound_not_confirmed"
+      ],
+      "entry_price_usdt": 388.78558667188923,
+      "current_price_usdt": 389.24,
+      "distance_to_entry_pct": 0.11688018889812746,
+      "entry_state": "at_trigger",
+      "stop_price_initial": 383.085437858007,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 1.466142009706954,
+      "target_1_price": 394.48573548577144,
+      "target_2_price": 400.18588429965365,
+      "target_3_price": 405.88603311353586,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "pullback",
+      "setup_subtype": "pullback_to_ema",
+      "setup_score": 42.21,
+      "global_score": 37.989,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "rebound_not_confirmed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.16698994206732964,
+      "depth_bid_1pct_usd": 66684.28332,
+      "depth_ask_1pct_usd": 90109.25835,
+      "slippage_bps_5k": 8.457038,
+      "slippage_bps_20k": 9.035515,
+      "risk_acceptable": false,
+      "market_cap_usd": 68972100.0347798,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 9,
+      "symbol": "STRCONUSDT",
+      "coin_name": "Strategy Stretch Preferred Tokenized Stock (Ondo)",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "risk_reward_unattractive",
+        "entry_not_confirmed",
+        "rebound_not_confirmed",
+        "entry_late"
+      ],
+      "entry_price_usdt": 106.74161363026023,
+      "current_price_usdt": 107.11,
+      "distance_to_entry_pct": 0.3451197309193965,
+      "entry_state": "late",
+      "stop_price_initial": 106.61297924195341,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 0.12051006531753859,
+      "target_1_price": 106.87024801856705,
+      "target_2_price": 106.99888240687388,
+      "target_3_price": 107.1275167951807,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "pullback",
+      "setup_subtype": "pullback_to_ema",
+      "setup_score": 41.08,
+      "global_score": 36.972,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "rebound_not_confirmed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.7567618068856004,
+      "depth_bid_1pct_usd": 3189.4397,
+      "depth_ask_1pct_usd": 1563.7688,
+      "slippage_bps_5k": 109.872911,
+      "slippage_bps_20k": 299.42751,
+      "risk_acceptable": false,
+      "market_cap_usd": 53934196.05617133,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 10,
+      "symbol": "APEPEUSDT",
+      "coin_name": "Ape and Pepe",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "risk_reward_unattractive",
+        "insufficient_edge",
+        "entry_not_confirmed",
+        "rebound_not_confirmed",
+        "entry_too_early"
+      ],
+      "entry_price_usdt": 1.2339172240667114e-06,
+      "current_price_usdt": 1.218e-06,
+      "distance_to_entry_pct": -1.2899750288152934,
+      "entry_state": "early",
+      "stop_price_initial": 1.2319919460101036e-06,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 0.15602975783598372,
+      "target_1_price": 1.2358425021233192e-06,
+      "target_2_price": 1.237767780179927e-06,
+      "target_3_price": 1.2396930582365348e-06,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "pullback",
+      "setup_subtype": "pullback_to_ema",
+      "setup_score": 39.74,
+      "global_score": 35.766,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "rebound_not_confirmed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.10671044531090479,
+      "depth_bid_1pct_usd": 8.8107364271,
+      "depth_ask_1pct_usd": 64.3314650065,
+      "slippage_bps_5k": 534.807962,
+      "slippage_bps_20k": 28479.139213,
+      "risk_acceptable": false,
+      "market_cap_usd": 255367508.989699,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 11,
+      "symbol": "LITUSDT",
+      "coin_name": "Lighter",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "risk_reward_unattractive",
+        "insufficient_edge",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_too_early"
+      ],
+      "entry_price_usdt": 3.2510685283340766,
+      "current_price_usdt": 3.0908,
+      "distance_to_entry_pct": -4.929718550602247,
+      "entry_state": "early",
+      "stop_price_initial": 2.5905,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 20.31850521073351,
+      "target_1_price": 3.911637056668153,
+      "target_2_price": 4.57220558500223,
+      "target_3_price": 5.232774113336307,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.000000000000001,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 33.87,
+      "global_score": 27.096,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "retest_not_reclaimed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.1650031544720742,
+      "depth_bid_1pct_usd": 2210.973232,
+      "depth_ask_1pct_usd": 911.289039,
+      "slippage_bps_5k": 575.353607,
+      "slippage_bps_20k": 2365.812761,
+      "risk_acceptable": false,
+      "market_cap_usd": 774058872.3019413,
+      "btc_regime": "RISK_OFF",
+      "flags": []
+    },
+    {
+      "rank": 12,
+      "symbol": "TIAUSDT",
+      "coin_name": "Celestia",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "insufficient_edge",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_too_early"
+      ],
+      "entry_price_usdt": 0.45545624384172084,
+      "current_price_usdt": 0.3658,
+      "distance_to_entry_pct": -19.684930232920017,
+      "entry_state": "early",
+      "stop_price_initial": 0.385,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 15.469377090416096,
+      "target_1_price": 0.5259124876834417,
+      "target_2_price": 0.5963687315251625,
+      "target_3_price": 0.6668249753668833,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 1.9999999999999991,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 30.0,
+      "global_score": 24.0,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "retest_not_reclaimed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.16393442622950533,
+      "depth_bid_1pct_usd": 22209.224757,
+      "depth_ask_1pct_usd": 68109.730795,
+      "slippage_bps_5k": 16.155395,
+      "slippage_bps_20k": 20.529296,
+      "risk_acceptable": true,
+      "market_cap_usd": 361951775.0944476,
+      "btc_regime": "RISK_OFF",
+      "flags": []
+    },
+    {
+      "rank": 13,
+      "symbol": "METUSDT",
+      "coin_name": "Meteora",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "insufficient_edge",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_too_early"
+      ],
+      "entry_price_usdt": 0.30071399490684947,
+      "current_price_usdt": 0.2818,
+      "distance_to_entry_pct": -6.289695600202561,
+      "entry_state": "early",
+      "stop_price_initial": 0.2627,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 12.641245685497566,
+      "target_1_price": 0.33872798981369895,
+      "target_2_price": 0.37674198472054843,
+      "target_3_price": 0.4147559796273979,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 29.35,
+      "global_score": 23.48,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "retest_not_reclaimed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.8543965824136749,
+      "depth_bid_1pct_usd": 6673.941464,
+      "depth_ask_1pct_usd": 7149.855865,
+      "slippage_bps_5k": 63.16534,
+      "slippage_bps_20k": 1310.411534,
+      "risk_acceptable": true,
+      "market_cap_usd": 157110556.2083115,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 14,
+      "symbol": "STABLEUSDT",
+      "coin_name": "Stable",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "insufficient_edge",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_too_early"
+      ],
+      "entry_price_usdt": 0.026683906667857124,
+      "current_price_usdt": 0.026263,
+      "distance_to_entry_pct": -1.5773802280763416,
+      "entry_state": "early",
+      "stop_price_initial": 0.023668,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 11.302343039184816,
+      "target_1_price": 0.029699813335714247,
+      "target_2_price": 0.03271572000357137,
+      "target_3_price": 0.03573162667142849,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 29.22,
+      "global_score": 23.376,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "retest_not_reclaimed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.17503139149956584,
+      "depth_bid_1pct_usd": 348.53992296,
+      "depth_ask_1pct_usd": 1352.26679087,
+      "slippage_bps_5k": 136.880863,
+      "slippage_bps_20k": 680.396963,
+      "risk_acceptable": true,
+      "market_cap_usd": 473006868.1532074,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 15,
+      "symbol": "TRXUSDT",
+      "coin_name": "TRON",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "insufficient_edge",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_too_early"
+      ],
+      "entry_price_usdt": 0.3206132079236493,
+      "current_price_usdt": 0.3131,
+      "distance_to_entry_pct": -2.3433869029620524,
+      "entry_state": "early",
+      "stop_price_initial": 0.3001,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 6.398116926154305,
+      "target_1_price": 0.3411264158472986,
+      "target_2_price": 0.3616396237709479,
+      "target_3_price": 0.3821528316945972,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 29.2,
+      "global_score": 23.36,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "retest_not_reclaimed"
+      ],
+      "tradeability_class": "DIRECT_OK",
+      "execution_mode": "direct",
+      "spread_pct": 0.03194377894904615,
+      "depth_bid_1pct_usd": 420235.841808,
+      "depth_ask_1pct_usd": 333008.471957,
+      "slippage_bps_5k": 2.204957,
+      "slippage_bps_20k": 4.252135,
+      "risk_acceptable": true,
+      "market_cap_usd": 29735661823.2113,
+      "btc_regime": "RISK_OFF",
+      "flags": []
+    },
+    {
+      "rank": 16,
+      "symbol": "IMXUSDT",
+      "coin_name": "Immutable",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "insufficient_edge",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_too_early"
+      ],
+      "entry_price_usdt": 0.12484481643420438,
+      "current_price_usdt": 0.10052,
+      "distance_to_entry_pct": -19.48404197223841,
+      "entry_state": "early",
+      "stop_price_initial": 0.10706,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 14.245538535095942,
+      "target_1_price": 0.14262963286840874,
+      "target_2_price": 0.16041444930261312,
+      "target_3_price": 0.1781992657368175,
+      "rr_to_target_1": 0.9999999999999992,
+      "rr_to_target_2": 1.9999999999999991,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 26.85,
+      "global_score": 21.48,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "retest_not_reclaimed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.12929534039485316,
+      "depth_bid_1pct_usd": 8425.465761,
+      "depth_ask_1pct_usd": 7618.5412232,
+      "slippage_bps_5k": 27.62289,
+      "slippage_bps_20k": 1218.746866,
+      "risk_acceptable": true,
+      "market_cap_usd": 201034819.1337741,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 17,
+      "symbol": "EDGEUSDT",
+      "coin_name": "edgeX",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "insufficient_edge",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_too_early"
+      ],
+      "entry_price_usdt": 0.3451031981842001,
+      "current_price_usdt": 0.3196,
+      "distance_to_entry_pct": -7.390020816494336,
+      "entry_state": "early",
+      "stop_price_initial": 0.2778,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 19.502339746001653,
+      "target_1_price": 0.4124063963684002,
+      "target_2_price": 0.4797095945526003,
+      "target_3_price": 0.5470127927368005,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 25.61,
+      "global_score": 20.488,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "retest_not_reclaimed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.2190580503833622,
+      "depth_bid_1pct_usd": 8052.401299,
+      "depth_ask_1pct_usd": 7663.389051,
+      "slippage_bps_5k": 32.329007,
+      "slippage_bps_20k": 7629.007807,
+      "risk_acceptable": true,
+      "market_cap_usd": 111677929.23932222,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 18,
+      "symbol": "WLFIUSDT",
+      "coin_name": "World Liberty Financial",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "insufficient_edge",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_too_early"
+      ],
+      "entry_price_usdt": 0.04895740236478277,
+      "current_price_usdt": 0.04737,
+      "distance_to_entry_pct": -3.242415422605549,
+      "entry_state": "early",
+      "stop_price_initial": 0.04397059458373056,
+      "stop_source": "atr_fallback",
+      "risk_pct_to_stop": 10.186013840961962,
+      "target_1_price": 0.05394421014583498,
+      "target_2_price": 0.058931017926887194,
+      "target_3_price": 0.06391782570793941,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 24.03,
+      "global_score": 19.224,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "retest_not_reclaimed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.67410996418791,
+      "depth_bid_1pct_usd": 4179.585337500001,
+      "depth_ask_1pct_usd": 10734.8670607,
+      "slippage_bps_5k": 75.127234,
+      "slippage_bps_20k": 237.182994,
+      "risk_acceptable": true,
+      "market_cap_usd": 1511605075.3049664,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 19,
+      "symbol": "SPYONUSDT",
+      "coin_name": "SPDR S&P 500 Tokenized ETF (Ondo)",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "insufficient_edge",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_too_early"
+      ],
+      "entry_price_usdt": 762.2267659973043,
+      "current_price_usdt": 758.88,
+      "distance_to_entry_pct": -0.43907746967207784,
+      "entry_state": "early",
+      "stop_price_initial": 707.48,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 7.182477504010645,
+      "target_1_price": 816.9735319946085,
+      "target_2_price": 871.7202979919127,
+      "target_3_price": 926.467063989217,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 24.01,
+      "global_score": 19.208,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "retest_not_reclaimed"
+      ],
+      "tradeability_class": "DIRECT_OK",
+      "execution_mode": "direct",
+      "spread_pct": 0.08957740541680678,
+      "depth_bid_1pct_usd": 203636.96172,
+      "depth_ask_1pct_usd": 190931.73121,
+      "slippage_bps_5k": 4.483097,
+      "slippage_bps_20k": 4.758352,
+      "risk_acceptable": true,
+      "market_cap_usd": 47312618.425371915,
+      "btc_regime": "RISK_OFF",
+      "flags": [
+        "low_liquidity"
+      ]
+    },
+    {
+      "rank": 20,
+      "symbol": "ZROUSDT",
+      "coin_name": "LayerZero",
+      "decision": "NO_TRADE",
+      "decision_reasons": [
+        "tradeability_marginal",
+        "insufficient_edge",
+        "entry_not_confirmed",
+        "retest_not_reclaimed",
+        "entry_too_early"
+      ],
+      "entry_price_usdt": 1.6564996312261377,
+      "current_price_usdt": 1.527,
+      "distance_to_entry_pct": -7.817667374322468,
+      "entry_state": "early",
+      "stop_price_initial": 1.4151,
+      "stop_source": "invalidation",
+      "risk_pct_to_stop": 14.572875639426144,
+      "target_1_price": 1.8978992624522755,
+      "target_2_price": 2.139298893678413,
+      "target_3_price": 2.3806985249045507,
+      "rr_to_target_1": 1.0,
+      "rr_to_target_2": 2.0,
+      "best_setup_type": "reversal",
+      "setup_subtype": "reversal_base_reclaim",
+      "setup_score": 23.08,
+      "global_score": 18.464,
+      "entry_ready": false,
+      "entry_readiness_reasons": [
+        "retest_not_reclaimed"
+      ],
+      "tradeability_class": "MARGINAL",
+      "execution_mode": "none",
+      "spread_pct": 0.4322766570605147,
+      "depth_bid_1pct_usd": 4.35721,
+      "depth_ask_1pct_usd": 293.356206,
+      "slippage_bps_5k": 128.074255,
+      "slippage_bps_20k": 135.173834,
+      "risk_acceptable": true,
+      "market_cap_usd": 621152085.4536439,
+      "btc_regime": "RISK_OFF",
+      "flags": []
+    }
+  ],
+  "run_manifest": {
+    "run_id": "2026-11-14_1794655617593",
+    "timestamp_utc": "2026-11-14T11:26:57Z",
+    "config_hash": "aadf6b23583ab0808138df77404507492a41b13d29851e11565de4e92efd5967",
+    "canonical_schema_version": "6.3.0",
+    "feature_flags": {
+      "decision_enabled": true,
+      "risk_enabled": true,
+      "tradeability_enabled": true,
+      "btc_regime_enabled": true,
+      "breakout_scoring_enabled": true,
+      "pullback_scoring_enabled": true,
+      "reversal_scoring_enabled": true,
+      "mexc_enabled": true,
+      "shadow_mode_parallel": true
+    },
+    "pipeline_paths": {
+      "shadow_mode": "parallel",
+      "legacy_path_enabled": true,
+      "new_path_enabled": true,
+      "primary_path": "new",
+      "primary_path_source": "config"
+    },
+    "counts_per_stage": {
+      "universe": 1329,
+      "filtered": 389,
+      "shortlist": 112,
+      "orderbook_requested": 200,
+      "orderbook_selected": 200,
+      "tradeability_passed": 112,
+      "tradeability_stopped": 88,
+      "ohlcv_symbols": 109,
+      "features": 109,
+      "reversal_scored": 108,
+      "breakout_scored": 0,
+      "pullback_scored": 109,
+      "global_top20": 20,
+      "legacy_path_enabled": 1,
+      "new_path_enabled": 1,
+      "trade_candidates": 20
+    },
+    "shortlist_size_used": 200,
+    "orderbook_top_k_used": 200,
+    "data_freshness": {
+      "exchange_info_ts_utc": "2026-11-14T11:26:57Z",
+      "tickers_24h_ts_utc": "2026-11-14T11:26:57Z",
+      "market_cap_listings_ts_utc": "2026-11-14T11:26:57Z",
+      "asof_iso_utc": "2026-11-14T11:26:57Z",
+      "asof_ts_ms": 1794655617593
+    },
+    "warnings": [
+      "tradeability_gate_stopped_symbols"
+    ],
+    "duration_seconds": 83.743243208
+  },
+  "btc_regime": {
+    "state": "RISK_OFF",
+    "multiplier_risk_on": 1.0,
+    "multiplier_risk_off": 0.85,
+    "checks": {
+      "close_gt_ema50": false,
+      "ema20_gt_ema50": false
+    }
+  }
+}
